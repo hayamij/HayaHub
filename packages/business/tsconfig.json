@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "moduleResolution": "bundler",
+    "paths": {
+      "hayahub-domain": ["../domain/src"],
+      "hayahub-domain/*": ["../domain/src/*"],
+      "hayahub-shared": ["../shared/src"],
+      "hayahub-shared/*": ["../shared/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../domain" },
+    { "path": "../shared" }
+  ]
+}
