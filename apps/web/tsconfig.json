@@ -1,0 +1,66 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/adapters/*": [
+        "./src/adapters/*"
+      ],
+      "@/infrastructure/*": [
+        "./src/infrastructure/*"
+      ],
+      "hayahub-domain": [
+        "../../packages/domain/src"
+      ],
+      "hayahub-domain/*": [
+        "../../packages/domain/src/*"
+      ],
+      "hayahub-business": [
+        "../../packages/business/src"
+      ],
+      "hayahub-business/*": [
+        "../../packages/business/src/*"
+      ],
+      "hayahub-shared": [
+        "../../packages/shared/src"
+      ],
+      "hayahub-shared/*": [
+        "../../packages/shared/src/*"
+      ]
+    },
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "references": [
+    {
+      "path": "../../packages/domain"
+    },
+    {
+      "path": "../../packages/business"
+    },
+    {
+      "path": "../../packages/shared"
+    }
+  ]
+}
