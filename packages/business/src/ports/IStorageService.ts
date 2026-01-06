@@ -1,0 +1,11 @@
+/**
+ * Port (Interface) for Storage Service
+ * Can be implemented by LocalStorage, GitHub API, or any other storage
+ */
+export interface IStorageService {
+  get<T>(key: string): Promise<T | null>;
+  set<T>(key: string, value: T): Promise<void>;
+  remove(key: string): Promise<void>;
+  clear(): Promise<void>;
+  getAllKeys(): Promise<string[]>;
+}
