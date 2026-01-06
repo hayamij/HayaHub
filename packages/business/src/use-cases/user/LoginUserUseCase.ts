@@ -14,8 +14,11 @@ export class LoginUserUseCase {
         return failure(new Error('Invalid credentials'));
       }
 
-      // Password verification will be handled in infrastructure layer
-      // For now, we just return the user
+      // Verify password
+      const isValidPassword = await this.userRepository.verifyPassword(dto.email, dto.password);
+      if (!isValidPassword) {
+        return failure(new Error('Invalid credentials'));
+      }
 
       return success(this.toDTO(user));
     } catch (error) {

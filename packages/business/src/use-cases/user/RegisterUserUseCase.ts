@@ -18,8 +18,8 @@ export class RegisterUserUseCase {
       const email = Email.create(dto.email);
       const user = User.create(IdGenerator.generateUserId(), email, dto.name, UserRole.USER);
 
-      // Persist
-      await this.userRepository.save(user);
+      // Persist with password
+      await this.userRepository.save(user, dto.password);
 
       // Return DTO (password handling will be in infrastructure layer)
       return success(this.toDTO(user));
