@@ -184,4 +184,32 @@ export class GitHubStorageAdapter implements IStorageService {
     // Not implemented - would need to list and delete all files
     console.warn('Clear operation not implemented for GitHub storage');
   }
+
+  async getAllKeys(): Promise<string[]> {
+    try {
+      const url = `${this.baseUrl}/repos/${this.config.owner}/${this.config.repo}/contents/data?ref=${this.config.branch}`;
+
+      const response = await fetch(url, {
+        headers: this.getHeaders(),
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return [];
+        }
+        throw new Error(`GitHub API error: ${response.statusText}`);
+      }
+
+      const files: GitHubFile[] = await response.json();
+      
+      // Extract keys from .json files (remove .json extension)
+      return files
+        .filter(file => file.type === 'file' && file.name.endsWith('.json'))
+        .map(file => file.name.replace('.json', ''));
+    } catch (error) {
+      console.error('Error getting all keys from GitHub:', error);
+      return [];
+    }
+  }
 }
