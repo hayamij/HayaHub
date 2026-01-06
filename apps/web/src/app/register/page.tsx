@@ -50,10 +50,11 @@ export default function RegisterPage() {
         password: formData.password,
       });
 
-      if (result.isSuccess) {
+      if (result.isSuccess()) {
         // Store user session
         localStorage.setItem('currentUser', JSON.stringify(result.value));
-        router.push('/');
+        // Redirect to syncing page, then auto-redirect to home
+        router.push('/syncing?redirect=/');
       } else {
         setError(result.error.message);
       }
