@@ -2,13 +2,25 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useSyncStatus } from '@/hooks/useSyncStatus';
 
 export default function HomePage() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { isSyncing, queueSize } = useSyncStatus();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Sync indicator */}
+      {isSyncing && (
+        <div className="fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 z-50">
+          <div className="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            Syncing to GitHub... ({queueSize} items)
+          </span>
+        </div>
+      )}
+      
       <div className="container mx-auto px-4">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6 text-gray-900 dark:text-white">
