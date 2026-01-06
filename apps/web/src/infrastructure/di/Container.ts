@@ -3,7 +3,7 @@
  * Creates and wires up all dependencies
  */
 
-import { GitHubStorageAdapter } from '../storage/GitHubStorageAdapter';
+import { HybridStorageAdapter } from '../storage/HybridStorageAdapter';
 import { ExpenseRepositoryAdapter } from '../repositories/ExpenseRepositoryAdapter';
 import { UserRepositoryAdapter } from '../repositories/UserRepositoryAdapter';
 import {
@@ -48,7 +48,7 @@ class Container {
   // Infrastructure
   get storageService(): IStorageService {
     if (!this._storageService) {
-      this._storageService = new GitHubStorageAdapter();
+      this._storageService = new HybridStorageAdapter();
     }
     return this._storageService;
   }
@@ -121,3 +121,4 @@ class Container {
 }
 
 export const container = Container.getInstance();
+export { Container };
