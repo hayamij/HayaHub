@@ -34,13 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Redirect logic
-    const publicPaths = ['/login', '/register'];
+    const publicPaths = ['/login', '/register', '/syncing'];
     const isPublicPath = publicPaths.includes(pathname);
 
     if (!loading) {
       if (!user && !isPublicPath) {
         router.push('/login');
-      } else if (user && isPublicPath) {
+      } else if (user && isPublicPath && pathname !== '/syncing') {
         router.push('/');
       }
     }
