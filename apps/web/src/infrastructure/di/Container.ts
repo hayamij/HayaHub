@@ -3,7 +3,7 @@
  * Creates and wires up all dependencies
  */
 
-import { LocalStorageAdapter } from '../storage/LocalStorageAdapter';
+import { GitHubStorageAdapter } from '../storage/GitHubStorageAdapter';
 import { ExpenseRepositoryAdapter } from '../repositories/ExpenseRepositoryAdapter';
 import { UserRepositoryAdapter } from '../repositories/UserRepositoryAdapter';
 import {
@@ -15,12 +15,13 @@ import {
   LoginUserUseCase,
   GetUserUseCase,
 } from 'hayahub-business';
+import type { IStorageService } from 'hayahub-business';
 
 class Container {
   private static instance: Container;
 
   // Infrastructure
-  private _storageService?: LocalStorageAdapter;
+  private _storageService?: IStorageService;
 
   // Repositories
   private _expenseRepository?: ExpenseRepositoryAdapter;
@@ -45,9 +46,9 @@ class Container {
   }
 
   // Infrastructure
-  get storageService(): LocalStorageAdapter {
+  get storageService(): IStorageService {
     if (!this._storageService) {
-      this._storageService = new LocalStorageAdapter();
+      this._storageService = new GitHubStorageAdapter();
     }
     return this._storageService;
   }
