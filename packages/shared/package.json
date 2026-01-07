@@ -9,9 +9,14 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "echo \"No tests in shared package (utilities only)\" && exit 0",
+    "test:watch": "echo \"No tests in shared package\" && exit 0",
+    "test:ui": "echo \"No tests in shared package\" && exit 0"
   },
   "devDependencies": {
-    "typescript": "^5.3.0"
+    "@vitest/ui": "^4.0.16",
+    "typescript": "^5.3.0",
+    "vitest": "^4.0.16"
   }
 }
