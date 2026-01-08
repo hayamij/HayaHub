@@ -28,9 +28,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ToastProvider>
-            <OnlineSyncProvider>
-              <AuthProvider>{children}</AuthProvider>
-            </OnlineSyncProvider>
+            <AuthProvider>
+              <OnlineSyncProvider>{children}</OnlineSyncProvider>
+            </AuthProvider>
           </ToastProvider>
         </ThemeProvider>
       </body>
