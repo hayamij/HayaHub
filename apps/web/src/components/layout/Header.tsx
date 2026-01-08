@@ -5,10 +5,12 @@ import { Search, Moon, Sun, LogOut, User as UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -103,7 +105,7 @@ export function Header() {
                   <div className="py-1">
                     <button
                       onClick={() => {
-                        // TODO: Navigate to profile
+                        router.push('/profile');
                         setShowUserMenu(false);
                       }}
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

@@ -34,14 +34,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Redirect logic
-    const publicPaths = ['/login', '/register', '/syncing'];
+    const publicPaths = ['/login', '/register', '/syncing', '/', '/home'];
     const isPublicPath = publicPaths.includes(pathname);
 
     if (!loading) {
       if (!user && !isPublicPath) {
-        router.push('/login');
-      } else if (user && isPublicPath && pathname !== '/syncing') {
+        // Redirect to routing hub
         router.push('/');
+      } else if (user && (pathname === '/login' || pathname === '/register' || pathname === '/home')) {
+        router.push('/dashboard');
       }
     }
   }, [user, loading, pathname, router]);
@@ -52,9 +53,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
-    router.push('/login');
+    // Redirect immediately to routing hub for instant loading feedback
+    router.push('/?action=logout');
   };
 
   return (

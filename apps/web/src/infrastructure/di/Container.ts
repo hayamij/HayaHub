@@ -14,6 +14,7 @@ import {
   RegisterUserUseCase,
   LoginUserUseCase,
   GetUserUseCase,
+  UpdateUserUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -35,6 +36,7 @@ class Container {
   private _registerUserUseCase?: RegisterUserUseCase;
   private _loginUserUseCase?: LoginUserUseCase;
   private _getUserUseCase?: GetUserUseCase;
+  private _updateUserUseCase?: UpdateUserUseCase;
 
   private constructor() {}
 
@@ -119,6 +121,13 @@ class Container {
     return this._getUserUseCase;
   }
 
+  get updateUserUseCase(): UpdateUserUseCase {
+    if (!this._updateUserUseCase) {
+      this._updateUserUseCase = new UpdateUserUseCase(this.userRepository);
+    }
+    return this._updateUserUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -146,6 +155,10 @@ class Container {
 
   static getUserUseCase(): GetUserUseCase {
     return Container.getInstance().getUserUseCase;
+  }
+
+  static updateUserUseCase(): UpdateUserUseCase {
+    return Container.getInstance().updateUserUseCase;
   }
 }
 

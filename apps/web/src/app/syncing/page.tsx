@@ -11,7 +11,6 @@ export default function SyncingPage() {
   
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('Preparing your data...');
-  const [syncComplete, setSyncComplete] = useState(false);
 
   useEffect(() => {
     let progressInterval: NodeJS.Timeout;
@@ -47,7 +46,6 @@ export default function SyncingPage() {
           if (syncSuccess) {
             setProgress(100);
             setMessage('All set! Redirecting...');
-            setSyncComplete(true);
             
             // Redirect after longer delay - use window.location for full reload
             redirectTimer = setTimeout(() => {
@@ -74,7 +72,6 @@ export default function SyncingPage() {
         setTimeout(() => {
           setProgress(100);
           setMessage('All set! Redirecting...');
-          setSyncComplete(true);
           redirectTimer = setTimeout(() => {
             window.location.href = redirectTo;
           }, 2000);
@@ -91,92 +88,30 @@ export default function SyncingPage() {
   }, [router, redirectTo]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-        <div className="text-center">
-          {/* Animated logo/icon */}
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full border-4 border-indigo-200 dark:border-indigo-900"></div>
-              <div
-                className={`absolute top-0 left-0 w-20 h-20 rounded-full border-4 border-indigo-600 border-t-transparent ${
-                  syncComplete ? '' : 'animate-spin'
-                }`}
-                style={{ animationDuration: '1s' }}
-              >
-                {syncComplete && (
-                  <div className="flex items-center justify-center h-full">
-                    <svg
-                      className="w-12 h-12 text-indigo-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Progress bar */}
+        <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
+          <div
+            className="absolute top-0 left-0 h-full bg-gray-900 dark:bg-gray-100 transition-all duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Syncing with GitHub
-          </h2>
-          
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+        {/* Progress percentage */}
+        <div className="text-center mb-2">
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            {Math.round(progress)}%
+          </p>
+        </div>
+
+        {/* Status message */}
+        <div className="text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {message}
           </p>
-
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            >
-              <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-            </div>
-          </div>
-
-          <p className="text-sm text-gray-500 dark:text-gray-500">
-            {progress}% complete
-          </p>
-
-          {/* Info message */}
-          <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-            <p className="text-xs text-indigo-700 dark:text-indigo-300">
-              💡 Your data is being backed up to GitHub for persistence across devices
-            </p>
-          </div>
-
-          {/* Skip button (optional) */}
-          <button
-            onClick={() => router.push(redirectTo)}
-            className="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline"
-          >
-            Skip and continue →
-          </button>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-      `}</style>
     </div>
   );
 }

@@ -24,3 +24,4 @@ export * from './use-cases/expense/DeleteExpenseUseCase';
 export * from './use-cases/user/RegisterUserUseCase';
 export * from './use-cases/user/LoginUserUseCase';
 export * from './use-cases/user/GetUserUseCase';
+export * from './use-cases/user/UpdateUserUseCase';
