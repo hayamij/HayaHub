@@ -223,7 +223,7 @@ export default function ProfilePage() {
             Danger Zone
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Log out of your account. You'll need to sign in again to access your data.
+            Log out of your account. You&apos;ll need to sign in again to access your data.
           </p>
           <button
             onClick={handleLogout}
