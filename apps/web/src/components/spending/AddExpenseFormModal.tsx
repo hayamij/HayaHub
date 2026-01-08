@@ -149,7 +149,7 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Mô tả <span className="text-red-500">*</span>
+              Mô tả
             </label>
             <input
               type="text"
@@ -157,14 +157,13 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
               placeholder="Ví dụ: Ăn trưa"
-              required
             />
           </div>
 
           {/* Amount */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Số tiền (VND) <span className="text-red-500">*</span>
+              Số tiền (VND)
             </label>
             <input
               type="number"
@@ -172,7 +171,6 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
               placeholder="50000"
-              required
               min="0"
               step="1000"
             />
@@ -181,7 +179,7 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
           {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Danh mục <span className="text-red-500">*</span>
+              Danh mục
             </label>
             <select
               value={formData.category}
@@ -199,14 +197,13 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
           {/* Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Ngày <span className="text-red-500">*</span>
+              Ngày
             </label>
             <input
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
-              required
             />
           </div>
 

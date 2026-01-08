@@ -149,7 +149,6 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
               placeholder="Ví dụ: Ăn trưa"
-              required
             />
           </div>
 
@@ -164,7 +163,6 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
               placeholder="50000"
-              required
               min="0"
               step="1000"
             />
@@ -198,7 +196,6 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
-              required
             />
           </div>
 

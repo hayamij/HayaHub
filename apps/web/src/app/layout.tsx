@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { OnlineSyncProvider } from '@/components/OnlineSyncProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,7 +28,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ToastProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <OnlineSyncProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </OnlineSyncProvider>
           </ToastProvider>
         </ThemeProvider>
       </body>

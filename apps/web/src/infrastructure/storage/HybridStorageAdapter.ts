@@ -201,19 +201,61 @@ export class HybridStorageAdapter implements IStorageService {
    */
   async fullSync(): Promise<void> {
     try {
+      console.log('🔄 Starting full sync...');
       const localKeys = await this.localStorage.getAllKeys();
+      let syncedCount = 0;
       
       for (const key of localKeys) {
         const value = await this.localStorage.get(key);
         if (value !== null) {
           await this.githubStorage.set(key, value);
           console.log(`✓ Full synced ${key} to GitHub`);
+          syncedCount++;
         }
       }
       
-      console.log('✓ Full sync completed');
+      console.log(`✓ Full sync completed (${syncedCount}/${localKeys.length} items)`);
     } catch (error) {
       console.error('✗ Full sync failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Smart sync: Compare localStorage and GitHub, only sync differences
+   * This is more efficient than fullSync for large datasets
+   */
+  async compareAndSync(): Promise<void> {
+    try {
+      console.log('🔍 Starting smart sync (comparing localStorage vs GitHub)...');
+      const localKeys = await this.localStorage.getAllKeys();
+      let syncedCount = 0;
+      let skippedCount = 0;
+      
+      for (const key of localKeys) {
+        const localValue = await this.localStorage.get(key);
+        if (localValue === null) continue;
+        
+        // Get GitHub value to compare
+        const githubValue = await this.githubStorage.get(key);
+        
+        // Compare by stringifying (simple but effective)
+        const localStr = JSON.stringify(localValue);
+        const githubStr = githubValue ? JSON.stringify(githubValue) : null;
+        
+        if (localStr !== githubStr) {
+          // Data is different or missing in GitHub, sync it
+          await this.githubStorage.set(key, localValue);
+          console.log(`✓ Synced ${key} to GitHub (changed)`);
+          syncedCount++;
+        } else {
+          skippedCount++;
+        }
+      }
+      
+      console.log(`✓ Smart sync completed (${syncedCount} synced, ${skippedCount} unchanged)`);
+    } catch (error) {
+      console.error('✗ Smart sync failed:', error);
       throw error;
     }
   }
@@ -236,6 +278,36 @@ export class HybridStorageAdapter implements IStorageService {
       console.log('✓ Pull from GitHub completed');
     } catch (error) {
       console.error('✗ Pull from GitHub failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Refresh data from GitHub: Clear all data keys (keep auth), then pull from GitHub
+   * This ensures localStorage is always in sync with GitHub as source of truth
+   */
+  async refreshFromGitHub(): Promise<void> {
+    try {
+      console.log('🔄 Refreshing data from GitHub...');
+      
+      // Step 1: Get all current localStorage keys
+      const allKeys = await this.localStorage.getAllKeys();
+      
+      // Step 2: Clear all keys EXCEPT currentUser (auth session)
+      const authKeys = ['currentUser'];
+      for (const key of allKeys) {
+        if (!authKeys.includes(key)) {
+          await this.localStorage.remove(key);
+          console.log(`🗑️ Cleared ${key} from localStorage`);
+        }
+      }
+      
+      // Step 3: Pull fresh data from GitHub
+      await this.pullFromGitHub();
+      
+      console.log('✓ Refresh from GitHub completed');
+    } catch (error) {
+      console.error('✗ Refresh from GitHub failed:', error);
       throw error;
     }
   }
