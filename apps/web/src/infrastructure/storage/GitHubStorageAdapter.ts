@@ -28,6 +28,7 @@ interface GitHubFile {
 export class GitHubStorageAdapter implements IStorageService {
   private config: GitHubConfig;
   private baseUrl = 'https://api.github.com';
+  private isConfigured: boolean;
 
   constructor() {
     this.config = {
@@ -37,8 +38,10 @@ export class GitHubStorageAdapter implements IStorageService {
       branch: process.env.NEXT_PUBLIC_GITHUB_BRANCH || 'data',
     };
 
-    if (!this.config.token) {
-      console.warn('GitHub token not configured');
+    this.isConfigured = !!(this.config.token && this.config.owner && this.config.repo);
+
+    if (!this.isConfigured) {
+      console.warn('GitHub storage not configured - using localStorage only mode');
     }
   }
 
@@ -55,6 +58,11 @@ export class GitHubStorageAdapter implements IStorageService {
   }
 
   async get<T>(key: string): Promise<T | null> {
+    // Return null if not configured - let HybridStorageAdapter fallback to localStorage
+    if (!this.isConfigured) {
+      return null;
+    }
+
     try {
       const path = this.getFilePath(key);
       const url = `${this.baseUrl}/repos/${this.config.owner}/${this.config.repo}/contents/${path}?ref=${this.config.branch}`;
@@ -87,6 +95,11 @@ export class GitHubStorageAdapter implements IStorageService {
   }
 
   async set<T>(key: string, value: T): Promise<void> {
+    // Skip if not configured - HybridStorageAdapter will use localStorage only
+    if (!this.isConfigured) {
+      return;
+    }
+
     try {
       const path = this.getFilePath(key);
       const content = JSON.stringify(value, null, 2);
@@ -140,6 +153,11 @@ export class GitHubStorageAdapter implements IStorageService {
   }
 
   async remove(key: string): Promise<void> {
+    // Skip if not configured
+    if (!this.isConfigured) {
+      return;
+    }
+
     try {
       const path = this.getFilePath(key);
 
@@ -186,6 +204,11 @@ export class GitHubStorageAdapter implements IStorageService {
   }
 
   async getAllKeys(): Promise<string[]> {
+    // Return empty array if not configured
+    if (!this.isConfigured) {
+      return [];
+    }
+
     try {
       const url = `${this.baseUrl}/repos/${this.config.owner}/${this.config.repo}/contents/data?ref=${this.config.branch}`;
 
