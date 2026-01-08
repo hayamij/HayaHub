@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Container } from '@/infrastructure/di/Container';
 
-export default function SyncingPage() {
+function SyncingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = (searchParams.get('redirect') || '/') as any;
@@ -113,5 +113,27 @@ export default function SyncingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SyncingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
+            <div className="absolute top-0 left-0 h-full bg-gray-900 dark:bg-gray-100 transition-all duration-300 ease-out" style={{ width: '0%' }} />
+          </div>
+          <div className="text-center mb-2">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">0%</p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <SyncingPageContent />
+    </Suspense>
   );
 }

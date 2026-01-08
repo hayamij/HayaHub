@@ -2,12 +2,12 @@
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { User, Mail, Calendar, LogOut } from 'lucide-react';
 import { Container } from '@/infrastructure/di/Container';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const { user, logout, login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -235,5 +235,26 @@ export default function ProfilePage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <div className="max-w-2xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Profile Settings
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Loading...
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    }>
+      <ProfilePageContent />
+    </Suspense>
   );
 }
