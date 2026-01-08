@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { AddExpenseFormModal } from '@/components/spending/AddExpenseFormModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Calendar, TrendingUp } from 'lucide-react';
@@ -34,6 +35,7 @@ export default function SpendingPage() {
   const [timeView, setTimeView] = useState<TimeView>('month');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedCategory, setSelectedCategory] = useState<ExpenseCategory | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Category labels in Vietnamese
   const categoryLabels: Record<ExpenseCategory, string> = {
@@ -108,21 +110,12 @@ export default function SpendingPage() {
     }
   };
 
-  const handleAdd = async () => {
-    if (!user) return;
+  const handleAdd = () => {
+    setIsAddModalOpen(true);
+  };
 
-    const newExpense: ExpenseRow = {
-      id: 'temp-' + Date.now(),
-      date: new Date(),
-      description: '',
-      amount: 0,
-      category: ExpenseCategory.OTHER,
-      notes: '',
-    };
-
-    setEditingId(newExpense.id);
-    setEditForm(newExpense);
-    setExpenses([newExpense, ...expenses]);
+  const handleAddSuccess = async () => {
+    await loadExpenses();
   };
 
   const handleEdit = (expense: ExpenseRow) => {
@@ -703,6 +696,16 @@ export default function SpendingPage() {
           </div>
         </div>
       </div>
+
+      {/* Add Expense Modal */}
+      {user && (
+        <AddExpenseFormModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          userId={user.id}
+          onSuccess={handleAddSuccess}
+        />
+      )}
     </DashboardLayout>
   );
 }
