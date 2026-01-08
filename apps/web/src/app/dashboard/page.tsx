@@ -1,10 +1,10 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { SpendingWidget } from '@/components/dashboard/SpendingWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import {
-  TrendingUp,
   Wallet,
   Calendar,
   Target,
@@ -16,15 +16,6 @@ export default function DashboardPage() {
 
   // Mock data - sẽ được thay thế bằng data thật sau
   const stats = [
-    {
-      id: 'total-expenses',
-      label: 'Total Expenses',
-      value: '$2,450.00',
-      change: '+12.5%',
-      icon: TrendingUp,
-      color: 'text-gray-900 dark:text-gray-100',
-      bgColor: 'bg-gray-100 dark:bg-gray-800',
-    },
     {
       id: 'monthly-budget',
       label: 'Monthly Budget',
@@ -78,6 +69,10 @@ export default function DashboardPage() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Spending Widget - Real data */}
+        {user && <SpendingWidget userId={user.id} />}
+        
+        {/* Other stats - Mock data */}
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

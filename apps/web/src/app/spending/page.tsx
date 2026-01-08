@@ -33,6 +33,7 @@ export default function SpendingPage() {
   const [editForm, setEditForm] = useState<ExpenseRow | null>(null);
   const [timeView, setTimeView] = useState<TimeView>('month');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedCategory, setSelectedCategory] = useState<ExpenseCategory | null>(null);
 
   // Category labels in Vietnamese
   const categoryLabels: Record<ExpenseCategory, string> = {
@@ -221,6 +222,14 @@ export default function SpendingPage() {
     }
   };
 
+  // Filter expenses by selected category
+  const getFilteredExpenses = (): ExpenseRow[] => {
+    if (!selectedCategory) {
+      return expenses;
+    }
+    return expenses.filter((expense) => expense.category === selectedCategory);
+  };
+
   // Calculate category summaries
   const getCategorySummaries = (): CategorySummary[] => {
     const summaries = new Map<ExpenseCategory, { total: number; count: number }>();
@@ -268,8 +277,24 @@ export default function SpendingPage() {
     setSelectedDate(newDate);
   };
 
+  // Handle category filter click
+  const handleCategoryClick = (category: ExpenseCategory) => {
+    if (selectedCategory === category) {
+      // Toggle off if clicking the same category
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(category);
+    }
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSelectedCategory(null);
+  };
+
   const categorySummaries = getCategorySummaries();
-  const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const filteredExpenses = getFilteredExpenses();
+  const totalAmount = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <DashboardLayout>
@@ -355,14 +380,17 @@ export default function SpendingPage() {
                   <TrendingUp className="w-5 h-5 text-gray-900 dark:text-white" />
                 </div>
                 <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Tổng chi tiêu
+                  {selectedCategory ? `${categoryLabels[selectedCategory]}` : 'Tổng chi tiêu'}
                 </h3>
               </div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {formatCurrency(totalAmount)}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {expenses.length} giao dịch
+                {filteredExpenses.length} giao dịch
+                {selectedCategory && expenses.length !== filteredExpenses.length && (
+                  <span className="ml-1">/ {expenses.length} tổng</span>
+                )}
               </p>
             </div>
 
@@ -394,33 +422,94 @@ export default function SpendingPage() {
         {/* Category Breakdown */}
         {categorySummaries.length > 0 && (
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Chi tiết theo danh mục
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categorySummaries.map((summary) => (
-                <div
-                  key={summary.category}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Chi tiết theo danh mục
+              </h3>
+              {selectedCategory && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors underline"
                 >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {categoryLabels[summary.category]}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {summary.count} giao dịch
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">
-                      {formatCurrency(summary.total)}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {((summary.total / totalAmount) * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              ))}
+                  Xóa bộ lọc
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categorySummaries.map((summary) => {
+                const isSelected = selectedCategory === summary.category;
+                const isOtherCategorySelected = selectedCategory && selectedCategory !== summary.category;
+                
+                return (
+                  <button
+                    key={summary.category}
+                    onClick={() => handleCategoryClick(summary.category)}
+                    className={`flex items-center justify-between p-4 rounded-lg transition-all text-left ${
+                      isSelected
+                        ? 'bg-gray-900 dark:bg-gray-100 ring-2 ring-gray-900 dark:ring-gray-100'
+                        : isOtherCategorySelected
+                        ? 'bg-gray-50 dark:bg-gray-800 opacity-50'
+                        : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex-1">
+                      <p className={`text-sm font-medium ${
+                        isSelected
+                          ? 'text-white dark:text-gray-900'
+                          : 'text-gray-900 dark:text-white'
+                      }`}>
+                        {categoryLabels[summary.category]}
+                      </p>
+                      <p className={`text-xs mt-1 ${
+                        isSelected
+                          ? 'text-gray-300 dark:text-gray-600'
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}>
+                        {summary.count} giao dịch
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-bold ${
+                        isSelected
+                          ? 'text-white dark:text-gray-900'
+                          : 'text-gray-900 dark:text-white'
+                      }`}>
+                        {formatCurrency(summary.total)}
+                      </p>
+                      <p className={`text-xs mt-1 ${
+                        isSelected
+                          ? 'text-gray-300 dark:text-gray-600'
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}>
+                        {((summary.total / expenses.reduce((sum, e) => sum + e.amount, 0)) * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Filter indicator */}
+        {selectedCategory && (
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Đang lọc theo:
+                </span>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900">
+                  {categoryLabels[selectedCategory]}
+                </span>
+              </div>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1"
+              >
+                <X className="w-4 h-4" />
+                Xóa bộ lọc
+              </button>
             </div>
           </div>
         )}
@@ -458,14 +547,17 @@ export default function SpendingPage() {
                       Đang tải...
                     </td>
                   </tr>
-                ) : expenses.length === 0 ? (
+                ) : filteredExpenses.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                      Chưa có chi tiêu nào. Nhấn "Thêm chi tiêu" để bắt đầu.
+                      {selectedCategory 
+                        ? `Không có chi tiêu nào trong danh mục "${categoryLabels[selectedCategory]}".`
+                        : 'Chưa có chi tiêu nào. Nhấn "Thêm chi tiêu" để bắt đầu.'
+                      }
                     </td>
                   </tr>
                 ) : (
-                  expenses.map((expense) => (
+                  filteredExpenses.map((expense) => (
                     <tr
                       key={expense.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
