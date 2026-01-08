@@ -118,6 +118,35 @@ class Container {
     }
     return this._getUserUseCase;
   }
+
+  // Static convenience methods
+  static createExpenseUseCase(): CreateExpenseUseCase {
+    return Container.getInstance().createExpenseUseCase;
+  }
+
+  static getExpensesUseCase(): GetExpensesUseCase {
+    return Container.getInstance().getExpensesUseCase;
+  }
+
+  static updateExpenseUseCase(): UpdateExpenseUseCase {
+    return Container.getInstance().updateExpenseUseCase;
+  }
+
+  static deleteExpenseUseCase(): DeleteExpenseUseCase {
+    return Container.getInstance().deleteExpenseUseCase;
+  }
+
+  static registerUserUseCase(): RegisterUserUseCase {
+    return Container.getInstance().registerUserUseCase;
+  }
+
+  static loginUserUseCase(): LoginUserUseCase {
+    return Container.getInstance().loginUserUseCase;
+  }
+
+  static getUserUseCase(): GetUserUseCase {
+    return Container.getInstance().getUserUseCase;
+  }
 }
 
 export const container = Container.getInstance();

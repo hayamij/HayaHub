@@ -9,5 +9,7 @@ export enum ExpenseCategory {
   HOUSING = 'HOUSING',
   INSURANCE = 'INSURANCE',
   SAVINGS = 'SAVINGS',
+  BILLS = 'BILLS',
+  TRAVEL = 'TRAVEL',
   OTHER = 'OTHER',
 }

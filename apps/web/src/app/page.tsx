@@ -2,60 +2,99 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function HomePage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  const { isSyncing, queueSize } = useSyncStatus();
+
+  // Redirect to dashboard if user is logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+  // Show landing page only for non-authenticated users
+  if (user) {
+    return null; // Will redirect
+  }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Sync indicator */}
-      {isSyncing && (
-        <div className="fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 z-50">
-          <div className="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Syncing to GitHub... ({queueSize} items)
-          </span>
-        </div>
-      )}
-      
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
       <div className="container mx-auto px-4">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6 text-gray-900 dark:text-white">
-            Welcome to <span className="text-indigo-600 dark:text-indigo-400">HayaHub</span>
+        <div className="text-center max-w-4xl mx-auto">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <div className="w-20 h-20 bg-gray-900 dark:bg-gray-100 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-white dark:text-gray-900 font-bold text-4xl">H</span>
+            </div>
+          </div>
+
+          {/* Hero section */}
+          <h1 className="text-5xl font-bold tracking-tight sm:text-7xl mb-6 text-gray-900 dark:text-white">
+            Welcome to <span className="text-gray-900 dark:text-gray-100">HayaHub</span>
           </h1>
-          {user ? (
-            <div className="space-y-6">
-              <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">
-                Hello, {user.name}! 👋
-              </p>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                Your all-in-one personal management hub
-              </p>
-              <div className="flex gap-4 justify-center">
-                <button
-                  onClick={() => router.push('/expenses')}
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-indigo-600 px-8 text-sm font-medium text-white shadow hover:bg-indigo-700"
-                >
-                  Manage Expenses
-                </button>
-                <button
-                  onClick={logout}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-8 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  Logout
-                </button>
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-4">
+            Your all-in-one personal management hub
+          </p>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-12">
+            Master your life and finance with powerful tools and insights
+          </p>
+
+          {/* CTA buttons */}
+          <div className="flex gap-4 justify-center">
+            <Link
+              href="/register"
+              className="inline-flex h-12 items-center justify-center rounded-lg bg-gray-900 dark:bg-gray-100 px-8 text-base font-medium text-white dark:text-gray-900 shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex h-12 items-center justify-center rounded-lg border-2 border-gray-900 dark:border-gray-100 bg-transparent px-8 text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
+
+          {/* Features */}
+          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-800">
+              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-2xl">💰</span>
               </div>
-            </div>
-          ) : (
-            <div>
-              <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">
-                Master your life and finance
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Expense Tracking
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Track your expenses effortlessly and gain insights into your spending habits
               </p>
             </div>
-          )}
+            <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-800">
+              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-2xl">☁️</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Cloud Sync
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Your data synced securely to GitHub, accessible from anywhere
+              </p>
+            </div>
+            <div className="p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-200 dark:border-gray-800">
+              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <span className="text-2xl">📊</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Analytics
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Visualize your data with beautiful charts and detailed reports
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
