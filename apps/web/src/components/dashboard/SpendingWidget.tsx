@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
-import type { ExpenseDTO } from 'hayahub-business';
+import { useMonthExpenses, useTodayExpenses } from '@/hooks/useExpenses';
 
 interface SpendingData {
   todayTotal: number;
@@ -20,128 +19,97 @@ interface SpendingWidgetProps {
 
 export function SpendingWidget({ userId }: SpendingWidgetProps) {
   const [data, setData] = useState<SpendingData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    loadSpendingData();
-  }, [userId]);
+  // Fetch current month expenses
+  const { expenses: currentMonthExpenses, isLoading: isLoadingCurrent } = useMonthExpenses(userId);
+  
+  // Fetch today's expenses
+  const { expenses: todayExpenses } = useTodayExpenses(userId);
+  
+  // Fetch previous month for comparison
+  const today = new Date();
+  const { expenses: prevMonthExpenses } = useMonthExpenses(
+    userId,
+    today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear(),
+    today.getMonth() === 0 ? 11 : today.getMonth() - 1
+  );
 
   const handleClick = () => {
     router.push('/spending');
   };
 
-  const loadSpendingData = async () => {
-    setIsLoading(true);
-    try {
-      const getExpensesUseCase = Container.getExpensesUseCase();
+  useEffect(() => {
+    if (isLoadingCurrent) return;
+
+    const today = new Date();
+    
+    // Calculate today's total
+    const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+    // Calculate month total
+    const monthTotal = currentMonthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+    // Calculate weekly data (last 7 days)
+    const weeklyData: { date: string; amount: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
       
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
       
-      // Get current month expenses
-      const currentMonthResult = await getExpensesUseCase.execute({
-        userId,
-        startDate: startOfMonth,
-        endDate: endOfMonth,
-      });
-
-      if (!currentMonthResult.isSuccess()) {
-        setIsLoading(false);
-        return;
-      }
-
-      const currentMonthExpenses = currentMonthResult.value;
-
-      // Get previous month expenses for comparison
-      const startOfPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const endOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999);
-      
-      const prevMonthResult = await getExpensesUseCase.execute({
-        userId,
-        startDate: startOfPrevMonth,
-        endDate: endOfPrevMonth,
-      });
-
-      const prevMonthExpenses = prevMonthResult.isSuccess() ? prevMonthResult.value : [];
-
-      // Calculate today's total
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-      
-      const todayExpenses = currentMonthExpenses.filter((exp: ExpenseDTO) => {
+      const dayExpenses = currentMonthExpenses.filter((exp) => {
         const expDate = new Date(exp.date);
-        return expDate >= startOfDay && expDate <= endOfDay;
+        return expDate >= date && expDate <= endDate;
       });
       
-      const todayTotal = todayExpenses.reduce((sum: number, exp: ExpenseDTO) => sum + exp.amount, 0);
-
-      // Calculate month total
-      const monthTotal = currentMonthExpenses.reduce((sum: number, exp: ExpenseDTO) => sum + exp.amount, 0);
-
-      // Calculate weekly data (last 7 days)
-      const weeklyData: { date: string; amount: number }[] = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
-        
-        const endDate = new Date(date);
-        endDate.setHours(23, 59, 59, 999);
-        
-        const dayExpenses = currentMonthExpenses.filter((exp: ExpenseDTO) => {
-          const expDate = new Date(exp.date);
-          return expDate >= date && expDate <= endDate;
-        });
-        
-        const dayTotal = dayExpenses.reduce((sum: number, exp: ExpenseDTO) => sum + exp.amount, 0);
-        
-        weeklyData.push({
-          date: date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
-          amount: dayTotal,
-        });
-      }
-
-      // Calculate percentage change compared to same day of previous month
-      const currentDayOfMonth = today.getDate();
+      const dayTotal = dayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
       
-      // Get expenses up to current day in current month
-      const currentMonthToDate = currentMonthExpenses.filter((exp: ExpenseDTO) => {
-        const expDate = new Date(exp.date);
-        return expDate.getDate() <= currentDayOfMonth;
+      weeklyData.push({
+        date: date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }),
+        amount: dayTotal,
       });
-      
-      const currentMonthTotalToDate = currentMonthToDate.reduce((sum: number, exp: ExpenseDTO) => sum + exp.amount, 0);
-      
-      // Get expenses up to same day in previous month
-      const prevMonthToDate = prevMonthExpenses.filter((exp: ExpenseDTO) => {
-        const expDate = new Date(exp.date);
-        return expDate.getDate() <= currentDayOfMonth;
-      });
-      
-      const prevMonthTotalToDate = prevMonthToDate.reduce((sum: number, exp: ExpenseDTO) => sum + exp.amount, 0);
-      
-      let percentageChange = 0;
-      if (prevMonthTotalToDate > 0) {
-        percentageChange = ((currentMonthTotalToDate - prevMonthTotalToDate) / prevMonthTotalToDate) * 100;
-      } else if (currentMonthTotalToDate > 0) {
-        percentageChange = 100;
-      }
-
-      setData({
-        todayTotal,
-        monthTotal,
-        weeklyData,
-        percentageChange,
-        isIncrease: percentageChange > 0,
-      });
-    } catch (error) {
-      console.error('Failed to load spending data:', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+
+    // Calculate percentage change
+    const currentDayOfMonth = today.getDate();
+    
+    const currentMonthToDate = currentMonthExpenses.filter((exp) => {
+      const expDate = new Date(exp.date);
+      return expDate.getDate() <= currentDayOfMonth;
+    });
+    
+    const currentMonthTotalToDate = currentMonthToDate.reduce((sum, exp) => sum + exp.amount, 0);
+    
+    const prevMonthToDate = prevMonthExpenses.filter((exp) => {
+      const expDate = new Date(exp.date);
+      return expDate.getDate() <= currentDayOfMonth;
+    });
+    
+    const prevMonthTotalToDate = prevMonthToDate.reduce((sum, exp) => sum + exp.amount, 0);
+    
+    let percentageChange = 0;
+    let isIncrease = false;
+    
+    if (prevMonthTotalToDate > 0) {
+      const change = ((currentMonthTotalToDate - prevMonthTotalToDate) / prevMonthTotalToDate) * 100;
+      percentageChange = Math.abs(change);
+      isIncrease = change > 0;
+    } else if (currentMonthTotalToDate > 0) {
+      percentageChange = 100;
+      isIncrease = true;
+    }
+
+    setData({
+      todayTotal,
+      monthTotal,
+      weeklyData,
+      percentageChange,
+      isIncrease,
+    });
+  }, [currentMonthExpenses, todayExpenses, prevMonthExpenses, isLoadingCurrent]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
@@ -151,7 +119,7 @@ export function SpendingWidget({ userId }: SpendingWidgetProps) {
     }).format(amount);
   };
 
-  if (isLoading) {
+  if (isLoadingCurrent) {
     return (
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
         <div className="animate-pulse space-y-4">

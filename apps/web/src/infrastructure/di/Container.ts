@@ -1,9 +1,11 @@
 /**
  * Dependency Injection Container
- * Creates and wires up all dependencies
+ * Creates and wires up all dependencies using Strategy Pattern
  */
 
 import { HybridStorageAdapter } from '../storage/HybridStorageAdapter';
+import { LocalStorageStrategy } from '../storage/strategies/LocalStorageStrategy';
+import { GitHubStorageStrategy } from '../storage/strategies/GitHubStorageStrategy';
 import { ExpenseRepositoryAdapter } from '../repositories/ExpenseRepositoryAdapter';
 import { UserRepositoryAdapter } from '../repositories/UserRepositoryAdapter';
 import {
@@ -50,7 +52,10 @@ class Container {
   // Infrastructure
   get storageService(): IStorageService {
     if (!this._storageService) {
-      this._storageService = new HybridStorageAdapter();
+      // Strategy Pattern: Inject storage strategies
+      const primaryStorage = new LocalStorageStrategy();
+      const secondaryStorage = new GitHubStorageStrategy();
+      this._storageService = new HybridStorageAdapter(primaryStorage, secondaryStorage);
     }
     return this._storageService;
   }
