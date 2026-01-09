@@ -6,8 +6,9 @@ import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Plus, TrendingUp, FileText, Target } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, TrendingUp, /*TrendingDown,*/ FileText, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Container } from '@/infrastructure/di/Container';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -15,10 +16,91 @@ export default function DashboardPage() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [stats, setStats] = useState({
+    today: { income: 0, expense: 0 },
+    week: { income: 0, expense: 0 },
+    month: { income: 0, expense: 0 },
+  });
 
   const handleExpenseAdded = () => {
-    // Refresh spending widget by changing key
+    // Refresh spending widget and stats by changing key
     setRefreshKey(prev => prev + 1);
+    loadStats();
+  };
+
+  // Load stats when user is available
+  useEffect(() => {
+    if (user) {
+      loadStats();
+    }
+  }, [user, refreshKey]);
+
+  const loadStats = async () => {
+    if (!user) return;
+
+    try {
+      const getExpensesUseCase = Container.getExpensesUseCase();
+      const now = new Date();
+
+      // Get all expenses for the month to filter locally
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      
+      const result = await getExpensesUseCase.execute({
+        userId: user.id,
+        startDate: startOfMonth,
+        endDate: endOfMonth,
+      });
+
+      if (result.isSuccess()) {
+        const expenses = result.value;
+
+        // Calculate today
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(now);
+        todayEnd.setHours(23, 59, 59, 999);
+        const todayExpenses = expenses.filter(exp => {
+          const expDate = new Date(exp.date);
+          return expDate >= todayStart && expDate <= todayEnd;
+        });
+        const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+        // Calculate this week (Monday to Sunday)
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() + mondayOffset);
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        const weekExpenses = expenses.filter(exp => {
+          const expDate = new Date(exp.date);
+          return expDate >= weekStart && expDate <= weekEnd;
+        });
+        const weekTotal = weekExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+        // Calculate this month
+        const monthTotal = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+        setStats({
+          today: { income: 0, expense: todayTotal },
+          week: { income: 0, expense: weekTotal },
+          month: { income: 0, expense: monthTotal },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    }
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (
@@ -66,36 +148,92 @@ export default function DashboardPage() {
 
         {/* Quick Stats Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Today Card */}
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Hôm nay</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">--</p>
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Hôm nay</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.today.income - stats.today.expense)}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span>Thu</span>
+                </div>
+                <span className="font-medium text-green-600 dark:text-green-400">
+                  {formatCurrency(stats.today.income)}
+                </span>
               </div>
-              <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-gray-900 dark:text-white" />
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                  <ArrowDownRight className="w-3.5 h-3.5" />
+                  <span>Chi</span>
+                </div>
+                <span className="font-medium text-red-600 dark:text-red-400">
+                  -{formatCurrency(stats.today.expense)}
+                </span>
               </div>
             </div>
           </div>
+
+          {/* Week Card */}
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Tuần này</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">--</p>
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Tuần này</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.week.income - stats.week.expense)}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span>Thu</span>
+                </div>
+                <span className="font-medium text-green-600 dark:text-green-400">
+                  {formatCurrency(stats.week.income)}
+                </span>
               </div>
-              <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-gray-900 dark:text-white" />
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                  <ArrowDownRight className="w-3.5 h-3.5" />
+                  <span>Chi</span>
+                </div>
+                <span className="font-medium text-red-600 dark:text-red-400">
+                  -{formatCurrency(stats.week.expense)}
+                </span>
               </div>
             </div>
           </div>
+
+          {/* Month Card */}
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Tháng này</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">--</p>
+            <div className="mb-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Tháng này</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.month.income - stats.month.expense)}
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span>Thu</span>
+                </div>
+                <span className="font-medium text-green-600 dark:text-green-400">
+                  {formatCurrency(stats.month.income)}
+                </span>
               </div>
-              <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-gray-900 dark:text-white" />
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                  <ArrowDownRight className="w-3.5 h-3.5" />
+                  <span>Chi</span>
+                </div>
+                <span className="font-medium text-red-600 dark:text-red-400">
+                  -{formatCurrency(stats.month.expense)}
+                </span>
               </div>
             </div>
           </div>

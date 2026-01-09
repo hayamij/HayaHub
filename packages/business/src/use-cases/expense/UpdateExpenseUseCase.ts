@@ -37,6 +37,9 @@ export class UpdateExpenseUseCase {
       if (dto.date !== undefined) {
         expense.updateDate(dto.date);
       }
+      if (dto.tags !== undefined) {
+        expense.updateTags(dto.tags);
+      }
 
       // Persist
       await this.expenseRepository.update(expense);

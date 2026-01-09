@@ -62,7 +62,9 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
     const year = vietnamTime.getFullYear();
     const month = String(vietnamTime.getMonth() + 1).padStart(2, '0');
     const day = String(vietnamTime.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const hours = String(vietnamTime.getHours()).padStart(2, '0');
+    const minutes = String(vietnamTime.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   const [formData, setFormData] = useState({
@@ -157,8 +159,23 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
 
   // Submit all selected presets + manual entry as separate expenses
   const handleSubmitAll = async () => {
-    if (selectedPresets.length === 0 && !formData.description && !formData.amount) {
+    // Check if user has started manual entry
+    const hasStartedManualEntry = formData.description || formData.amount || formData.category;
+    const hasCompleteManualEntry = formData.description && formData.amount && formData.category;
+
+    // If no presets and no manual entry at all
+    if (selectedPresets.length === 0 && !hasStartedManualEntry) {
       showError('Vui lòng chọn preset hoặc nhập thủ công');
+      return;
+    }
+
+    // If user started manual entry but incomplete, block submission
+    if (hasStartedManualEntry && !hasCompleteManualEntry) {
+      const missingFields = [];
+      if (!formData.description) missingFields.push('Mô tả');
+      if (!formData.amount) missingFields.push('Số tiền');
+      if (!formData.category) missingFields.push('Danh mục');
+      showError(`Vui lòng điền đầy đủ thông tin: ${missingFields.join(', ')}`);
       return;
     }
 
@@ -184,8 +201,8 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
         });
       }
 
-      // Add manual entry if filled
-      if (formData.description && formData.amount && formData.category) {
+      // Add manual entry if complete
+      if (hasCompleteManualEntry) {
         allExpenses.push({
           userId,
           description: formData.description,
@@ -476,10 +493,10 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
                 {/* Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ngày
+                    Ngày giờ
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
@@ -542,7 +559,7 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
                   >
                     {loading
                       ? 'Đang lưu...'
-                      : `Thêm ${selectedPresets.length + (formData.description ? 1 : 0)} chi tiêu`}
+                      : `Thêm ${selectedPresets.length + (formData.description && formData.amount && formData.category ? 1 : 0)} chi tiêu`}
                   </button>
                 ) : (
                   <button

@@ -73,6 +73,11 @@ export class Expense {
     this._updatedAt = new Date();
   }
 
+  updateTags(tags: string[]): void {
+    this._tags = [...tags];
+    this._updatedAt = new Date();
+  }
+
   addTag(tag: string): void {
     if (!this._tags.includes(tag)) {
       this._tags.push(tag);
