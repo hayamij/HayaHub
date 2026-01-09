@@ -126,7 +126,14 @@ export class GitHubStorageAdapter implements IStorageService {
       // Create or update file
       const putUrl = `${this.baseUrl}/repos/${this.config.owner}/${this.config.repo}/contents/${path}`;
 
-      const body: any = {
+      interface GitHubPutBody {
+        message: string;
+        content: string;
+        branch: string;
+        sha?: string;
+      }
+
+      const body: GitHubPutBody = {
         message: `Update ${key}`,
         content: contentBase64,
         branch: this.config.branch,

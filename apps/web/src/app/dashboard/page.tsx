@@ -6,7 +6,7 @@ import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, /*TrendingDown,*/ FileText, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Container } from '@/infrastructure/di/Container';
 
@@ -28,14 +28,8 @@ export default function DashboardPage() {
     loadStats();
   };
 
-  // Load stats when user is available
-  useEffect(() => {
-    if (user) {
-      loadStats();
-    }
-  }, [user, refreshKey]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -93,7 +87,14 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
-  };
+  }, [user]);
+
+  // Load stats when user is available
+  useEffect(() => {
+    if (user) {
+      loadStats();
+    }
+  }, [user, refreshKey, loadStats]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {

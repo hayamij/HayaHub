@@ -12,7 +12,7 @@ import type { IStorageStrategy } from './strategies/IStorageStrategy';
  * Write operations: Write to primary immediately, then sync to secondary in background
  */
 export class HybridStorageAdapter implements IStorageService {
-  private syncQueue: Map<string, any> = new Map();
+  private syncQueue: Map<string, unknown> = new Map();
   private isSyncing = false;
   private syncCallbacks: (() => void)[] = [];
 

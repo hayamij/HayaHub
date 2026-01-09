@@ -20,7 +20,10 @@ export function useSyncStatus() {
     const checkStatus = () => {
       try {
         const container = Container.getInstance();
-        const storageService = container.storageService as any;
+        interface StorageWithSync {
+          getSyncStatus?: () => SyncStatus;
+        }
+        const storageService = container.storageService as StorageWithSync;
 
         if (typeof storageService.getSyncStatus === 'function') {
           const currentStatus = storageService.getSyncStatus();

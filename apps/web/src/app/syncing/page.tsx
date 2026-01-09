@@ -7,7 +7,7 @@ import { Container } from '@/infrastructure/di/Container';
 function SyncingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = (searchParams.get('redirect') || '/') as any;
+  const redirectTo = (searchParams.get('redirect') || '/') as string;
   
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState('Preparing your data...');
@@ -22,7 +22,11 @@ function SyncingPageContent() {
       const storageService = container.storageService;
 
       // Check if it's HybridStorageAdapter with sync capabilities
-      const hybridStorage = storageService as any;
+      interface HybridStorageWithSync {
+        syncToRemote?: () => Promise<void>;
+        waitForSync?: (timeout: number) => Promise<boolean>;
+      }
+      const hybridStorage = storageService as HybridStorageWithSync;
       
       // Animate progress bar smoothly (slower for better UX)
       progressInterval = setInterval(() => {
