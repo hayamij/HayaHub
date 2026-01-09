@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { AddExpenseFormModal } from '@/components/spending/AddExpenseFormModal';
+import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Calendar, TrendingUp } from 'lucide-react';
@@ -699,7 +699,7 @@ export default function SpendingPage() {
 
       {/* Add Expense Modal */}
       {user && (
-        <AddExpenseFormModal
+        <AddExpenseModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           userId={user.id}

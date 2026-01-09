@@ -2,6 +2,7 @@
 
 // Ports (Interfaces)
 export * from './ports/IExpenseRepository';
+export * from './ports/IExpensePresetRepository';
 export * from './ports/IUserRepository';
 export * from './ports/IProjectRepository';
 export * from './ports/ITaskRepository';
@@ -11,6 +12,7 @@ export * from './ports/IStorageService';
 
 // DTOs
 export * from './dtos/expense';
+export * from './dtos/expensePreset';
 export * from './dtos/user';
 export * from './dtos/project';
 export * from './dtos/task';
@@ -20,6 +22,10 @@ export * from './use-cases/expense/CreateExpenseUseCase';
 export * from './use-cases/expense/GetExpensesUseCase';
 export * from './use-cases/expense/UpdateExpenseUseCase';
 export * from './use-cases/expense/DeleteExpenseUseCase';
+export * from './use-cases/expense/CreateExpensePresetUseCase';
+export * from './use-cases/expense/GetExpensePresetsUseCase';
+export * from './use-cases/expense/UpdateExpensePresetUseCase';
+export * from './use-cases/expense/DeleteExpensePresetUseCase';
 
 export * from './use-cases/user/RegisterUserUseCase';
 export * from './use-cases/user/LoginUserUseCase';

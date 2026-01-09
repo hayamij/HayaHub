@@ -4,6 +4,7 @@
 // Entities
 export * from './entities/User';
 export * from './entities/Expense';
+export * from './entities/ExpensePreset';
 export * from './entities/Project';
 export * from './entities/Task';
 export * from './entities/Event';

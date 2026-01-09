@@ -7,12 +7,17 @@ import { HybridStorageAdapter } from '../storage/HybridStorageAdapter';
 import { LocalStorageStrategy } from '../storage/strategies/LocalStorageStrategy';
 import { GitHubStorageStrategy } from '../storage/strategies/GitHubStorageStrategy';
 import { ExpenseRepositoryAdapter } from '../repositories/ExpenseRepositoryAdapter';
+import { ExpensePresetRepositoryAdapter } from '../repositories/ExpensePresetRepositoryAdapter';
 import { UserRepositoryAdapter } from '../repositories/UserRepositoryAdapter';
 import {
   CreateExpenseUseCase,
   GetExpensesUseCase,
   UpdateExpenseUseCase,
   DeleteExpenseUseCase,
+  CreateExpensePresetUseCase,
+  GetExpensePresetsUseCase,
+  UpdateExpensePresetUseCase,
+  DeleteExpensePresetUseCase,
   RegisterUserUseCase,
   LoginUserUseCase,
   GetUserUseCase,
@@ -28,6 +33,7 @@ class Container {
 
   // Repositories
   private _expenseRepository?: ExpenseRepositoryAdapter;
+  private _expensePresetRepository?: ExpensePresetRepositoryAdapter;
   private _userRepository?: UserRepositoryAdapter;
 
   // Use Cases
@@ -35,6 +41,10 @@ class Container {
   private _getExpensesUseCase?: GetExpensesUseCase;
   private _updateExpenseUseCase?: UpdateExpenseUseCase;
   private _deleteExpenseUseCase?: DeleteExpenseUseCase;
+  private _createExpensePresetUseCase?: CreateExpensePresetUseCase;
+  private _getExpensePresetsUseCase?: GetExpensePresetsUseCase;
+  private _updateExpensePresetUseCase?: UpdateExpensePresetUseCase;
+  private _deleteExpensePresetUseCase?: DeleteExpensePresetUseCase;
   private _registerUserUseCase?: RegisterUserUseCase;
   private _loginUserUseCase?: LoginUserUseCase;
   private _getUserUseCase?: GetUserUseCase;
@@ -66,6 +76,13 @@ class Container {
       this._expenseRepository = new ExpenseRepositoryAdapter(this.storageService);
     }
     return this._expenseRepository;
+  }
+
+  get expensePresetRepository(): ExpensePresetRepositoryAdapter {
+    if (!this._expensePresetRepository) {
+      this._expensePresetRepository = new ExpensePresetRepositoryAdapter(this.storageService);
+    }
+    return this._expensePresetRepository;
   }
 
   get userRepository(): UserRepositoryAdapter {
@@ -102,6 +119,43 @@ class Container {
       this._deleteExpenseUseCase = new DeleteExpenseUseCase(this.expenseRepository);
     }
     return this._deleteExpenseUseCase;
+  }
+
+  // Use Cases - Expense Presets
+  get createExpensePresetUseCase(): CreateExpensePresetUseCase {
+    if (!this._createExpensePresetUseCase) {
+      this._createExpensePresetUseCase = new CreateExpensePresetUseCase(
+        this.expensePresetRepository
+      );
+    }
+    return this._createExpensePresetUseCase;
+  }
+
+  get getExpensePresetsUseCase(): GetExpensePresetsUseCase {
+    if (!this._getExpensePresetsUseCase) {
+      this._getExpensePresetsUseCase = new GetExpensePresetsUseCase(
+        this.expensePresetRepository
+      );
+    }
+    return this._getExpensePresetsUseCase;
+  }
+
+  get updateExpensePresetUseCase(): UpdateExpensePresetUseCase {
+    if (!this._updateExpensePresetUseCase) {
+      this._updateExpensePresetUseCase = new UpdateExpensePresetUseCase(
+        this.expensePresetRepository
+      );
+    }
+    return this._updateExpensePresetUseCase;
+  }
+
+  get deleteExpensePresetUseCase(): DeleteExpensePresetUseCase {
+    if (!this._deleteExpensePresetUseCase) {
+      this._deleteExpensePresetUseCase = new DeleteExpensePresetUseCase(
+        this.expensePresetRepository
+      );
+    }
+    return this._deleteExpensePresetUseCase;
   }
 
   // Use Cases - User
@@ -148,6 +202,22 @@ class Container {
 
   static deleteExpenseUseCase(): DeleteExpenseUseCase {
     return Container.getInstance().deleteExpenseUseCase;
+  }
+
+  static createExpensePresetUseCase(): CreateExpensePresetUseCase {
+    return Container.getInstance().createExpensePresetUseCase;
+  }
+
+  static getExpensePresetsUseCase(): GetExpensePresetsUseCase {
+    return Container.getInstance().getExpensePresetsUseCase;
+  }
+
+  static updateExpensePresetUseCase(): UpdateExpensePresetUseCase {
+    return Container.getInstance().updateExpensePresetUseCase;
+  }
+
+  static deleteExpensePresetUseCase(): DeleteExpensePresetUseCase {
+    return Container.getInstance().deleteExpensePresetUseCase;
   }
 
   static registerUserUseCase(): RegisterUserUseCase {
