@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Plus, Calendar, /*TrendingUp*/ } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import { ExpenseCategory } from 'hayahub-domain';
+import { filterByTimeView, type TimeView } from '@/lib/date-filter';
 
 interface ExpenseRow {
   id: string;
@@ -15,7 +16,7 @@ interface ExpenseRow {
 
 interface SpendingChartCardProps {
   expenses: ExpenseRow[];
-  timeView: 'day' | 'month' | 'year' | 'all';
+  timeView: TimeView;
   selectedDate: Date;
   onAddClick: () => void;
   isEditingDisabled: boolean;
@@ -126,51 +127,9 @@ export function SpendingChartCard({
   // Calculate max for scaling
   const maxAmount = Math.max(...chartData.map((d) => d.amount), 1);
   
-  // Calculate total based on timeView (filter expenses by selected period)
+  // Calculate total based on timeView using shared utility
   const { total, transactionCount } = useMemo(() => {
-    let filteredExpenses: ExpenseRow[] = [];
-
-    if (timeView === 'day') {
-      // Filter expenses for the selected day
-      const dayStart = new Date(selectedDate);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(selectedDate);
-      dayEnd.setHours(23, 59, 59, 999);
-      
-      filteredExpenses = expenses.filter((exp) => {
-        const expDate = new Date(exp.date);
-        return expDate >= dayStart && expDate <= dayEnd;
-      });
-    } else if (timeView === 'month') {
-      // Filter expenses for the selected month
-      const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      const monthEnd = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-        999
-      );
-      
-      filteredExpenses = expenses.filter((exp) => {
-        const expDate = new Date(exp.date);
-        return expDate >= monthStart && expDate <= monthEnd;
-      });
-    } else if (timeView === 'year') {
-      // Filter expenses for the selected year
-      const yearStart = new Date(selectedDate.getFullYear(), 0, 1);
-      const yearEnd = new Date(selectedDate.getFullYear(), 11, 31, 23, 59, 59, 999);
-      
-      filteredExpenses = expenses.filter((exp) => {
-        const expDate = new Date(exp.date);
-        return expDate >= yearStart && expDate <= yearEnd;
-      });
-    } else {
-      // All time - use all expenses
-      filteredExpenses = expenses;
-    }
+    const filteredExpenses = filterByTimeView(expenses, timeView, selectedDate);
 
     return {
       total: filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0),

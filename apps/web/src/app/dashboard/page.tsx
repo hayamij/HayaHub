@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, /*TrendingDown,*/ FileText, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Container } from '@/infrastructure/di/Container';
+import { getTodayRange, getWeekRange, getMonthRange, isDateInRange } from '@/lib/date-filter';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -36,43 +37,30 @@ export default function DashboardPage() {
       const getExpensesUseCase = Container.getExpensesUseCase();
       const now = new Date();
 
-      // Get all expenses for the month to filter locally
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      // Get all expenses for the month using shared utility
+      const monthRange = getMonthRange();
       
       const result = await getExpensesUseCase.execute({
         userId: user.id,
-        startDate: startOfMonth,
-        endDate: endOfMonth,
+        startDate: monthRange.start,
+        endDate: monthRange.end,
       });
 
       if (result.isSuccess()) {
         const expenses = result.value;
 
-        // Calculate today
-        const todayStart = new Date(now);
-        todayStart.setHours(0, 0, 0, 0);
-        const todayEnd = new Date(now);
-        todayEnd.setHours(23, 59, 59, 999);
-        const todayExpenses = expenses.filter(exp => {
-          const expDate = new Date(exp.date);
-          return expDate >= todayStart && expDate <= todayEnd;
-        });
+        // Calculate today using shared utility
+        const todayRange = getTodayRange();
+        const todayExpenses = expenses.filter(exp => 
+          isDateInRange(new Date(exp.date), todayRange.start, todayRange.end)
+        );
         const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
-        // Calculate this week (Monday to Sunday)
-        const dayOfWeek = now.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() + mondayOffset);
-        weekStart.setHours(0, 0, 0, 0);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-        const weekExpenses = expenses.filter(exp => {
-          const expDate = new Date(exp.date);
-          return expDate >= weekStart && expDate <= weekEnd;
-        });
+        // Calculate this week using shared utility
+        const weekRange = getWeekRange(now);
+        const weekExpenses = expenses.filter(exp => 
+          isDateInRange(new Date(exp.date), weekRange.start, weekRange.end)
+        );
         const weekTotal = weekExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
         // Calculate this month

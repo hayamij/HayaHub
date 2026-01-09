@@ -25,8 +25,8 @@ import {
 import { Container } from '@/infrastructure/di/Container';
 import { ExpenseCategory } from 'hayahub-domain';
 import type { ExpenseDTO } from 'hayahub-business';
+import { filterByTimeView, getYearRange, getDayOfYear, type TimeView } from '@/lib/date-filter';
 
-type TimeView = 'day' | 'month' | 'year' | 'all';
 type SortField = 'date' | 'description' | 'amount' | 'category' | 'notes';
 type SortDirection = 'asc' | 'desc';
 
@@ -182,32 +182,6 @@ export default function SpendingPage() {
     }
   };
 
-  // Utility: Filter expenses by time period (reusable)
-  const getTimeFilteredExpenses = (view: TimeView, date: Date, expenseList: ExpenseRow[]): ExpenseRow[] => {
-    if (view === 'all') return expenseList;
-
-    const ranges: Record<Exclude<TimeView, 'all'>, [Date, Date]> = {
-      day: [
-        new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0),
-        new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999),
-      ],
-      month: [
-        new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0),
-        new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999),
-      ],
-      year: [
-        new Date(date.getFullYear(), 0, 1, 0, 0, 0, 0),
-        new Date(date.getFullYear(), 11, 31, 23, 59, 59, 999),
-      ],
-    };
-
-    const [start, end] = ranges[view as Exclude<TimeView, 'all'>];
-    return expenseList.filter((exp) => {
-      const expDate = new Date(exp.date);
-      return expDate >= start && expDate <= end;
-    });
-  };
-
   const formatDate = (date: Date): string => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
@@ -250,8 +224,8 @@ export default function SpendingPage() {
 
   // Filter and sort expenses
   const getFilteredAndSortedExpenses = (): ExpenseRow[] => {
-    // Apply time filter using utility function
-    let filtered = getTimeFilteredExpenses(timeView, selectedDate, expenses);
+    // Apply time filter using shared utility
+    let filtered = filterByTimeView(expenses, timeView, selectedDate);
 
     // Filter by category
     if (selectedCategory) {
@@ -294,7 +268,7 @@ export default function SpendingPage() {
 
   // Calculate category summaries (based on timeView filter)
   const getCategorySummaries = (): CategorySummary[] => {
-    const filteredByTime = getTimeFilteredExpenses(timeView, selectedDate, expenses);
+    const filteredByTime = filterByTimeView(expenses, timeView, selectedDate);
     const summaries = new Map<ExpenseCategory, { total: number; count: number }>();
 
     filteredByTime.forEach((expense) => {
@@ -351,9 +325,9 @@ export default function SpendingPage() {
   const filteredExpenses = getFilteredAndSortedExpenses();
   const totalAmount = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-  // Calculate YEAR total (for Total Amount Card) using utility function
+  // Calculate YEAR total (for Total Amount Card) using shared utility
   const selectedYear = selectedDate.getFullYear();
-  const selectedYearExpenses = getTimeFilteredExpenses('year', selectedDate, expenses);
+  const selectedYearExpenses = filterByTimeView(expenses, 'year', selectedDate);
   const yearTotalAmount = selectedYearExpenses.reduce((sum, e) => sum + e.amount, 0);
 
   // Calculate year-to-date comparison (compare with same period last year)
@@ -366,18 +340,17 @@ export default function SpendingPage() {
     const currentYear = new Date().getFullYear();
     const isCurrentYear = selectedYear === currentYear;
     
-    // Determine current year amount and comparison end date
     let currentYearAmount: number;
     let comparisonEndDate: Date;
     
     if (isCurrentYear) {
-      // Year-to-date comparison
-      const yearStart = new Date(selectedYear, 0, 1, 0, 0, 0, 0);
-      const dayOfYear = Math.floor((now.getTime() - yearStart.getTime()) / 86400000);
+      // Year-to-date comparison using shared utility
+      const yearRange = getYearRange(selectedYear);
+      const dayOfYear = getDayOfYear(now);
       comparisonEndDate = new Date(selectedYear - 1, 0, 1 + dayOfYear, 23, 59, 59, 999);
       
       currentYearAmount = expenses
-        .filter(exp => new Date(exp.date) >= yearStart && new Date(exp.date) <= now)
+        .filter(exp => new Date(exp.date) >= yearRange.start && new Date(exp.date) <= now)
         .reduce((sum, e) => sum + e.amount, 0);
     } else {
       // Full year comparison
@@ -386,11 +359,11 @@ export default function SpendingPage() {
     }
     
     // Get previous year amount
-    const prevYearStart = new Date(selectedYear - 1, 0, 1, 0, 0, 0, 0);
+    const prevYearRange = getYearRange(selectedYear - 1);
     const prevYearAmount = expenses
       .filter(exp => {
         const expDate = new Date(exp.date);
-        return expDate >= prevYearStart && expDate <= comparisonEndDate;
+        return expDate >= prevYearRange.start && expDate <= comparisonEndDate;
       })
       .reduce((sum, e) => sum + e.amount, 0);
     
