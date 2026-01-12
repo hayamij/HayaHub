@@ -1,15 +1,21 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, Moon, Sun, LogOut, User as UserIcon } from 'lucide-react';
+import { Search, Moon, Sun, LogOut, User as UserIcon, Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useUserSettings } from '@/hooks/useUserSettings';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { settings, updateTheme } = useUserSettings();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -19,25 +25,51 @@ export function Header() {
     setMounted(true);
   }, []);
 
+  // Sync theme from settings on mount
+  useEffect(() => {
+    if (mounted && settings.theme && theme !== settings.theme) {
+      setTheme(settings.theme);
+    }
+  }, [mounted, settings.theme, theme, setTheme]);
+
+  // Handle theme toggle with database sync
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    updateTheme(newTheme);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 z-50">
-      <div className="flex items-center justify-between h-full px-6">
-        {/* Left section - Logo (clickable) */}
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <div className="w-8 h-8 bg-gray-900 dark:bg-gray-100 rounded-lg flex items-center justify-center">
-            <span className="text-white dark:text-gray-900 font-bold text-lg">H</span>
-          </div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
-            HayaHub
-          </span>
-        </Link>
+      <div className="flex items-center justify-between h-full px-4 sm:px-6">
+        {/* Left section - Hamburger + Logo */}
+        <div className="flex items-center gap-3">
+          {/* Hamburger menu - Mobile only */}
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
 
-        {/* Center section - Search bar */}
-        <div className="flex-1 max-w-xl mx-8">
-          <div className="relative">
+          {/* Logo */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-8 h-8 bg-gray-900 dark:bg-gray-100 rounded-lg flex items-center justify-center">
+              <span className="text-white dark:text-gray-900 font-bold text-lg">H</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block">
+              HayaHub
+            </span>
+          </Link>
+        </div>
+
+        {/* Center section - Search bar (hidden on small mobile) */}
+        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
@@ -51,7 +83,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           {/* Dark/Light mode toggle */}
           <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={handleThemeToggle}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
             aria-label="Toggle theme"
           >

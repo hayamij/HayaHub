@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Wallet,
+  X,
 } from 'lucide-react';
 import type { Route } from 'next';
 
@@ -30,13 +31,32 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 z-40"
+      className={`
+        fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 z-40
+        transition-transform duration-300 ease-in-out
+        lg:translate-x-0
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}
     >
+      {/* Close button - Mobile only */}
+      <button
+        onClick={onClose}
+        className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        aria-label="Close menu"
+      >
+        <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+      </button>
+
       {/* Sidebar content */}
       <div className="flex flex-col h-full py-6">
         {/* Logo area */}
@@ -61,6 +81,7 @@ export function Sidebar() {
               <Link
                 key={item.id}
                 href={item.href}
+                onClick={onClose}
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors
                   ${
@@ -77,7 +98,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Footer - có thể thêm settings hoặc help sau */}
+        {/* Footer */}
         <div className="px-4 pt-4 border-t border-gray-200 dark:border-gray-800">
           <p className="text-xs text-gray-500 dark:text-gray-500">
             v1.0.0

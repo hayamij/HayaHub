@@ -181,27 +181,27 @@ export function SpendingChartCard({
   }, [chartData, timeView]);
 
   return (
-    <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-      <div className="flex flex-col lg:flex-row gap-6">
+    <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 sm:p-6">
+      <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
         {/* Left side - Info & Stats */}
-        <div className="flex-shrink-0 lg:w-80">
+        <div className="flex-shrink-0 xl:w-80 w-full">
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-              <Calendar className="w-6 h-6 text-gray-900 dark:text-white" />
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gray-900 dark:text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Quản lý Chi tiêu</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{getTimePeriodLabel()}</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">Quản lý Chi tiêu</h1>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">{getTimePeriodLabel()}</p>
             </div>
           </div>
 
           {/* Total */}
           <div className="mb-4">
-            <p className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-1">
               {formatCurrency(total)}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               {transactionCount} giao dịch
             </p>
           </div>
@@ -221,17 +221,17 @@ export function SpendingChartCard({
           <button
             onClick={onAddClick}
             disabled={isEditingDisabled}
-            className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             Thêm chi tiêu
           </button>
         </div>
 
-        {/* Right side - Chart */}
-        <div className="flex-1 min-w-0">
+        {/* Right side - Chart - maintains min 50% width on large screens, full width on small */}
+        <div className="flex-1 min-w-0 xl:min-w-[10%] overflow-hidden">
           <div className="h-full flex flex-col justify-center">
-            <div className="relative h-40 w-full">
+            <div className="relative h-32 sm:h-40 w-full overflow-hidden">
               <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 {/* Define gradient */}
                 <defs>

@@ -56,4 +56,61 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Always-visible scrollbar that doesn't affect layout */
+  html {
+    overflow-y: scroll; /* Force vertical scrollbar always visible */
+    scrollbar-gutter: stable; /* Reserve space for scrollbar */
+  }
+
+  /* Custom Overlay Scrollbar - doesn't affect layout */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(51 65 85) transparent; /* Dark scrollbar for light mode */
+  }
+
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgb(51 65 85); /* Dark scrollbar for light mode */
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgb(30 41 59);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+
+  /* Light scrollbar for dark mode (inverted) */
+  .dark * {
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: rgb(203 213 225);
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: rgb(226 232 240);
+  }
+
+  /* Hide scrollbar for mobile horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
