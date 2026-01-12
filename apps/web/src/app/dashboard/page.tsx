@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageLoader } from '@/components/layout/PageLoader';
 import { SpendingWidget } from '@/components/dashboard/SpendingWidget';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -93,6 +94,7 @@ export default function DashboardPage() {
   };
 
   return (
+    <PageLoader>
     <DashboardLayout>
       {/* Sync indicator */}
       {isSyncing && (
@@ -353,5 +355,6 @@ export default function DashboardPage() {
         />
       )}
     </DashboardLayout>
+    </PageLoader>
   );
 }

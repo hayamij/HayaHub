@@ -9,6 +9,9 @@ export * from './ports/IProjectRepository';
 export * from './ports/ITaskRepository';
 export * from './ports/IEventRepository';
 export * from './ports/IWishItemRepository';
+export * from './ports/ISubscriptionRepository';
+export * from './ports/ICalendarEventRepository';
+export * from './ports/IQuoteRepository';
 export * from './ports/IStorageService';
 
 // DTOs
@@ -18,6 +21,9 @@ export * from './dtos/user';
 export * from './dtos/userSettings';
 export * from './dtos/project';
 export * from './dtos/task';
+export * from './dtos/subscription';
+export * from './dtos/calendarEvent';
+export * from './dtos/quote';
 
 // Use Cases
 export * from './use-cases/expense/CreateExpenseUseCase';
@@ -35,3 +41,7 @@ export * from './use-cases/user/GetUserUseCase';
 export * from './use-cases/user/UpdateUserUseCase';
 export * from './use-cases/user/GetUserSettingsUseCase';
 export * from './use-cases/user/UpdateUserSettingsUseCase';
+
+export * from './use-cases/subscription/CreateSubscriptionUseCase';
+export * from './use-cases/calendar/CreateCalendarEventUseCase';
+export * from './use-cases/quote/CreateQuoteUseCase';

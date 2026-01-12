@@ -5,6 +5,11 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Wallet,
+  CreditCard,
+  Calendar,
+  Folder,
+  Heart,
+  Quote,
   X,
 } from 'lucide-react';
 import type { Route } from 'next';
@@ -28,6 +33,36 @@ const menuItems: MenuItem[] = [
     label: 'Spending',
     icon: Wallet,
     href: '/spending',
+  },
+  {
+    id: 'subscriptions',
+    label: 'Subscriptions',
+    icon: CreditCard,
+    href: '/subscriptions',
+  },
+  {
+    id: 'calendar',
+    label: 'Calendar',
+    icon: Calendar,
+    href: '/calendar',
+  },
+  {
+    id: 'projects',
+    label: 'Projects',
+    icon: Folder,
+    href: '/projects',
+  },
+  {
+    id: 'wishlist',
+    label: 'Wishlists',
+    icon: Heart,
+    href: '/wishlist',
+  },
+  {
+    id: 'quote',
+    label: 'Quotes',
+    icon: Quote,
+    href: '/quote',
   },
 ];
 

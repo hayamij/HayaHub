@@ -9,6 +9,9 @@ export * from './entities/Project';
 export * from './entities/Task';
 export * from './entities/Event';
 export * from './entities/WishItem';
+export * from './entities/Subscription';
+export * from './entities/CalendarEvent';
+export * from './entities/Quote';
 
 // Value Objects
 export * from './value-objects/Money';

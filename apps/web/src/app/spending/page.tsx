@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageLoader } from '@/components/layout/PageLoader';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { SpendingChartCard } from '@/components/spending/SpendingChartCard';
 import { TimeViewSelector } from '@/components/spending/TimeViewSelector';
@@ -197,6 +198,7 @@ export default function SpendingPage() {
 
 
   return (
+    <PageLoader>
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6">
         {/* Header with Stats */}
@@ -356,5 +358,6 @@ export default function SpendingPage() {
         />
       )}
     </DashboardLayout>
+    </PageLoader>
   );
 }

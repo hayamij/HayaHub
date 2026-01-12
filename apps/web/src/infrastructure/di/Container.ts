@@ -10,6 +10,9 @@ import { ExpenseRepositoryAdapter } from '../repositories/ExpenseRepositoryAdapt
 import { ExpensePresetRepositoryAdapter } from '../repositories/ExpensePresetRepositoryAdapter';
 import { UserRepositoryAdapter } from '../repositories/UserRepositoryAdapter';
 import { UserSettingsRepositoryAdapter } from '../repositories/UserSettingsRepositoryAdapter';
+import { SubscriptionRepositoryAdapter } from '../repositories/SubscriptionRepositoryAdapter';
+import { CalendarEventRepositoryAdapter } from '../repositories/CalendarEventRepositoryAdapter';
+import { QuoteRepositoryAdapter } from '../repositories/QuoteRepositoryAdapter';
 import {
   CreateExpenseUseCase,
   GetExpensesUseCase,
@@ -25,6 +28,9 @@ import {
   UpdateUserUseCase,
   GetUserSettingsUseCase,
   UpdateUserSettingsUseCase,
+  CreateSubscriptionUseCase,
+  CreateCalendarEventUseCase,
+  CreateQuoteUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -39,6 +45,9 @@ class Container {
   private _expensePresetRepository?: ExpensePresetRepositoryAdapter;
   private _userRepository?: UserRepositoryAdapter;
   private _userSettingsRepository?: UserSettingsRepositoryAdapter;
+  private _subscriptionRepository?: SubscriptionRepositoryAdapter;
+  private _calendarEventRepository?: CalendarEventRepositoryAdapter;
+  private _quoteRepository?: QuoteRepositoryAdapter;
 
   // Use Cases
   private _createExpenseUseCase?: CreateExpenseUseCase;
@@ -55,6 +64,9 @@ class Container {
   private _updateUserUseCase?: UpdateUserUseCase;
   private _getUserSettingsUseCase?: GetUserSettingsUseCase;
   private _updateUserSettingsUseCase?: UpdateUserSettingsUseCase;
+  private _createSubscriptionUseCase?: CreateSubscriptionUseCase;
+  private _createCalendarEventUseCase?: CreateCalendarEventUseCase;
+  private _createQuoteUseCase?: CreateQuoteUseCase;
 
   private constructor() {}
 
@@ -103,6 +115,27 @@ class Container {
       this._userSettingsRepository = new UserSettingsRepositoryAdapter(this.storageService);
     }
     return this._userSettingsRepository;
+  }
+
+  get subscriptionRepository(): SubscriptionRepositoryAdapter {
+    if (!this._subscriptionRepository) {
+      this._subscriptionRepository = new SubscriptionRepositoryAdapter(this.storageService);
+    }
+    return this._subscriptionRepository;
+  }
+
+  get calendarEventRepository(): CalendarEventRepositoryAdapter {
+    if (!this._calendarEventRepository) {
+      this._calendarEventRepository = new CalendarEventRepositoryAdapter(this.storageService);
+    }
+    return this._calendarEventRepository;
+  }
+
+  get quoteRepository(): QuoteRepositoryAdapter {
+    if (!this._quoteRepository) {
+      this._quoteRepository = new QuoteRepositoryAdapter(this.storageService);
+    }
+    return this._quoteRepository;
   }
 
   // Use Cases - Expense
@@ -214,6 +247,28 @@ class Container {
     return this._updateUserSettingsUseCase;
   }
 
+  // Use Cases - New Features
+  get createSubscriptionUseCase(): CreateSubscriptionUseCase {
+    if (!this._createSubscriptionUseCase) {
+      this._createSubscriptionUseCase = new CreateSubscriptionUseCase(this.subscriptionRepository);
+    }
+    return this._createSubscriptionUseCase;
+  }
+
+  get createCalendarEventUseCase(): CreateCalendarEventUseCase {
+    if (!this._createCalendarEventUseCase) {
+      this._createCalendarEventUseCase = new CreateCalendarEventUseCase(this.calendarEventRepository);
+    }
+    return this._createCalendarEventUseCase;
+  }
+
+  get createQuoteUseCase(): CreateQuoteUseCase {
+    if (!this._createQuoteUseCase) {
+      this._createQuoteUseCase = new CreateQuoteUseCase(this.quoteRepository);
+    }
+    return this._createQuoteUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -269,6 +324,18 @@ class Container {
 
   static updateUserSettingsUseCase(): UpdateUserSettingsUseCase {
     return Container.getInstance().updateUserSettingsUseCase;
+  }
+
+  static createSubscriptionUseCase(): CreateSubscriptionUseCase {
+    return Container.getInstance().createSubscriptionUseCase;
+  }
+
+  static createCalendarEventUseCase(): CreateCalendarEventUseCase {
+    return Container.getInstance().createCalendarEventUseCase;
+  }
+
+  static createQuoteUseCase(): CreateQuoteUseCase {
+    return Container.getInstance().createQuoteUseCase;
   }
 }
 
