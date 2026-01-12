@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Container } from '@/infrastructure/di/Container';
 
 export interface UserSettings {
   theme: 'light' | 'dark';
@@ -14,7 +15,7 @@ export function useUserSettings() {
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load settings from API
+  // Load settings using Use Case
   const loadSettings = useCallback(async () => {
     if (!user) {
       setSettings(defaultSettings);
@@ -23,11 +24,11 @@ export function useUserSettings() {
     }
 
     try {
-      const response = await fetch(`/api/settings?userId=${user.id}`);
-      const data = await response.json();
+      const getUserSettingsUseCase = Container.getUserSettingsUseCase();
+      const result = await getUserSettingsUseCase.execute({ userId: user.id });
 
-      if (data.success) {
-        setSettings(data.settings);
+      if (result.isSuccess()) {
+        setSettings(result.value);
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -36,7 +37,7 @@ export function useUserSettings() {
     }
   }, [user]);
 
-  // Save settings to API
+  // Save settings using Use Case
   const saveSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
     if (!user) return;
 
@@ -44,11 +45,15 @@ export function useUserSettings() {
     setSettings(updatedSettings);
 
     try {
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, settings: updatedSettings }),
+      const updateUserSettingsUseCase = Container.updateUserSettingsUseCase();
+      const result = await updateUserSettingsUseCase.execute({
+        userId: user.id,
+        theme: updatedSettings.theme,
       });
+
+      if (result.isSuccess()) {
+        setSettings(result.value);
+      }
     } catch (error) {
       console.error('Failed to save settings:', error);
     }

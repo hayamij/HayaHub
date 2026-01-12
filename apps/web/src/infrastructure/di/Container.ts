@@ -9,6 +9,7 @@ import { GitHubStorageStrategy } from '../storage/strategies/GitHubStorageStrate
 import { ExpenseRepositoryAdapter } from '../repositories/ExpenseRepositoryAdapter';
 import { ExpensePresetRepositoryAdapter } from '../repositories/ExpensePresetRepositoryAdapter';
 import { UserRepositoryAdapter } from '../repositories/UserRepositoryAdapter';
+import { UserSettingsRepositoryAdapter } from '../repositories/UserSettingsRepositoryAdapter';
 import {
   CreateExpenseUseCase,
   GetExpensesUseCase,
@@ -22,6 +23,8 @@ import {
   LoginUserUseCase,
   GetUserUseCase,
   UpdateUserUseCase,
+  GetUserSettingsUseCase,
+  UpdateUserSettingsUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -35,6 +38,7 @@ class Container {
   private _expenseRepository?: ExpenseRepositoryAdapter;
   private _expensePresetRepository?: ExpensePresetRepositoryAdapter;
   private _userRepository?: UserRepositoryAdapter;
+  private _userSettingsRepository?: UserSettingsRepositoryAdapter;
 
   // Use Cases
   private _createExpenseUseCase?: CreateExpenseUseCase;
@@ -49,6 +53,8 @@ class Container {
   private _loginUserUseCase?: LoginUserUseCase;
   private _getUserUseCase?: GetUserUseCase;
   private _updateUserUseCase?: UpdateUserUseCase;
+  private _getUserSettingsUseCase?: GetUserSettingsUseCase;
+  private _updateUserSettingsUseCase?: UpdateUserSettingsUseCase;
 
   private constructor() {}
 
@@ -90,6 +96,13 @@ class Container {
       this._userRepository = new UserRepositoryAdapter(this.storageService);
     }
     return this._userRepository;
+  }
+
+  get userSettingsRepository(): UserSettingsRepositoryAdapter {
+    if (!this._userSettingsRepository) {
+      this._userSettingsRepository = new UserSettingsRepositoryAdapter(this.storageService);
+    }
+    return this._userSettingsRepository;
   }
 
   // Use Cases - Expense
@@ -187,6 +200,20 @@ class Container {
     return this._updateUserUseCase;
   }
 
+  get getUserSettingsUseCase(): GetUserSettingsUseCase {
+    if (!this._getUserSettingsUseCase) {
+      this._getUserSettingsUseCase = new GetUserSettingsUseCase(this.userSettingsRepository);
+    }
+    return this._getUserSettingsUseCase;
+  }
+
+  get updateUserSettingsUseCase(): UpdateUserSettingsUseCase {
+    if (!this._updateUserSettingsUseCase) {
+      this._updateUserSettingsUseCase = new UpdateUserSettingsUseCase(this.userSettingsRepository);
+    }
+    return this._updateUserSettingsUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -234,6 +261,14 @@ class Container {
 
   static updateUserUseCase(): UpdateUserUseCase {
     return Container.getInstance().updateUserUseCase;
+  }
+
+  static getUserSettingsUseCase(): GetUserSettingsUseCase {
+    return Container.getInstance().getUserSettingsUseCase;
+  }
+
+  static updateUserSettingsUseCase(): UpdateUserSettingsUseCase {
+    return Container.getInstance().updateUserSettingsUseCase;
   }
 }
 

@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server';
-
-interface UserSettings {
-  theme?: 'light' | 'dark';
-  [key: string]: unknown;
-}
-
-// Simple in-memory storage for now (will be replaced with actual GitHub API storage)
-// Key: userId, Value: settings object
-const settingsStore = new Map<string, UserSettings>();
+import { Container } from '@/infrastructure/di/Container';
 
 export async function GET(request: Request) {
   try {
@@ -18,9 +10,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    const settings = settingsStore.get(userId) || { theme: 'light' };
-    
-    return NextResponse.json({ success: true, settings });
+    // Use Clean Architecture: Call use case through Container
+    const getUserSettingsUseCase = Container.getUserSettingsUseCase();
+    const result = await getUserSettingsUseCase.execute({ userId });
+
+    if (result.isSuccess()) {
+      return NextResponse.json({ success: true, settings: result.value });
+    } else {
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    }
   } catch (error) {
     console.error('Failed to get settings:', error);
     return NextResponse.json({ error: 'Failed to get settings' }, { status: 500 });
@@ -36,13 +34,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'userId and settings are required' }, { status: 400 });
     }
 
-    // Merge with existing settings
-    const existingSettings = settingsStore.get(userId) || {};
-    const updatedSettings = { ...existingSettings, ...settings };
-    
-    settingsStore.set(userId, updatedSettings);
+    if (!settings.theme || !['light', 'dark'].includes(settings.theme)) {
+      return NextResponse.json({ error: 'Invalid theme value' }, { status: 400 });
+    }
 
-    return NextResponse.json({ success: true, settings: updatedSettings });
+    // Use Clean Architecture: Call use case through Container
+    const updateUserSettingsUseCase = Container.updateUserSettingsUseCase();
+    const result = await updateUserSettingsUseCase.execute({
+      userId,
+      theme: settings.theme,
+    });
+
+    if (result.isSuccess()) {
+      return NextResponse.json({ success: true, settings: result.value });
+    } else {
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    }
   } catch (error) {
     console.error('Failed to save settings:', error);
     return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });

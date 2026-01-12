@@ -15,6 +15,7 @@ export * from './value-objects/Money';
 export * from './value-objects/DateRange';
 export * from './value-objects/Email';
 export * from './value-objects/UserId';
+export * from './value-objects/UserSettings';
 
 // Exceptions
 export * from './exceptions/DomainException';

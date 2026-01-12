@@ -4,6 +4,7 @@
 export * from './ports/IExpenseRepository';
 export * from './ports/IExpensePresetRepository';
 export * from './ports/IUserRepository';
+export * from './ports/IUserSettingsRepository';
 export * from './ports/IProjectRepository';
 export * from './ports/ITaskRepository';
 export * from './ports/IEventRepository';
@@ -14,6 +15,7 @@ export * from './ports/IStorageService';
 export * from './dtos/expense';
 export * from './dtos/expensePreset';
 export * from './dtos/user';
+export * from './dtos/userSettings';
 export * from './dtos/project';
 export * from './dtos/task';
 
@@ -31,3 +33,5 @@ export * from './use-cases/user/RegisterUserUseCase';
 export * from './use-cases/user/LoginUserUseCase';
 export * from './use-cases/user/GetUserUseCase';
 export * from './use-cases/user/UpdateUserUseCase';
+export * from './use-cases/user/GetUserSettingsUseCase';
+export * from './use-cases/user/UpdateUserSettingsUseCase';
