@@ -11,7 +11,7 @@ interface TopCategoryCardProps {
 }
 
 export function TopCategoryCard({
-  category,
+  category: _category,
   total,
   count,
   totalAmount,

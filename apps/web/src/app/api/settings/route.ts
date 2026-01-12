@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 
+interface UserSettings {
+  theme?: 'light' | 'dark';
+  [key: string]: unknown;
+}
+
 // Simple in-memory storage for now (will be replaced with actual GitHub API storage)
 // Key: userId, Value: settings object
-const settingsStore = new Map<string, any>();
+const settingsStore = new Map<string, UserSettings>();
 
 export async function GET(request: Request) {
   try {
