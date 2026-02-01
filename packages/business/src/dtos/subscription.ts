@@ -1,6 +1,7 @@
 import type {
   SubscriptionFrequency,
   SubscriptionStatus,
+  LayoutPositionData,
 } from 'hayahub-domain';
 
 export interface CreateSubscriptionDTO {
@@ -11,6 +12,7 @@ export interface CreateSubscriptionDTO {
   frequency: SubscriptionFrequency;
   startDate: Date;
   description?: string;
+  icon?: string;
 }
 
 export interface UpdateSubscriptionDTO {
@@ -19,6 +21,8 @@ export interface UpdateSubscriptionDTO {
   currency?: string;
   frequency?: SubscriptionFrequency;
   description?: string;
+  icon?: string;
+  layoutPosition?: LayoutPositionData;
 }
 
 export interface SubscriptionDTO {
@@ -32,6 +36,8 @@ export interface SubscriptionDTO {
   startDate: Date;
   nextBillingDate: Date;
   description?: string;
+  icon?: string;
+  layoutPosition?: LayoutPositionData;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,6 +1,7 @@
 import { ValidationException } from '../exceptions/ValidationException';
 import type { UserId } from '../value-objects/UserId';
 import type { Money } from '../value-objects/Money';
+import type { LayoutPosition } from '../value-objects/LayoutPosition';
 
 export type SubscriptionId = string;
 
@@ -30,6 +31,8 @@ export class Subscription {
     private _status: SubscriptionStatus,
     private _startDate: Date,
     private _nextBillingDate: Date,
+    private _layoutPosition?: LayoutPosition,
+    private _icon?: string,
     private _description?: string,
     private readonly _createdAt: Date = new Date(),
     private _updatedAt: Date = new Date()
@@ -44,7 +47,8 @@ export class Subscription {
     amount: Money,
     frequency: SubscriptionFrequency,
     startDate: Date,
-    description?: string
+    description?: string,
+    icon?: string
   ): Subscription {
     const nextBillingDate = Subscription.calculateNextBillingDate(startDate, frequency);
     return new Subscription(
@@ -56,6 +60,8 @@ export class Subscription {
       SubscriptionStatus.ACTIVE,
       startDate,
       nextBillingDate,
+      undefined, // layoutPosition will be set later
+      icon,
       description
     );
   }
@@ -69,6 +75,8 @@ export class Subscription {
     status: SubscriptionStatus,
     startDate: Date,
     nextBillingDate: Date,
+    layoutPosition: LayoutPosition | undefined,
+    icon: string | undefined,
     description: string | undefined,
     createdAt: Date,
     updatedAt: Date
@@ -82,6 +90,8 @@ export class Subscription {
       status,
       startDate,
       nextBillingDate,
+      layoutPosition,
+      icon,
       description,
       createdAt,
       updatedAt
@@ -118,6 +128,29 @@ export class Subscription {
   updateFrequency(frequency: SubscriptionFrequency): void {
     this._frequency = frequency;
     this._nextBillingDate = Subscription.calculateNextBillingDate(new Date(), frequency);
+    this._updatedAt = new Date();
+  }
+
+  updateLayout(layoutPosition: LayoutPosition): void {
+    this._layoutPosition = layoutPosition;
+    this._updatedAt = new Date();
+  }
+
+  updateIcon(icon: string): void {
+    this._icon = icon;
+    this._updatedAt = new Date();
+  }
+
+  updateName(name: string): void {
+    if (!name || name.trim().length === 0) {
+      throw new ValidationException('Subscription name cannot be empty');
+    }
+    this._name = name.trim();
+    this._updatedAt = new Date();
+  }
+
+  updateDescription(description: string | undefined): void {
+    this._description = description;
     this._updatedAt = new Date();
   }
 
@@ -189,6 +222,14 @@ export class Subscription {
 
   get description(): string | undefined {
     return this._description;
+  }
+
+  get layoutPosition(): LayoutPosition | undefined {
+    return this._layoutPosition;
+  }
+
+  get icon(): string | undefined {
+    return this._icon;
   }
 
   get createdAt(): Date {

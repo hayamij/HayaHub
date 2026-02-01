@@ -43,5 +43,8 @@ export * from './use-cases/user/GetUserSettingsUseCase';
 export * from './use-cases/user/UpdateUserSettingsUseCase';
 
 export * from './use-cases/subscription/CreateSubscriptionUseCase';
+export * from './use-cases/subscription/GetSubscriptionsUseCase';
+export * from './use-cases/subscription/UpdateSubscriptionUseCase';
+export * from './use-cases/subscription/DeleteSubscriptionUseCase';
 export * from './use-cases/calendar/CreateCalendarEventUseCase';
 export * from './use-cases/quote/CreateQuoteUseCase';

@@ -1,29 +1,16 @@
 import { success, failure, type Result } from 'hayahub-shared';
-import { Subscription, Money } from 'hayahub-domain';
-import { IdGenerator } from 'hayahub-shared';
 import type { ISubscriptionRepository } from '../../ports/ISubscriptionRepository';
-import type { CreateSubscriptionDTO, SubscriptionDTO } from '../../dtos/subscription';
+import type { SubscriptionDTO } from '../../dtos/subscription';
+import { Subscription } from 'hayahub-domain';
 
-export class CreateSubscriptionUseCase {
+export class GetSubscriptionsUseCase {
   constructor(private readonly subscriptionRepository: ISubscriptionRepository) {}
 
-  async execute(dto: CreateSubscriptionDTO): Promise<Result<SubscriptionDTO, Error>> {
+  async execute(userId: string): Promise<Result<SubscriptionDTO[], Error>> {
     try {
-      const money = Money.create(dto.amount, dto.currency);
-      const subscription = Subscription.create(
-        IdGenerator.generate('sub'),
-        dto.userId,
-        dto.name,
-        money,
-        dto.frequency,
-        dto.startDate,
-        dto.description,
-        dto.icon
-      );
-
-      await this.subscriptionRepository.save(subscription);
-
-      return success(this.toDTO(subscription));
+      const subscriptions = await this.subscriptionRepository.findByUserId(userId);
+      const dtos = subscriptions.map(this.toDTO);
+      return success(dtos);
     } catch (error) {
       return failure(error as Error);
     }

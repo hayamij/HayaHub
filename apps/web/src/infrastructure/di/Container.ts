@@ -29,6 +29,9 @@ import {
   GetUserSettingsUseCase,
   UpdateUserSettingsUseCase,
   CreateSubscriptionUseCase,
+  GetSubscriptionsUseCase,
+  UpdateSubscriptionUseCase,
+  DeleteSubscriptionUseCase,
   CreateCalendarEventUseCase,
   CreateQuoteUseCase,
 } from 'hayahub-business';
@@ -65,6 +68,9 @@ class Container {
   private _getUserSettingsUseCase?: GetUserSettingsUseCase;
   private _updateUserSettingsUseCase?: UpdateUserSettingsUseCase;
   private _createSubscriptionUseCase?: CreateSubscriptionUseCase;
+  private _getSubscriptionsUseCase?: GetSubscriptionsUseCase;
+  private _updateSubscriptionUseCase?: UpdateSubscriptionUseCase;
+  private _deleteSubscriptionUseCase?: DeleteSubscriptionUseCase;
   private _createCalendarEventUseCase?: CreateCalendarEventUseCase;
   private _createQuoteUseCase?: CreateQuoteUseCase;
 
@@ -247,7 +253,7 @@ class Container {
     return this._updateUserSettingsUseCase;
   }
 
-  // Use Cases - New Features
+  // Use Cases - Subscription
   get createSubscriptionUseCase(): CreateSubscriptionUseCase {
     if (!this._createSubscriptionUseCase) {
       this._createSubscriptionUseCase = new CreateSubscriptionUseCase(this.subscriptionRepository);
@@ -255,6 +261,28 @@ class Container {
     return this._createSubscriptionUseCase;
   }
 
+  get getSubscriptionsUseCase(): GetSubscriptionsUseCase {
+    if (!this._getSubscriptionsUseCase) {
+      this._getSubscriptionsUseCase = new GetSubscriptionsUseCase(this.subscriptionRepository);
+    }
+    return this._getSubscriptionsUseCase;
+  }
+
+  get updateSubscriptionUseCase(): UpdateSubscriptionUseCase {
+    if (!this._updateSubscriptionUseCase) {
+      this._updateSubscriptionUseCase = new UpdateSubscriptionUseCase(this.subscriptionRepository);
+    }
+    return this._updateSubscriptionUseCase;
+  }
+
+  get deleteSubscriptionUseCase(): DeleteSubscriptionUseCase {
+    if (!this._deleteSubscriptionUseCase) {
+      this._deleteSubscriptionUseCase = new DeleteSubscriptionUseCase(this.subscriptionRepository);
+    }
+    return this._deleteSubscriptionUseCase;
+  }
+
+  // Use Cases - Other Features
   get createCalendarEventUseCase(): CreateCalendarEventUseCase {
     if (!this._createCalendarEventUseCase) {
       this._createCalendarEventUseCase = new CreateCalendarEventUseCase(this.calendarEventRepository);
@@ -328,6 +356,18 @@ class Container {
 
   static createSubscriptionUseCase(): CreateSubscriptionUseCase {
     return Container.getInstance().createSubscriptionUseCase;
+  }
+
+  static getSubscriptionsUseCase(): GetSubscriptionsUseCase {
+    return Container.getInstance().getSubscriptionsUseCase;
+  }
+
+  static updateSubscriptionUseCase(): UpdateSubscriptionUseCase {
+    return Container.getInstance().updateSubscriptionUseCase;
+  }
+
+  static deleteSubscriptionUseCase(): DeleteSubscriptionUseCase {
+    return Container.getInstance().deleteSubscriptionUseCase;
   }
 
   static createCalendarEventUseCase(): CreateCalendarEventUseCase {

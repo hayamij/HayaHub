@@ -19,6 +19,7 @@ export * from './value-objects/DateRange';
 export * from './value-objects/Email';
 export * from './value-objects/UserId';
 export * from './value-objects/UserSettings';
+export * from './value-objects/LayoutPosition';
 
 // Exceptions
 export * from './exceptions/DomainException';
