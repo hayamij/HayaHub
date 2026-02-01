@@ -24,6 +24,16 @@ export class UpdateSubscriptionUseCase {
       if (dto.frequency !== undefined) {
         subscription.updateFrequency(dto.frequency);
       }
+      if (dto.status !== undefined) {
+        // Handle status changes
+        if (dto.status === 'PAUSED') {
+          subscription.pause();
+        } else if (dto.status === 'ACTIVE') {
+          subscription.resume();
+        } else if (dto.status === 'CANCELLED') {
+          subscription.cancel();
+        }
+      }
       if (dto.description !== undefined) {
         subscription.updateDescription(dto.description);
       }

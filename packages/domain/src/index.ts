@@ -13,6 +13,9 @@ export * from './entities/Subscription';
 export * from './entities/CalendarEvent';
 export * from './entities/Quote';
 
+// Subscription Enums (exported separately for convenience)
+export { SubscriptionFrequency, SubscriptionStatus } from './entities/Subscription';
+
 // Value Objects
 export * from './value-objects/Money';
 export * from './value-objects/DateRange';

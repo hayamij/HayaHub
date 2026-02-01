@@ -2,12 +2,15 @@
 
 import type { SubscriptionDTO } from 'hayahub-business';
 import { SubscriptionFrequency, SubscriptionStatus } from 'hayahub-domain';
-import { Pencil, Trash2, Play, Pause, Ban } from 'lucide-react';
+import { Calendar, Edit2, Pause, Play, Trash2 } from 'lucide-react';
 
 interface SubscriptionTableProps {
   subscriptions: SubscriptionDTO[];
   onEdit: (subscription: SubscriptionDTO) => void;
   onDelete: (id: string) => void;
+  onPause: (id: string) => void;
+  onResume: (id: string) => void;
+  formatCurrency: (amount: number, currency: string) => string;
 }
 
 const FREQUENCY_LABELS: Record<SubscriptionFrequency, string> = {
@@ -23,123 +26,126 @@ const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.CANCELLED]: 'Đã hủy',
 };
 
-const formatCurrency = (amount: number, currency: string): string => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: currency,
-  }).format(amount);
+const STATUS_COLORS: Record<SubscriptionStatus, string> = {
+  [SubscriptionStatus.ACTIVE]: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+  [SubscriptionStatus.PAUSED]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+  [SubscriptionStatus.CANCELLED]: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 };
 
-const formatDate = (date: Date): string => {
-  return new Date(date).toLocaleDateString('vi-VN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-};
-
-const getStatusColor = (status: SubscriptionStatus): string => {
-  switch (status) {
-    case SubscriptionStatus.ACTIVE:
-      return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
-    case SubscriptionStatus.PAUSED:
-      return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
-    case SubscriptionStatus.CANCELLED:
-      return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
+export function SubscriptionTable({
+  subscriptions,
+  onEdit,
+  onDelete,
+  onPause,
+  onResume,
+  formatCurrency,
+}: SubscriptionTableProps) {
+  if (subscriptions.length === 0) {
+    return (
+      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+        <p className="text-gray-500 dark:text-gray-400">Chưa có subscription nào</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+          Thêm subscription đầu tiên để bắt đầu theo dõi
+        </p>
+      </div>
+    );
   }
-};
 
-const getStatusIcon = (status: SubscriptionStatus) => {
-  switch (status) {
-    case SubscriptionStatus.ACTIVE:
-      return <Play className="w-3 h-3" />;
-    case SubscriptionStatus.PAUSED:
-      return <Pause className="w-3 h-3" />;
-    case SubscriptionStatus.CANCELLED:
-      return <Ban className="w-3 h-3" />;
-  }
-};
-
-export function SubscriptionTable({ subscriptions, onEdit, onDelete }: SubscriptionTableProps) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="border-b border-gray-200 dark:border-gray-800">
-          <tr className="text-left">
-            <th className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Tên</th>
-            <th className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Số tiền</th>
-            <th className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Tần suất</th>
-            <th className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Ngày gia hạn</th>
-            <th className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Trạng thái</th>
-            <th className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-right">Thao tác</th>
+    <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <table className="w-full">
+        <thead className="bg-gray-50 dark:bg-gray-900">
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Tên
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Số tiền
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Chu kỳ
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Trạng thái
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Ngày thanh toán kế
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Thao tác
+            </th>
           </tr>
         </thead>
-        <tbody>
-          {subscriptions.length === 0 ? (
-            <tr>
-              <td colSpan={6} className="py-8 text-center text-gray-500 dark:text-gray-400">
-                Chưa có subscription nào
+        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          {subscriptions.map((sub) => (
+            <tr key={sub.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+              <td className="px-4 py-4">
+                <div className="flex items-center gap-3">
+                  {sub.icon && (
+                    <span className="text-2xl" aria-label="icon">
+                      {sub.icon}
+                    </span>
+                  )}
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">{sub.name}</div>
+                    {sub.description && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{sub.description}</div>
+                    )}
+                  </div>
+                </div>
+              </td>
+              <td className="px-4 py-4 text-gray-900 dark:text-white font-medium">
+                {formatCurrency(sub.amount, sub.currency)}
+              </td>
+              <td className="px-4 py-4 text-gray-600 dark:text-gray-300">
+                {FREQUENCY_LABELS[sub.frequency]}
+              </td>
+              <td className="px-4 py-4">
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[sub.status]}`}>
+                  {STATUS_LABELS[sub.status]}
+                </span>
+              </td>
+              <td className="px-4 py-4 text-gray-600 dark:text-gray-300">
+                {new Date(sub.nextBillingDate).toLocaleDateString('vi-VN')}
+              </td>
+              <td className="px-4 py-4">
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => onEdit(sub)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition"
+                    title="Chỉnh sửa"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  {sub.status === SubscriptionStatus.ACTIVE ? (
+                    <button
+                      onClick={() => onPause(sub.id)}
+                      className="p-2 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded transition"
+                      title="Tạm dừng"
+                    >
+                      <Pause className="w-4 h-4" />
+                    </button>
+                  ) : sub.status === SubscriptionStatus.PAUSED ? (
+                    <button
+                      onClick={() => onResume(sub.id)}
+                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition"
+                      title="Tiếp tục"
+                    >
+                      <Play className="w-4 h-4" />
+                    </button>
+                  ) : null}
+                  <button
+                    onClick={() => onDelete(sub.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                    title="Xóa"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </td>
             </tr>
-          ) : (
-            subscriptions.map((sub) => (
-              <tr
-                key={sub.id}
-                className="border-b border-gray-100 dark:border-gray-900 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
-              >
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    {sub.icon && <span className="text-xl">{sub.icon}</span>}
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-gray-100">{sub.name}</div>
-                      {sub.description && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {sub.description}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3 px-4 font-medium text-gray-900 dark:text-gray-100">
-                  {formatCurrency(sub.amount, sub.currency)}
-                </td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                  {FREQUENCY_LABELS[sub.frequency]}
-                </td>
-                <td className="py-3 px-4 text-gray-700 dark:text-gray-300">
-                  {formatDate(sub.nextBillingDate)}
-                </td>
-                <td className="py-3 px-4">
-                  <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      sub.status
-                    )}`}
-                  >
-                    {getStatusIcon(sub.status)}
-                    {STATUS_LABELS[sub.status]}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => onEdit(sub)}
-                      className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
-                      title="Chỉnh sửa"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(sub.id)}
-                      className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors"
-                      title="Xóa"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
     </div>

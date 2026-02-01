@@ -2,82 +2,88 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { SubscriptionDTO } from 'hayahub-business';
+import type { CreateSubscriptionDTO, SubscriptionDTO, UpdateSubscriptionDTO } from 'hayahub-business';
 import { SubscriptionFrequency } from 'hayahub-domain';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
-  subscription?: SubscriptionDTO | null;
   onClose: () => void;
-  onSave: (data: {
-    name: string;
-    amount: number;
-    currency: string;
-    frequency: SubscriptionFrequency;
-    startDate: Date;
-    description?: string;
-    icon?: string;
-  }) => Promise<void>;
+  onSubmit: (dto: CreateSubscriptionDTO | UpdateSubscriptionDTO) => Promise<boolean>;
+  editingSubscription?: SubscriptionDTO | null;
+  userId: string;
 }
 
-const FREQUENCY_OPTIONS = [
-  { value: SubscriptionFrequency.MONTHLY, label: 'Hàng tháng' },
-  { value: SubscriptionFrequency.YEARLY, label: 'Hàng năm' },
-  { value: SubscriptionFrequency.WEEKLY, label: 'Hàng tuần' },
-  { value: SubscriptionFrequency.DAILY, label: 'Hàng ngày' },
-];
-
-const COMMON_ICONS = ['💳', '📺', '🎵', '🎮', '☁️', '📚', '🏋️', '🍕', '🚗', '📱', '💻', '🎬'];
-
-export function SubscriptionModal({ isOpen, subscription, onClose, onSave }: SubscriptionModalProps) {
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('VND');
-  const [frequency, setFrequency] = useState<SubscriptionFrequency>(SubscriptionFrequency.MONTHLY);
-  const [startDate, setStartDate] = useState('');
-  const [description, setDescription] = useState('');
-  const [icon, setIcon] = useState('💳');
+export function SubscriptionModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  editingSubscription,
+  userId,
+}: SubscriptionModalProps) {
+  const [formData, setFormData] = useState({
+    name: '',
+    amount: '',
+    currency: 'VND',
+    frequency: SubscriptionFrequency.MONTHLY as SubscriptionFrequency,
+    startDate: new Date().toISOString().split('T')[0],
+    description: '',
+    icon: '',
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (subscription) {
-      setName(subscription.name);
-      setAmount(subscription.amount.toString());
-      setCurrency(subscription.currency);
-      setFrequency(subscription.frequency);
-      setStartDate(new Date(subscription.startDate).toISOString().split('T')[0]);
-      setDescription(subscription.description || '');
-      setIcon(subscription.icon || '💳');
+    if (editingSubscription) {
+      setFormData({
+        name: editingSubscription.name,
+        amount: editingSubscription.amount.toString(),
+        currency: editingSubscription.currency,
+        frequency: editingSubscription.frequency,
+        startDate: new Date(editingSubscription.startDate).toISOString().split('T')[0],
+        description: editingSubscription.description || '',
+        icon: editingSubscription.icon || '',
+      });
     } else {
-      // Reset for new subscription
-      setName('');
-      setAmount('');
-      setCurrency('VND');
-      setFrequency(SubscriptionFrequency.MONTHLY);
-      setStartDate(new Date().toISOString().split('T')[0]);
-      setDescription('');
-      setIcon('💳');
+      setFormData({
+        name: '',
+        amount: '',
+        currency: 'VND',
+        frequency: SubscriptionFrequency.MONTHLY,
+        startDate: new Date().toISOString().split('T')[0],
+        description: '',
+        icon: '',
+      });
     }
-  }, [subscription, isOpen]);
+  }, [editingSubscription, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !amount) return;
-
     setIsSubmitting(true);
+
     try {
-      await onSave({
-        name: name.trim(),
-        amount: parseFloat(amount),
-        currency,
-        frequency,
-        startDate: new Date(startDate),
-        description: description.trim() || undefined,
-        icon: icon || undefined,
-      });
-      onClose();
-    } catch (error) {
-      console.error('Failed to save subscription:', error);
+      const dto = editingSubscription
+        ? ({
+            name: formData.name,
+            amount: parseFloat(formData.amount),
+            currency: formData.currency,
+            frequency: formData.frequency,
+            description: formData.description || undefined,
+            icon: formData.icon || undefined,
+          } as UpdateSubscriptionDTO)
+        : ({
+            userId,
+            name: formData.name,
+            amount: parseFloat(formData.amount),
+            currency: formData.currency,
+            frequency: formData.frequency,
+            startDate: new Date(formData.startDate),
+            description: formData.description || undefined,
+            icon: formData.icon || undefined,
+          } as CreateSubscriptionDTO);
+
+      const success = await onSubmit(dto);
+      if (success) {
+        onClose();
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -86,89 +92,72 @@ export function SubscriptionModal({ isOpen, subscription, onClose, onSave }: Sub
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            {subscription ? 'Chỉnh sửa Subscription' : 'Thêm Subscription mới'}
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            {editingSubscription ? 'Chỉnh sửa Subscription' : 'Thêm Subscription Mới'}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Icon Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Icon
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {COMMON_ICONS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => setIcon(emoji)}
-                  className={`text-2xl p-2 rounded-lg border-2 transition-all ${
-                    icon === emoji
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Tên <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Netflix, Spotify, ..."
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               required
+              placeholder="Netflix, Spotify,..."
             />
           </div>
 
-          {/* Amount & Currency */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Icon (Emoji)
+            </label>
+            <input
+              type="text"
+              value={formData.icon}
+              onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="📺 🎵 ☁️..."
+              maxLength={2}
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Số tiền <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                id="amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-                step="0.01"
-                min="0"
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 required
+                min="0"
+                step="0.01"
               />
             </div>
             <div>
-              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Đơn vị
               </label>
               <select
-                id="currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               >
                 <option value="VND">VND</option>
                 <option value="USD">USD</option>
@@ -177,70 +166,67 @@ export function SubscriptionModal({ isOpen, subscription, onClose, onSave }: Sub
             </div>
           </div>
 
-          {/* Frequency */}
-          <div>
-            <label htmlFor="frequency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tần suất
-            </label>
-            <select
-              id="frequency"
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value as SubscriptionFrequency)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {FREQUENCY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Chu kỳ <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.frequency}
+                onChange={(e) =>
+                  setFormData({ ...formData, frequency: e.target.value as SubscriptionFrequency })
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value={SubscriptionFrequency.DAILY}>Hàng ngày</option>
+                <option value={SubscriptionFrequency.WEEKLY}>Hàng tuần</option>
+                <option value={SubscriptionFrequency.MONTHLY}>Hàng tháng</option>
+                <option value={SubscriptionFrequency.YEARLY}>Hàng năm</option>
+              </select>
+            </div>
+            {!editingSubscription && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Ngày bắt đầu
+                </label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Start Date */}
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Ngày bắt đầu
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Mô tả (tùy chọn)
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Mô tả
             </label>
             <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ghi chú về subscription này..."
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Gói Premium, Gia đình,..."
             />
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              disabled={isSubmitting}
             >
               Hủy
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !name.trim() || !amount}
-              className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+              disabled={isSubmitting}
             >
-              {isSubmitting ? 'Đang lưu...' : subscription ? 'Cập nhật' : 'Thêm mới'}
+              {isSubmitting ? 'Đang xử lý...' : editingSubscription ? 'Cập nhật' : 'Thêm mới'}
             </button>
           </div>
         </form>

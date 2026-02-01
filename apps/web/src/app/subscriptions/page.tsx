@@ -8,10 +8,11 @@ import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { SubscriptionTable } from '@/components/subscriptions/SubscriptionTable';
 import { SubscriptionWorkspace } from '@/components/subscriptions/SubscriptionWorkspace';
 import { SubscriptionModal } from '@/components/subscriptions/SubscriptionModal';
+import { SubscriptionStatsCards } from '@/components/subscriptions/SubscriptionStatsCards';
 import { Plus, Table, Layout } from 'lucide-react';
-import type { SubscriptionDTO } from 'hayahub-business';
+import type { SubscriptionDTO, CreateSubscriptionDTO, UpdateSubscriptionDTO } from 'hayahub-business';
+import { SubscriptionStatus } from 'hayahub-domain';
 import type { LayoutPositionData } from 'hayahub-domain';
-import { SubscriptionFrequency } from 'hayahub-domain';
 
 type ViewMode = 'table' | 'workspace';
 
@@ -29,6 +30,13 @@ export default function SubscriptionsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<SubscriptionDTO | null>(null);
+
+  const formatCurrency = useCallback((amount: number, currency: string) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: currency || 'VND',
+    }).format(amount);
+  }, []);
 
   const handleAdd = useCallback(() => {
     setEditingSubscription(null);
@@ -48,43 +56,31 @@ export default function SubscriptionsPage() {
     [deleteSubscription]
   );
 
-  const handleSave = useCallback(
-    async (data: {
-      name: string;
-      amount: number;
-      currency: string;
-      frequency: SubscriptionFrequency;
-      startDate: Date;
-      description?: string;
-      icon?: string;
-    }) => {
-      if (!user?.id) return;
-
-      if (editingSubscription) {
-        // Update existing
-        await updateSubscription(editingSubscription.id, {
-          name: data.name,
-          amount: data.amount,
-          currency: data.currency,
-          frequency: data.frequency,
-          description: data.description,
-          icon: data.icon,
-        });
-      } else {
-        // Create new
-        await createSubscription({
-          userId: user.id,
-          name: data.name,
-          amount: data.amount,
-          currency: data.currency,
-          frequency: data.frequency,
-          startDate: data.startDate,
-          description: data.description,
-          icon: data.icon,
-        });
-      }
+  const handlePause = useCallback(
+    async (id: string) => {
+      await updateSubscription(id, { status: SubscriptionStatus.PAUSED });
     },
-    [user?.id, editingSubscription, createSubscription, updateSubscription]
+    [updateSubscription]
+  );
+
+  const handleResume = useCallback(
+    async (id: string) => {
+      await updateSubscription(id, { status: SubscriptionStatus.ACTIVE });
+    },
+    [updateSubscription]
+  );
+
+  const handleSave = useCallback(
+    async (data: CreateSubscriptionDTO | UpdateSubscriptionDTO) => {
+      if (editingSubscription) {
+        await updateSubscription(editingSubscription.id, data as UpdateSubscriptionDTO);
+      } else {
+        await createSubscription(data as CreateSubscriptionDTO);
+      }
+      setIsModalOpen(false);
+      setEditingSubscription(null);
+    },
+    [editingSubscription, createSubscription, updateSubscription]
   );
 
   const handleLayoutChange = useCallback(
@@ -120,6 +116,9 @@ export default function SubscriptionsPage() {
             </button>
           </div>
 
+          {/* Stats Cards */}
+          <SubscriptionStatsCards subscriptions={subscriptions} formatCurrency={formatCurrency} />
+
           {/* View Mode Switcher */}
           <div className="flex gap-2 bg-gray-100 dark:bg-gray-900 rounded-lg p-1 w-fit">
             <button
@@ -146,35 +145,6 @@ export default function SubscriptionsPage() {
             </button>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Tổng số Subscriptions</div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                {subscriptions.length}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Đang hoạt động</div>
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
-                {subscriptions.filter((s) => s.status === 'ACTIVE').length}
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Chi phí hàng tháng</div>
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">
-                {new Intl.NumberFormat('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND',
-                }).format(
-                  subscriptions
-                    .filter((s) => s.status === 'ACTIVE' && s.frequency === 'MONTHLY')
-                    .reduce((sum, s) => sum + s.amount, 0)
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Content */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
@@ -184,33 +154,35 @@ export default function SubscriptionsPage() {
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
               <p className="text-red-600 dark:text-red-400">Có lỗi xảy ra: {error.message}</p>
             </div>
+          ) : viewMode === 'table' ? (
+            <SubscriptionTable
+              subscriptions={subscriptions}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onPause={handlePause}
+              onResume={handleResume}
+              formatCurrency={formatCurrency}
+            />
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-              {viewMode === 'table' ? (
-                <SubscriptionTable
-                  subscriptions={subscriptions}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ) : (
-                <div className="p-6">
-                  <SubscriptionWorkspace
-                    subscriptions={subscriptions}
-                    onEdit={handleEdit}
-                    onLayoutChange={handleLayoutChange}
-                  />
-                </div>
-              )}
-            </div>
+            <SubscriptionWorkspace
+              subscriptions={subscriptions}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onPause={handlePause}
+              onResume={handleResume}
+              onLayoutChange={handleLayoutChange}
+              formatCurrency={formatCurrency}
+            />
           )}
         </div>
 
         {/* Modal */}
         <SubscriptionModal
           isOpen={isModalOpen}
-          subscription={editingSubscription}
+          editingSubscription={editingSubscription}
           onClose={handleCloseModal}
           onSave={handleSave}
+          userId={user?.id || ''}
         />
       </DashboardLayout>
     </PageLoader>

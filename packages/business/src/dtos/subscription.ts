@@ -20,6 +20,7 @@ export interface UpdateSubscriptionDTO {
   amount?: number;
   currency?: string;
   frequency?: SubscriptionFrequency;
+  status?: SubscriptionStatus;
   description?: string;
   icon?: string;
   layoutPosition?: LayoutPositionData;
