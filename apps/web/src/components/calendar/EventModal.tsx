@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { CalendarEventDTO, CreateCalendarEventDTO } from 'hayahub-business';
 import { EventPriority } from 'hayahub-domain';
 import { X } from 'lucide-react';
+import { toLocalDateString, toLocalTimeString } from '@/lib/date-utils';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface EventModalProps {
   onSave: (data: CreateCalendarEventDTO | Partial<CalendarEventDTO>) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
   userId: string;
+  quickAddDate?: Date | null;
 }
 
 const PRIORITY_LABELS: Record<EventPriority, string> = {
@@ -20,7 +22,7 @@ const PRIORITY_LABELS: Record<EventPriority, string> = {
   [EventPriority.HIGH]: 'Cao',
 };
 
-export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, userId }: EventModalProps) {
+export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, userId, quickAddDate }: EventModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -42,33 +44,31 @@ export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, us
       setFormData({
         title: editingEvent.title,
         description: editingEvent.description,
-        startDate: startDate.toISOString().split('T')[0],
-        startTime: startDate.toTimeString().slice(0, 5),
-        endDate: endDate.toISOString().split('T')[0],
-        endTime: endDate.toTimeString().slice(0, 5),
+        startDate: toLocalDateString(startDate),
+        startTime: toLocalTimeString(startDate),
+        endDate: toLocalDateString(endDate),
+        endTime: toLocalTimeString(endDate),
         location: editingEvent.location || '',
         priority: editingEvent.priority,
         isAllDay: editingEvent.isAllDay,
       });
     } else {
-      // Default to today
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      // Use quickAddDate if available, otherwise default to today
+      const now = quickAddDate || new Date();
       
       setFormData({
         title: '',
         description: '',
-        startDate: now.toISOString().split('T')[0],
+        startDate: toLocalDateString(now),
         startTime: '09:00',
-        endDate: now.toISOString().split('T')[0],
+        endDate: toLocalDateString(now),
         endTime: '10:00',
         location: '',
         priority: EventPriority.MEDIUM,
         isAllDay: false,
       });
     }
-  }, [editingEvent]);
+  }, [editingEvent, quickAddDate]);
 
   if (!isOpen) return null;
 

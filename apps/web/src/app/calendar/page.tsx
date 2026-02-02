@@ -367,6 +367,7 @@ export default function CalendarPage() {
           onSave={handleSave}
           onDelete={handleDelete}
           userId={user?.id || ''}
+          quickAddDate={quickAddDate}
         />
       </DashboardLayout>
     </PageLoader>
