@@ -1,6 +1,3 @@
-// Domain Layer - Core Business Entities and Rules
-// NO DEPENDENCIES on other layers allowed
-
 // Entities
 export * from './entities/User';
 export * from './entities/Expense';
