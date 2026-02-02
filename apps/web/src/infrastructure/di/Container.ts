@@ -16,6 +16,7 @@ import { QuoteRepositoryAdapter } from '../repositories/QuoteRepositoryAdapter';
 import { ProjectRepositoryAdapter } from '../repositories/ProjectRepositoryAdapter';
 import { TaskRepositoryAdapter } from '../repositories/TaskRepositoryAdapter';
 import { WishItemRepositoryAdapter } from '../repositories/WishItemRepositoryAdapter';
+import { DashboardWidgetRepositoryAdapter } from '../repositories/DashboardWidgetRepositoryAdapter';
 import {
   CreateExpenseUseCase,
   GetExpensesUseCase,
@@ -55,6 +56,8 @@ import {
   GetWishItemsUseCase,
   UpdateWishItemUseCase,
   DeleteWishItemUseCase,
+  GetDashboardWidgetsUseCase,
+  UpdateDashboardWidgetUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -75,6 +78,7 @@ class Container {
   private _projectRepository?: ProjectRepositoryAdapter;
   private _taskRepository?: TaskRepositoryAdapter;
   private _wishItemRepository?: WishItemRepositoryAdapter;
+  private _dashboardWidgetRepository?: DashboardWidgetRepositoryAdapter;
 
   // Use Cases
   private _createExpenseUseCase?: CreateExpenseUseCase;
@@ -115,6 +119,8 @@ class Container {
   private _getWishItemsUseCase?: GetWishItemsUseCase;
   private _updateWishItemUseCase?: UpdateWishItemUseCase;
   private _deleteWishItemUseCase?: DeleteWishItemUseCase;
+  private _getDashboardWidgetsUseCase?: GetDashboardWidgetsUseCase;
+  private _updateDashboardWidgetUseCase?: UpdateDashboardWidgetUseCase;
 
   private constructor() {}
 
@@ -205,6 +211,13 @@ class Container {
       this._wishItemRepository = new WishItemRepositoryAdapter(this.storageService);
     }
     return this._wishItemRepository;
+  }
+
+  get dashboardWidgetRepository(): DashboardWidgetRepositoryAdapter {
+    if (!this._dashboardWidgetRepository) {
+      this._dashboardWidgetRepository = new DashboardWidgetRepositoryAdapter(this.storageService);
+    }
+    return this._dashboardWidgetRepository;
   }
 
   // Use Cases - Expense
@@ -489,6 +502,21 @@ class Container {
     return this._deleteWishItemUseCase;
   }
 
+  // Use Cases - DashboardWidget
+  get getDashboardWidgetsUseCase(): GetDashboardWidgetsUseCase {
+    if (!this._getDashboardWidgetsUseCase) {
+      this._getDashboardWidgetsUseCase = new GetDashboardWidgetsUseCase(this.dashboardWidgetRepository);
+    }
+    return this._getDashboardWidgetsUseCase;
+  }
+
+  get updateDashboardWidgetUseCase(): UpdateDashboardWidgetUseCase {
+    if (!this._updateDashboardWidgetUseCase) {
+      this._updateDashboardWidgetUseCase = new UpdateDashboardWidgetUseCase(this.dashboardWidgetRepository);
+    }
+    return this._updateDashboardWidgetUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -640,6 +668,14 @@ class Container {
 
   static deleteWishItemUseCase(): DeleteWishItemUseCase {
     return Container.getInstance().deleteWishItemUseCase;
+  }
+
+  static getDashboardWidgetsUseCase(): GetDashboardWidgetsUseCase {
+    return Container.getInstance().getDashboardWidgetsUseCase;
+  }
+
+  static updateDashboardWidgetUseCase(): UpdateDashboardWidgetUseCase {
+    return Container.getInstance().updateDashboardWidgetUseCase;
   }
 }
 
