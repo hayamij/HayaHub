@@ -84,7 +84,7 @@ export default function QuoteWidgetContent() {
               <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">Quote hôm nay</span>
             </div>
             <blockquote className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3 italic">
-              "{dailyQuote.text}"
+              &ldquo;{dailyQuote.text}&rdquo;
             </blockquote>
             {dailyQuote.author && (
               <div className="text-xs text-gray-500 dark:text-gray-400 text-right">— {dailyQuote.author}</div>
