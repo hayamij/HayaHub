@@ -24,6 +24,7 @@ export * from './dtos/task';
 export * from './dtos/subscription';
 export * from './dtos/calendarEvent';
 export * from './dtos/quote';
+export * from './dtos/wishItem';
 
 // Use Cases
 export * from './use-cases/expense/CreateExpenseUseCase';
@@ -50,4 +51,23 @@ export * from './use-cases/calendar/CreateCalendarEventUseCase';
 export * from './use-cases/calendar/GetCalendarEventsUseCase';
 export * from './use-cases/calendar/UpdateCalendarEventUseCase';
 export * from './use-cases/calendar/DeleteCalendarEventUseCase';
+
 export * from './use-cases/quote/CreateQuoteUseCase';
+export * from './use-cases/quote/GetQuotesUseCase';
+export * from './use-cases/quote/UpdateQuoteUseCase';
+export * from './use-cases/quote/DeleteQuoteUseCase';
+
+export * from './use-cases/project/CreateProjectUseCase';
+export * from './use-cases/project/GetProjectsUseCase';
+export * from './use-cases/project/UpdateProjectUseCase';
+export * from './use-cases/project/DeleteProjectUseCase';
+
+export * from './use-cases/task/CreateTaskUseCase';
+export * from './use-cases/task/GetTasksUseCase';
+export * from './use-cases/task/UpdateTaskUseCase';
+export * from './use-cases/task/DeleteTaskUseCase';
+
+export * from './use-cases/wishlist/CreateWishItemUseCase';
+export * from './use-cases/wishlist/GetWishItemsUseCase';
+export * from './use-cases/wishlist/UpdateWishItemUseCase';
+export * from './use-cases/wishlist/DeleteWishItemUseCase';

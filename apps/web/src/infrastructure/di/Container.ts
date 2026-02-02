@@ -13,6 +13,9 @@ import { UserSettingsRepositoryAdapter } from '../repositories/UserSettingsRepos
 import { SubscriptionRepositoryAdapter } from '../repositories/SubscriptionRepositoryAdapter';
 import { CalendarEventRepositoryAdapter } from '../repositories/CalendarEventRepositoryAdapter';
 import { QuoteRepositoryAdapter } from '../repositories/QuoteRepositoryAdapter';
+import { ProjectRepositoryAdapter } from '../repositories/ProjectRepositoryAdapter';
+import { TaskRepositoryAdapter } from '../repositories/TaskRepositoryAdapter';
+import { WishItemRepositoryAdapter } from '../repositories/WishItemRepositoryAdapter';
 import {
   CreateExpenseUseCase,
   GetExpensesUseCase,
@@ -37,6 +40,21 @@ import {
   UpdateCalendarEventUseCase,
   DeleteCalendarEventUseCase,
   CreateQuoteUseCase,
+  GetQuotesUseCase,
+  UpdateQuoteUseCase,
+  DeleteQuoteUseCase,
+  CreateProjectUseCase,
+  GetProjectsUseCase,
+  UpdateProjectUseCase,
+  DeleteProjectUseCase,
+  CreateTaskUseCase,
+  GetTasksUseCase,
+  UpdateTaskUseCase,
+  DeleteTaskUseCase,
+  CreateWishItemUseCase,
+  GetWishItemsUseCase,
+  UpdateWishItemUseCase,
+  DeleteWishItemUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -54,6 +72,9 @@ class Container {
   private _subscriptionRepository?: SubscriptionRepositoryAdapter;
   private _calendarEventRepository?: CalendarEventRepositoryAdapter;
   private _quoteRepository?: QuoteRepositoryAdapter;
+  private _projectRepository?: ProjectRepositoryAdapter;
+  private _taskRepository?: TaskRepositoryAdapter;
+  private _wishItemRepository?: WishItemRepositoryAdapter;
 
   // Use Cases
   private _createExpenseUseCase?: CreateExpenseUseCase;
@@ -79,6 +100,21 @@ class Container {
   private _updateCalendarEventUseCase?: UpdateCalendarEventUseCase;
   private _deleteCalendarEventUseCase?: DeleteCalendarEventUseCase;
   private _createQuoteUseCase?: CreateQuoteUseCase;
+  private _getQuotesUseCase?: GetQuotesUseCase;
+  private _updateQuoteUseCase?: UpdateQuoteUseCase;
+  private _deleteQuoteUseCase?: DeleteQuoteUseCase;
+  private _createProjectUseCase?: CreateProjectUseCase;
+  private _getProjectsUseCase?: GetProjectsUseCase;
+  private _updateProjectUseCase?: UpdateProjectUseCase;
+  private _deleteProjectUseCase?: DeleteProjectUseCase;
+  private _createTaskUseCase?: CreateTaskUseCase;
+  private _getTasksUseCase?: GetTasksUseCase;
+  private _updateTaskUseCase?: UpdateTaskUseCase;
+  private _deleteTaskUseCase?: DeleteTaskUseCase;
+  private _createWishItemUseCase?: CreateWishItemUseCase;
+  private _getWishItemsUseCase?: GetWishItemsUseCase;
+  private _updateWishItemUseCase?: UpdateWishItemUseCase;
+  private _deleteWishItemUseCase?: DeleteWishItemUseCase;
 
   private constructor() {}
 
@@ -148,6 +184,27 @@ class Container {
       this._quoteRepository = new QuoteRepositoryAdapter(this.storageService);
     }
     return this._quoteRepository;
+  }
+
+  get projectRepository(): ProjectRepositoryAdapter {
+    if (!this._projectRepository) {
+      this._projectRepository = new ProjectRepositoryAdapter(this.storageService);
+    }
+    return this._projectRepository;
+  }
+
+  get taskRepository(): TaskRepositoryAdapter {
+    if (!this._taskRepository) {
+      this._taskRepository = new TaskRepositoryAdapter(this.storageService);
+    }
+    return this._taskRepository;
+  }
+
+  get wishItemRepository(): WishItemRepositoryAdapter {
+    if (!this._wishItemRepository) {
+      this._wishItemRepository = new WishItemRepositoryAdapter(this.storageService);
+    }
+    return this._wishItemRepository;
   }
 
   // Use Cases - Expense
@@ -324,6 +381,114 @@ class Container {
     return this._createQuoteUseCase;
   }
 
+  get getQuotesUseCase(): GetQuotesUseCase {
+    if (!this._getQuotesUseCase) {
+      this._getQuotesUseCase = new GetQuotesUseCase(this.quoteRepository);
+    }
+    return this._getQuotesUseCase;
+  }
+
+  get updateQuoteUseCase(): UpdateQuoteUseCase {
+    if (!this._updateQuoteUseCase) {
+      this._updateQuoteUseCase = new UpdateQuoteUseCase(this.quoteRepository);
+    }
+    return this._updateQuoteUseCase;
+  }
+
+  get deleteQuoteUseCase(): DeleteQuoteUseCase {
+    if (!this._deleteQuoteUseCase) {
+      this._deleteQuoteUseCase = new DeleteQuoteUseCase(this.quoteRepository);
+    }
+    return this._deleteQuoteUseCase;
+  }
+
+  // Use Cases - Project
+  get createProjectUseCase(): CreateProjectUseCase {
+    if (!this._createProjectUseCase) {
+      this._createProjectUseCase = new CreateProjectUseCase(this.projectRepository);
+    }
+    return this._createProjectUseCase;
+  }
+
+  get getProjectsUseCase(): GetProjectsUseCase {
+    if (!this._getProjectsUseCase) {
+      this._getProjectsUseCase = new GetProjectsUseCase(this.projectRepository);
+    }
+    return this._getProjectsUseCase;
+  }
+
+  get updateProjectUseCase(): UpdateProjectUseCase {
+    if (!this._updateProjectUseCase) {
+      this._updateProjectUseCase = new UpdateProjectUseCase(this.projectRepository);
+    }
+    return this._updateProjectUseCase;
+  }
+
+  get deleteProjectUseCase(): DeleteProjectUseCase {
+    if (!this._deleteProjectUseCase) {
+      this._deleteProjectUseCase = new DeleteProjectUseCase(this.projectRepository);
+    }
+    return this._deleteProjectUseCase;
+  }
+
+  // Use Cases - Task
+  get createTaskUseCase(): CreateTaskUseCase {
+    if (!this._createTaskUseCase) {
+      this._createTaskUseCase = new CreateTaskUseCase(this.taskRepository);
+    }
+    return this._createTaskUseCase;
+  }
+
+  get getTasksUseCase(): GetTasksUseCase {
+    if (!this._getTasksUseCase) {
+      this._getTasksUseCase = new GetTasksUseCase(this.taskRepository);
+    }
+    return this._getTasksUseCase;
+  }
+
+  get updateTaskUseCase(): UpdateTaskUseCase {
+    if (!this._updateTaskUseCase) {
+      this._updateTaskUseCase = new UpdateTaskUseCase(this.taskRepository);
+    }
+    return this._updateTaskUseCase;
+  }
+
+  get deleteTaskUseCase(): DeleteTaskUseCase {
+    if (!this._deleteTaskUseCase) {
+      this._deleteTaskUseCase = new DeleteTaskUseCase(this.taskRepository);
+    }
+    return this._deleteTaskUseCase;
+  }
+
+  // Use Cases - WishItem
+  get createWishItemUseCase(): CreateWishItemUseCase {
+    if (!this._createWishItemUseCase) {
+      this._createWishItemUseCase = new CreateWishItemUseCase(this.wishItemRepository);
+    }
+    return this._createWishItemUseCase;
+  }
+
+  get getWishItemsUseCase(): GetWishItemsUseCase {
+    if (!this._getWishItemsUseCase) {
+      this._getWishItemsUseCase = new GetWishItemsUseCase(this.wishItemRepository);
+    }
+    return this._getWishItemsUseCase;
+  }
+
+  get updateWishItemUseCase(): UpdateWishItemUseCase {
+    if (!this._updateWishItemUseCase) {
+      this._updateWishItemUseCase = new UpdateWishItemUseCase(this.wishItemRepository);
+    }
+    return this._updateWishItemUseCase;
+  }
+
+  get deleteWishItemUseCase(): DeleteWishItemUseCase {
+    if (!this._deleteWishItemUseCase) {
+      this._deleteWishItemUseCase = new DeleteWishItemUseCase(this.wishItemRepository);
+    }
+    return this._deleteWishItemUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -415,6 +580,66 @@ class Container {
 
   static createQuoteUseCase(): CreateQuoteUseCase {
     return Container.getInstance().createQuoteUseCase;
+  }
+
+  static getQuotesUseCase(): GetQuotesUseCase {
+    return Container.getInstance().getQuotesUseCase;
+  }
+
+  static updateQuoteUseCase(): UpdateQuoteUseCase {
+    return Container.getInstance().updateQuoteUseCase;
+  }
+
+  static deleteQuoteUseCase(): DeleteQuoteUseCase {
+    return Container.getInstance().deleteQuoteUseCase;
+  }
+
+  static createProjectUseCase(): CreateProjectUseCase {
+    return Container.getInstance().createProjectUseCase;
+  }
+
+  static getProjectsUseCase(): GetProjectsUseCase {
+    return Container.getInstance().getProjectsUseCase;
+  }
+
+  static updateProjectUseCase(): UpdateProjectUseCase {
+    return Container.getInstance().updateProjectUseCase;
+  }
+
+  static deleteProjectUseCase(): DeleteProjectUseCase {
+    return Container.getInstance().deleteProjectUseCase;
+  }
+
+  static createTaskUseCase(): CreateTaskUseCase {
+    return Container.getInstance().createTaskUseCase;
+  }
+
+  static getTasksUseCase(): GetTasksUseCase {
+    return Container.getInstance().getTasksUseCase;
+  }
+
+  static updateTaskUseCase(): UpdateTaskUseCase {
+    return Container.getInstance().updateTaskUseCase;
+  }
+
+  static deleteTaskUseCase(): DeleteTaskUseCase {
+    return Container.getInstance().deleteTaskUseCase;
+  }
+
+  static createWishItemUseCase(): CreateWishItemUseCase {
+    return Container.getInstance().createWishItemUseCase;
+  }
+
+  static getWishItemsUseCase(): GetWishItemsUseCase {
+    return Container.getInstance().getWishItemsUseCase;
+  }
+
+  static updateWishItemUseCase(): UpdateWishItemUseCase {
+    return Container.getInstance().updateWishItemUseCase;
+  }
+
+  static deleteWishItemUseCase(): DeleteWishItemUseCase {
+    return Container.getInstance().deleteWishItemUseCase;
   }
 }
 
