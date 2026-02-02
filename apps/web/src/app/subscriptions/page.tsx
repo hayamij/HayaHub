@@ -71,14 +71,20 @@ export default function SubscriptionsPage() {
   );
 
   const handleSave = useCallback(
-    async (data: CreateSubscriptionDTO | UpdateSubscriptionDTO) => {
-      if (editingSubscription) {
-        await updateSubscription(editingSubscription.id, data as UpdateSubscriptionDTO);
-      } else {
-        await createSubscription(data as CreateSubscriptionDTO);
+    async (data: CreateSubscriptionDTO | UpdateSubscriptionDTO): Promise<boolean> => {
+      try {
+        if (editingSubscription) {
+          await updateSubscription(editingSubscription.id, data as UpdateSubscriptionDTO);
+        } else {
+          await createSubscription(data as CreateSubscriptionDTO);
+        }
+        setIsModalOpen(false);
+        setEditingSubscription(null);
+        return true;
+      } catch (error) {
+        console.error('Failed to save subscription:', error);
+        return false;
       }
-      setIsModalOpen(false);
-      setEditingSubscription(null);
     },
     [editingSubscription, createSubscription, updateSubscription]
   );
@@ -181,7 +187,7 @@ export default function SubscriptionsPage() {
           isOpen={isModalOpen}
           editingSubscription={editingSubscription}
           onClose={handleCloseModal}
-          onSave={handleSave}
+          onSubmit={handleSave}
           userId={user?.id || ''}
         />
       </DashboardLayout>

@@ -33,6 +33,9 @@ import {
   UpdateSubscriptionUseCase,
   DeleteSubscriptionUseCase,
   CreateCalendarEventUseCase,
+  GetCalendarEventsUseCase,
+  UpdateCalendarEventUseCase,
+  DeleteCalendarEventUseCase,
   CreateQuoteUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
@@ -72,6 +75,9 @@ class Container {
   private _updateSubscriptionUseCase?: UpdateSubscriptionUseCase;
   private _deleteSubscriptionUseCase?: DeleteSubscriptionUseCase;
   private _createCalendarEventUseCase?: CreateCalendarEventUseCase;
+  private _getCalendarEventsUseCase?: GetCalendarEventsUseCase;
+  private _updateCalendarEventUseCase?: UpdateCalendarEventUseCase;
+  private _deleteCalendarEventUseCase?: DeleteCalendarEventUseCase;
   private _createQuoteUseCase?: CreateQuoteUseCase;
 
   private constructor() {}
@@ -290,6 +296,27 @@ class Container {
     return this._createCalendarEventUseCase;
   }
 
+  get getCalendarEventsUseCase(): GetCalendarEventsUseCase {
+    if (!this._getCalendarEventsUseCase) {
+      this._getCalendarEventsUseCase = new GetCalendarEventsUseCase(this.calendarEventRepository);
+    }
+    return this._getCalendarEventsUseCase;
+  }
+
+  get updateCalendarEventUseCase(): UpdateCalendarEventUseCase {
+    if (!this._updateCalendarEventUseCase) {
+      this._updateCalendarEventUseCase = new UpdateCalendarEventUseCase(this.calendarEventRepository);
+    }
+    return this._updateCalendarEventUseCase;
+  }
+
+  get deleteCalendarEventUseCase(): DeleteCalendarEventUseCase {
+    if (!this._deleteCalendarEventUseCase) {
+      this._deleteCalendarEventUseCase = new DeleteCalendarEventUseCase(this.calendarEventRepository);
+    }
+    return this._deleteCalendarEventUseCase;
+  }
+
   get createQuoteUseCase(): CreateQuoteUseCase {
     if (!this._createQuoteUseCase) {
       this._createQuoteUseCase = new CreateQuoteUseCase(this.quoteRepository);
@@ -372,6 +399,18 @@ class Container {
 
   static createCalendarEventUseCase(): CreateCalendarEventUseCase {
     return Container.getInstance().createCalendarEventUseCase;
+  }
+
+  static getCalendarEventsUseCase(): GetCalendarEventsUseCase {
+    return Container.getInstance().getCalendarEventsUseCase;
+  }
+
+  static updateCalendarEventUseCase(): UpdateCalendarEventUseCase {
+    return Container.getInstance().updateCalendarEventUseCase;
+  }
+
+  static deleteCalendarEventUseCase(): DeleteCalendarEventUseCase {
+    return Container.getInstance().deleteCalendarEventUseCase;
   }
 
   static createQuoteUseCase(): CreateQuoteUseCase {

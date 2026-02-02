@@ -32,9 +32,8 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>(initialView);
 
-  const container = new Container();
-  const calendarEventRepository = container.calendarEventRepository;
-  const createCalendarEventUseCase = container.createCalendarEventUseCase;
+  const calendarEventRepository = Container.getInstance().calendarEventRepository;
+  const createCalendarEventUseCase = Container.getInstance().createCalendarEventUseCase;
 
   const fetchEvents = async () => {
     if (!user) {
@@ -50,7 +49,7 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
       // Calculate date range based on current view
       const { startDate, endDate } = getDateRange(currentDate, view);
       
-      const result = await calendarEventRepository.findByDateRange(user.id, startDate, endDate);
+      const result = await calendarEventRepository.findByUserIdAndDateRange(user.id, startDate, endDate);
       setEvents(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load events');
@@ -84,11 +83,16 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
       throw new Error('Event not found');
     }
 
-    // Update event properties (simplified - only basic fields)
+    // Update event properties using reschedule for date changes
     if (dto.title) event.updateTitle(dto.title);
     if (dto.description) event.updateDescription(dto.description);
-    if (dto.startDate) event.updateStartDate(dto.startDate);
-    if (dto.endDate) event.updateEndDate(dto.endDate);
+    if (dto.startDate || dto.endDate) {
+      const startDate = dto.startDate || event.startDate;
+      const endDate = dto.endDate || event.endDate;
+      event.reschedule(startDate, endDate);
+    }
+    if (dto.location) event.updateLocation(dto.location);
+    if (dto.priority) event.setPriority(dto.priority);
 
     await calendarEventRepository.update(event);
     await fetchEvents();
