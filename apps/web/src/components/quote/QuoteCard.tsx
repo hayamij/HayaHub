@@ -36,7 +36,7 @@ export function QuoteCard({ quote, onToggleFavorite }: QuoteCardProps) {
         
         <div className="flex-1 min-w-0">
           <p className="text-lg text-gray-900 dark:text-white leading-relaxed mb-4 italic">
-            "{quote.text}"
+            &ldquo;{quote.text}&rdquo;
           </p>
           
           <div className="flex items-center justify-between gap-3 flex-wrap">

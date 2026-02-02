@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +30,7 @@ export default function CalendarPage() {
   const updateCalendarEventUseCase = Container.updateCalendarEventUseCase();
   const deleteCalendarEventUseCase = Container.deleteCalendarEventUseCase();
 
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     if (!user?.id) {
       setEvents([]);
       setIsLoading(false);
@@ -52,11 +52,11 @@ export default function CalendarPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, getCalendarEventsUseCase]);
 
   useEffect(() => {
     loadEvents();
-  }, [user]);
+  }, [user, loadEvents]);
 
   const handleAdd = () => {
     setEditingEvent(null);

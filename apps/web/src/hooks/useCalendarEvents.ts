@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Container } from '@/infrastructure/di/Container';
 import type { CalendarEventDTO } from 'hayahub-business';
@@ -35,7 +35,7 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
   const calendarEventRepository = Container.getInstance().calendarEventRepository;
   const createCalendarEventUseCase = Container.getInstance().createCalendarEventUseCase;
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     if (!user) {
       setEvents([]);
       setLoading(false);
@@ -56,11 +56,11 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentDate, view, calendarEventRepository]);
 
   useEffect(() => {
     fetchEvents();
-  }, [user, currentDate, view]);
+  }, [user, currentDate, view, fetchEvents]);
 
   const createEvent = async (dto: Omit<CalendarEventDTO, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) throw new Error('User not authenticated');
