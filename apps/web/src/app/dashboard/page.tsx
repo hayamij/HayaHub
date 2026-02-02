@@ -41,6 +41,40 @@ export default function DashboardPage() {
     loadStats();
   };
 
+  const loadUserSettings = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const getUserSettingsUseCase = Container.getUserSettingsUseCase();
+      const result = await getUserSettingsUseCase.execute({ userId: user.id });
+
+      if (result.isSuccess()) {
+        setViewMode(result.value.preferredDashboardView);
+      }
+    } catch (error) {
+      console.error('Failed to load user settings:', error);
+    }
+  }, [user]);
+
+  const saveViewMode = useCallback(async (mode: 'grid' | 'workspace') => {
+    if (!user?.id) return;
+
+    try {
+      const updateUserSettingsUseCase = Container.updateUserSettingsUseCase();
+      await updateUserSettingsUseCase.execute({
+        userId: user.id,
+        preferredDashboardView: mode,
+      });
+    } catch (error) {
+      console.error('Failed to save view mode:', error);
+    }
+  }, [user]);
+
+  const handleViewModeChange = (mode: 'grid' | 'workspace') => {
+    setViewMode(mode);
+    saveViewMode(mode);
+  };
+
   const loadWidgets = useCallback(async () => {
     if (!user?.id) return;
 
@@ -75,6 +109,34 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Failed to update widget layout:', error);
+    }
+  };
+
+  const handleBatchLayoutChange = async (updates: Array<{ id: string; layout: LayoutPositionData }>) => {
+    if (!user?.id) return;
+
+    try {
+      const updateManyDashboardWidgetsUseCase = Container.updateManyDashboardWidgetsUseCase();
+      
+      // Convert to WidgetUpdate format expected by use case
+      const widgetUpdates = updates.map(update => ({
+        id: update.id,
+        updates: { layoutPosition: update.layout }
+      }));
+
+      const result = await updateManyDashboardWidgetsUseCase.execute(user.id, widgetUpdates);
+
+      if (result.isSuccess()) {
+        // Update state with all new layouts
+        setWidgets(prev => 
+          prev.map(widget => {
+            const update = updates.find(u => u.id === widget.id);
+            return update ? { ...widget, layoutPosition: update.layout } : widget;
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Failed to batch update widget layouts:', error);
     }
   };
 
@@ -145,13 +207,14 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  // Load stats and widgets when user is available
+  // Load stats, widgets and settings when user is available
   useEffect(() => {
     if (user) {
       loadStats();
       loadWidgets();
+      loadUserSettings();
     }
-  }, [user, loadStats, loadWidgets]);
+  }, [user, loadStats, loadWidgets, loadUserSettings]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
@@ -206,7 +269,7 @@ export default function DashboardPage() {
             {/* View mode toggle */}
             <div className="inline-flex items-center gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-1">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => handleViewModeChange('grid')}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-medium transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
@@ -217,7 +280,7 @@ export default function DashboardPage() {
                 <Grid3x3 className="w-4 h-4" />
               </button>
               <button
-                onClick={() => setViewMode('workspace')}
+                onClick={() => handleViewModeChange('workspace')}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-medium transition-colors ${
                   viewMode === 'workspace'
                     ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
@@ -387,6 +450,7 @@ export default function DashboardPage() {
             <DashboardWorkspace
               widgets={widgets}
               onLayoutChange={handleLayoutChange}
+              onBatchLayoutChange={handleBatchLayoutChange}
               onToggleVisibility={handleToggleVisibility}
               userId={user.id}
             />

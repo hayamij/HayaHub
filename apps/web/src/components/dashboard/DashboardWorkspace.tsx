@@ -4,18 +4,20 @@ import { useState } from 'react';
 import type { DashboardWidgetDTO } from 'hayahub-business';
 import type { LayoutPositionData } from 'hayahub-domain';
 import { WidgetType } from 'hayahub-domain';
-import { GripVertical, Eye, EyeOff } from 'lucide-react';
+import { GripVertical, Eye, EyeOff, Settings, Grid } from 'lucide-react';
 import SpendingWidgetContent from './SpendingWidgetContent';
 import CalendarWidgetContent from './CalendarWidgetContent';
 import ProjectsWidgetContent from './ProjectsWidgetContent';
 import WishlistWidgetContent from './WishlistWidgetContent';
 import QuoteWidgetContent from './QuoteWidgetContent';
 import SubscriptionsWidgetContent from './SubscriptionsWidgetContent';
+import { WidgetConfigModal } from './WidgetConfigModal';
 
 interface DashboardWorkspaceProps {
   widgets: DashboardWidgetDTO[];
-  onLayoutChange: (id: string, layout: LayoutPositionData) => void;
+  onLayoutChange: (id: string, layout: LayoutPositionData) => void | Promise<void>;
   onToggleVisibility: (id: string, visible: boolean) => void;
+  onBatchLayoutChange: (updates: Array<{ id: string; layout: LayoutPositionData }>) => Promise<void>;
   userId: string;
 }
 
@@ -32,14 +34,22 @@ export function DashboardWorkspace({
   widgets,
   onLayoutChange,
   onToggleVisibility,
+  onBatchLayoutChange,
   userId,
 }: DashboardWorkspaceProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [resizingId, setResizingId] = useState<string | null>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [isArranging, setIsArranging] = useState(false);
 
   const handleDragStart = (id: string, e: React.MouseEvent) => {
-    const target = e.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
+    e.preventDefault();
+    const header = e.currentTarget as HTMLElement;
+    const widgetElement = header.parentElement as HTMLElement;
+    
+    if (!widgetElement) return;
+
+    const rect = widgetElement.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
 
@@ -53,8 +63,11 @@ export function DashboardWorkspace({
       const newX = moveEvent.clientX - containerRect.left - offsetX;
       const newY = moveEvent.clientY - containerRect.top - offsetY;
 
-      target.style.left = `${Math.max(0, Math.min(newX, containerRect.width - rect.width))}px`;
-      target.style.top = `${Math.max(0, Math.min(newY, containerRect.height - rect.height))}px`;
+      const maxX = containerRect.width - rect.width;
+      const maxY = containerRect.height - rect.height;
+
+      widgetElement.style.left = `${Math.max(0, Math.min(newX, maxX))}px`;
+      widgetElement.style.top = `${Math.max(0, Math.min(newY, maxY))}px`;
     };
 
     const handleUp = () => {
@@ -62,15 +75,15 @@ export function DashboardWorkspace({
       
       const widget = widgets.find((w) => w.id === id);
       if (widget) {
-        const rect = target.getBoundingClientRect();
+        const finalRect = widgetElement.getBoundingClientRect();
         const container = document.getElementById('dashboard-workspace-container');
         if (container) {
           const containerRect = container.getBoundingClientRect();
           onLayoutChange(id, {
-            x: rect.left - containerRect.left,
-            y: rect.top - containerRect.top,
-            w: rect.width,
-            h: rect.height,
+            x: finalRect.left - containerRect.left,
+            y: finalRect.top - containerRect.top,
+            w: finalRect.width,
+            h: finalRect.height,
           });
         }
       }
@@ -84,21 +97,30 @@ export function DashboardWorkspace({
   };
 
   const handleResizeStart = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
-    const target = e.currentTarget.parentElement as HTMLElement;
-    const startWidth = target.offsetWidth;
-    const startHeight = target.offsetHeight;
+    
+    const resizeHandle = e.currentTarget as HTMLElement;
+    const widgetElement = resizeHandle.parentElement as HTMLElement;
+    
+    if (!widgetElement) return;
+
+    const startWidth = widgetElement.offsetWidth;
+    const startHeight = widgetElement.offsetHeight;
     const startX = e.clientX;
     const startY = e.clientY;
 
     setResizingId(id);
 
     const handleMove = (moveEvent: MouseEvent) => {
-      const newWidth = startWidth + (moveEvent.clientX - startX);
-      const newHeight = startHeight + (moveEvent.clientY - startY);
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      
+      const newWidth = startWidth + deltaX;
+      const newHeight = startHeight + deltaY;
 
-      target.style.width = `${Math.max(280, newWidth)}px`;
-      target.style.height = `${Math.max(200, newHeight)}px`;
+      widgetElement.style.width = `${Math.max(280, newWidth)}px`;
+      widgetElement.style.height = `${Math.max(200, newHeight)}px`;
     };
 
     const handleUp = () => {
@@ -106,15 +128,15 @@ export function DashboardWorkspace({
 
       const widget = widgets.find((w) => w.id === id);
       if (widget) {
-        const rect = target.getBoundingClientRect();
+        const finalRect = widgetElement.getBoundingClientRect();
         const container = document.getElementById('dashboard-workspace-container');
         if (container) {
           const containerRect = container.getBoundingClientRect();
           onLayoutChange(id, {
-            x: rect.left - containerRect.left,
-            y: rect.top - containerRect.top,
-            w: rect.width,
-            h: rect.height,
+            x: finalRect.left - containerRect.left,
+            y: finalRect.top - containerRect.top,
+            w: finalRect.width,
+            h: finalRect.height,
           });
         }
       }
@@ -125,6 +147,74 @@ export function DashboardWorkspace({
 
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleUp);
+  };
+
+  const handleAutoArrange = async () => {
+    setIsArranging(true);
+    const visibleWidgets = widgets.filter((w) => w.isVisible);
+    const gap = 5;
+    const startX = 20;
+    const startY = 60;
+
+    // Grid layout with 3 columns
+    const maxColumns = 3;
+    
+    // Track height and max width of each column
+    const columnHeights: number[] = Array(maxColumns).fill(startY);
+    const columnWidths: number[] = Array(maxColumns).fill(0);
+    const columnXPositions: number[] = Array(maxColumns).fill(0);
+
+    // First pass: calculate max width for each column and X positions
+    visibleWidgets.forEach((widget, index) => {
+      const currentLayout = widget.layoutPosition || { x: 0, y: 0, w: 380, h: 300 };
+      const col = index % maxColumns;
+      
+      // Track max width in this column
+      columnWidths[col] = Math.max(columnWidths[col], currentLayout.w);
+    });
+
+    // Calculate X position for each column based on actual widths
+    columnXPositions[0] = startX;
+    for (let i = 1; i < maxColumns; i++) {
+      columnXPositions[i] = columnXPositions[i - 1] + columnWidths[i - 1] + gap;
+    }
+
+    // Second pass: place widgets and collect all updates for batch save
+    const updates: Array<{ id: string; layout: LayoutPositionData }> = [];
+
+    visibleWidgets.forEach((widget, index) => {
+      const currentLayout = widget.layoutPosition || { x: 0, y: 0, w: 380, h: 300 };
+      const col = index % maxColumns;
+      
+      // Get X position from pre-calculated column positions
+      const x = columnXPositions[col];
+      
+      // Get Y position from column height
+      const y = columnHeights[col];
+      
+      // Update column height for next widget in this column
+      columnHeights[col] += currentLayout.h + gap;
+
+      // Collect update for batch save
+      updates.push({
+        id: widget.id,
+        layout: {
+          x,
+          y,
+          w: currentLayout.w,
+          h: currentLayout.h,
+        },
+      });
+    });
+
+    // Batch update all widget positions in one call
+    try {
+      await onBatchLayoutChange(updates);
+    } catch (error) {
+      console.error('Failed to save auto-arrange:', error);
+    } finally {
+      setIsArranging(false);
+    }
   };
 
   const renderWidgetContent = (widget: DashboardWidgetDTO) => {
@@ -163,8 +253,31 @@ export function DashboardWorkspace({
   return (
     <div
       id="dashboard-workspace-container"
-      className="relative min-h-[800px] bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 overflow-auto"
+      className="relative min-h-[1200px] bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 overflow-auto"
     >
+      {/* Floating action buttons */}
+      <div className="absolute top-4 right-4 z-40 flex gap-2">
+        <button
+          onClick={handleAutoArrange}
+          disabled={isArranging}
+          className="p-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={isArranging ? 'Đang sắp xếp...' : 'Tự động sắp xếp'}
+        >
+          {isArranging ? (
+            <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Grid className="w-5 h-5" />
+          )}
+        </button>
+        <button
+          onClick={() => setShowConfigModal(true)}
+          className="p-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+          title="Cấu hình widgets"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+      </div>
+
       {visibleWidgets.map((widget) => {
         const layout = widget.layoutPosition || { x: 0, y: 0, w: 350, h: 300 };
         const isDragging = draggingId === widget.id;
@@ -224,6 +337,15 @@ export function DashboardWorkspace({
           </div>
         );
       })}
+
+      {/* Widget config modal */}
+      {showConfigModal && (
+        <WidgetConfigModal
+          widgets={widgets}
+          onToggleVisibility={onToggleVisibility}
+          onClose={() => setShowConfigModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -6,9 +6,11 @@ export interface GetUserSettingsDTO {
 
 export interface UpdateUserSettingsDTO {
   userId: UserId;
-  theme: 'light' | 'dark';
+  theme?: 'light' | 'dark';
+  preferredDashboardView?: 'grid' | 'workspace';
 }
 
 export interface UserSettingsDTO {
   theme: 'light' | 'dark';
+  preferredDashboardView: 'grid' | 'workspace';
 }

@@ -90,47 +90,129 @@ export default function SpendingWidgetContent({ userId }: SpendingWidgetContentP
 
   const maxAmount = Math.max(...data.weeklyData.map((d) => d.amount), 1);
 
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
-    <div className="h-full flex flex-col">
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-          <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">Hôm nay</div>
-          <div className="text-lg font-bold text-blue-700 dark:text-blue-300">
-            {data.todayTotal.toLocaleString()} đ
-          </div>
-        </div>
-        <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-          <div className="text-xs text-purple-600 dark:text-purple-400 mb-1">Tháng này</div>
-          <div className="text-lg font-bold text-purple-700 dark:text-purple-300">
-            {data.monthTotal.toLocaleString()} đ
-          </div>
+    <div className="h-full flex flex-col p-4">
+      {/* Header with percentage */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          Chi tiêu
+        </h3>
+        <div className={`flex items-center gap-1 text-xs font-medium ${
+          data.isIncrease 
+            ? 'text-red-600 dark:text-red-400' 
+            : 'text-green-600 dark:text-green-400'
+        }`}>
+          {data.isIncrease ? (
+            <TrendingUp className="w-3 h-3" />
+          ) : (
+            <TrendingDown className="w-3 h-3" />
+          )}
+          {Math.abs(data.percentageChange).toFixed(1)}%
         </div>
       </div>
 
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-600 dark:text-gray-400">7 ngày qua</span>
-          <div
-            className={`flex items-center gap-1 text-xs ${
-              data.isIncrease ? 'text-red-500' : 'text-green-500'
-            }`}
-          >
-            {data.isIncrease ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-            {data.percentageChange.toFixed(1)}%
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Hôm nay</p>
+          <p className="text-lg font-bold text-gray-900 dark:text-white">
+            {formatCurrency(data.todayTotal)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Tháng này</p>
+          <p className="text-lg font-bold text-gray-900 dark:text-white">
+            {formatCurrency(data.monthTotal)}
+          </p>
+        </div>
+      </div>
+
+      {/* Line chart */}
+      <div className="flex-1 space-y-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          7 ngày qua
+        </p>
+        
+        <div className="relative h-32 w-full">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="spendingAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" className="text-gray-900 dark:text-gray-100" stopColor="currentColor" stopOpacity="0.3" />
+                <stop offset="100%" className="text-gray-900 dark:text-gray-100" stopColor="currentColor" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            
+            {/* Area under line */}
+            <polygon
+              fill="url(#spendingAreaGradient)"
+              points={
+                `0,100 ${data.weeklyData
+                  .map((day, index) => {
+                    const x = (index / (data.weeklyData.length - 1)) * 100;
+                    const heightPercentage = maxAmount > 0 ? (day.amount / maxAmount) * 100 : 0;
+                    const y = 100 - Math.max(heightPercentage, 5);
+                    return `${x},${y}`;
+                  })
+                  .join(' ')} 100,100`
+              }
+            />
+            
+            {/* Line */}
+            <polyline
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-gray-900 dark:text-gray-100"
+              points={data.weeklyData
+                .map((day, index) => {
+                  const x = (index / (data.weeklyData.length - 1)) * 100;
+                  const heightPercentage = maxAmount > 0 ? (day.amount / maxAmount) * 100 : 0;
+                  const y = 100 - Math.max(heightPercentage, 5);
+                  return `${x},${y}`;
+                })
+                .join(' ')}
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+          
+          {/* Hover tooltips */}
+          <div className="absolute inset-0 flex items-stretch pointer-events-none">
+            {data.weeklyData.map((day, index) => (
+              <div
+                key={index}
+                className="flex-1 relative group"
+              >
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                  {formatCurrency(day.amount)}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex items-end justify-between gap-1 h-20">
+        
+        {/* Date labels */}
+        <div className="flex justify-between px-1">
           {data.weeklyData.map((day, index) => (
-            <div key={index} className="flex flex-col items-center flex-1 gap-1">
-              <div className="text-[10px] text-gray-500 dark:text-gray-400">{day.date}</div>
-              <div
-                className="w-full bg-blue-500 dark:bg-blue-400 rounded-t transition-all hover:bg-blue-600"
-                style={{ height: `${(day.amount / maxAmount) * 100}%`, minHeight: '2px' }}
-                title={`${day.amount.toLocaleString()} đ`}
-              />
-            </div>
+            <span key={index} className="text-[10px] text-gray-400 dark:text-gray-500 text-center" style={{ width: `${100 / data.weeklyData.length}%` }}>
+              {day.date}
+            </span>
           ))}
         </div>
+      </div>
+
+      {/* Comparison */}
+      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {data.isIncrease ? 'Tăng' : 'Giảm'} {Math.abs(data.percentageChange).toFixed(1)}% so với cùng kỳ tháng trước
+        </p>
       </div>
     </div>
   );

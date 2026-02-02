@@ -30,4 +30,9 @@ export interface IDashboardWidgetRepository {
    * Initialize default widgets for a new user
    */
   initializeDefaultWidgets(userId: string): Promise<void>;
+
+  /**
+   * Update multiple widgets at once (batch update)
+   */
+  updateMany(widgets: DashboardWidget[]): Promise<void>;
 }

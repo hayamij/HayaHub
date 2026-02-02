@@ -84,6 +84,21 @@ export class DashboardWidgetRepositoryAdapter implements IDashboardWidgetReposit
     await this.storage.set(STORAGE_KEY, updated);
   }
 
+  async updateMany(widgets: DashboardWidget[]): Promise<void> {
+    const allWidgets = await this.loadAll();
+    
+    // Update each widget in the array
+    widgets.forEach((widget) => {
+      const index = allWidgets.findIndex((w) => w.id === widget.getId());
+      if (index !== -1) {
+        allWidgets[index] = this.toStorage(widget);
+      }
+    });
+
+    // Single write operation
+    await this.storage.set(STORAGE_KEY, allWidgets);
+  }
+
   private async loadAll(): Promise<DashboardWidgetStorage[]> {
     const data = (await this.storage.get<DashboardWidgetStorage[]>(STORAGE_KEY)) || [];
     

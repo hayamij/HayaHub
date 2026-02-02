@@ -58,6 +58,7 @@ import {
   DeleteWishItemUseCase,
   GetDashboardWidgetsUseCase,
   UpdateDashboardWidgetUseCase,
+  UpdateManyDashboardWidgetsUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -121,6 +122,7 @@ class Container {
   private _deleteWishItemUseCase?: DeleteWishItemUseCase;
   private _getDashboardWidgetsUseCase?: GetDashboardWidgetsUseCase;
   private _updateDashboardWidgetUseCase?: UpdateDashboardWidgetUseCase;
+  private _updateManyDashboardWidgetsUseCase?: UpdateManyDashboardWidgetsUseCase;
 
   private constructor() {}
 
@@ -517,6 +519,13 @@ class Container {
     return this._updateDashboardWidgetUseCase;
   }
 
+  get updateManyDashboardWidgetsUseCase(): UpdateManyDashboardWidgetsUseCase {
+    if (!this._updateManyDashboardWidgetsUseCase) {
+      this._updateManyDashboardWidgetsUseCase = new UpdateManyDashboardWidgetsUseCase(this.dashboardWidgetRepository);
+    }
+    return this._updateManyDashboardWidgetsUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -676,6 +685,10 @@ class Container {
 
   static updateDashboardWidgetUseCase(): UpdateDashboardWidgetUseCase {
     return Container.getInstance().updateDashboardWidgetUseCase;
+  }
+
+  static updateManyDashboardWidgetsUseCase(): UpdateManyDashboardWidgetsUseCase {
+    return Container.getInstance().updateManyDashboardWidgetsUseCase;
   }
 }
 

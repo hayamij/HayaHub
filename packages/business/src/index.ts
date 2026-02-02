@@ -76,3 +76,4 @@ export * from './use-cases/wishlist/DeleteWishItemUseCase';
 
 export * from './use-cases/dashboardWidget/GetDashboardWidgetsUseCase';
 export * from './use-cases/dashboardWidget/UpdateDashboardWidgetUseCase';
+export * from './use-cases/dashboardWidget/UpdateManyDashboardWidgetsUseCase';

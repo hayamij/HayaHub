@@ -92,11 +92,47 @@ export class DashboardWidget {
     return this.updatedAt;
   }
 
+  /**
+   * Immutable update: Create a new instance with updated visibility
+   */
+  withVisibility(visible: boolean): DashboardWidget {
+    return new DashboardWidget(
+      this.id,
+      this.userId,
+      this.type,
+      visible,
+      this.layoutPosition,
+      this.createdAt,
+      new Date()
+    );
+  }
+
+  /**
+   * Immutable update: Create a new instance with updated layout position
+   */
+  withLayoutPosition(position: LayoutPosition): DashboardWidget {
+    return new DashboardWidget(
+      this.id,
+      this.userId,
+      this.type,
+      this.isVisible,
+      position,
+      this.createdAt,
+      new Date()
+    );
+  }
+
+  /**
+   * @deprecated Use withVisibility() instead for immutable updates
+   */
   setVisible(visible: boolean): void {
     this.isVisible = visible;
     this.updatedAt = new Date();
   }
 
+  /**
+   * @deprecated Use withLayoutPosition() instead for immutable updates
+   */
   updateLayoutPosition(position: LayoutPosition): void {
     this.layoutPosition = position;
     this.updatedAt = new Date();
