@@ -3,12 +3,17 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
 import { SpendingWidget } from '@/components/dashboard/SpendingWidget';
+import CalendarWidget from '@/components/dashboard/CalendarWidget';
+import ProjectsWidget from '@/components/dashboard/ProjectsWidget';
+import WishlistWidget from '@/components/dashboard/WishlistWidget';
+import QuoteWidget from '@/components/dashboard/QuoteWidget';
+import SubscriptionsWidget from '@/components/dashboard/SubscriptionsWidget';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, TrendingUp, /*TrendingDown,*/ FileText, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Plus, TrendingUp, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Container } from '@/infrastructure/di/Container';
 import { getTodayRange, getWeekRange, getMonthRange, isDateInRange } from '@/lib/date-filter';
 
@@ -238,80 +243,23 @@ export default function DashboardPage() {
           {/* Spending Widget - Real data */}
           {user && <SpendingWidget key={refreshKey} userId={user.id} />}
 
-          {/* Recent Transactions */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Tính năng khác
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {/* Placeholder */}
-              <div className="text-center py-8">
-                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="w-6 h-6 text-gray-400 dark:text-gray-600" />
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Đang phát triển
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Calendar Widget */}
+          <CalendarWidget />
+
+          {/* Projects Widget */}
+          <ProjectsWidget />
         </div>
 
         {/* Right Column - Sidebar (1/3 width) */}
         <div className="space-y-6">
-          {/* Widget placeholder */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-5 opacity-60">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  <svg className="w-4 h-4 text-gray-900 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Thống kê
-                </h3>
-              </div>
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                Đang phát triển
-              </span>
-            </div>
-            <div className="mb-2">
-              <p className="text-2xl font-bold text-gray-300 dark:text-gray-700">
-                --/--
-              </p>
-            </div>
-            <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gray-300 dark:bg-gray-700 rounded-full" style={{ width: '0%' }}></div>
-            </div>
-          </div>
+          {/* Quote Widget */}
+          <QuoteWidget />
 
-          {/* Another widget placeholder */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-5 opacity-60">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Tính năng
-              </h3>
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                Đang phát triển
-              </span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                  <Target className="w-5 h-5 text-gray-400 dark:text-gray-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-700 dark:text-gray-300">Placeholder</p>
-                  <div className="h-1 bg-gray-100 dark:bg-gray-800 rounded-full mt-1">
-                    <div className="h-full bg-gray-300 dark:bg-gray-700 rounded-full" style={{ width: '0%' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Wishlist Widget */}
+          <WishlistWidget />
+
+          {/* Subscriptions Widget */}
+          <SubscriptionsWidget />
 
           {/* Quick Links */}
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-5">
@@ -332,16 +280,6 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Bottom Section - Placeholder */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Các tính năng khác
-        </h2>
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-8 text-center opacity-60">
-          <p className="text-gray-500 dark:text-gray-400">Đang phát triển</p>
         </div>
       </div>
 
