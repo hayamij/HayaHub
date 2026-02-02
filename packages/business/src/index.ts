@@ -12,6 +12,7 @@ export * from './ports/IWishItemRepository';
 export * from './ports/ISubscriptionRepository';
 export * from './ports/ICalendarEventRepository';
 export * from './ports/IQuoteRepository';
+export * from './ports/IDashboardWidgetRepository';
 export * from './ports/IStorageService';
 
 // DTOs
@@ -25,6 +26,7 @@ export * from './dtos/subscription';
 export * from './dtos/calendarEvent';
 export * from './dtos/quote';
 export * from './dtos/wishItem';
+export * from './dtos/dashboardWidget';
 
 // Use Cases
 export * from './use-cases/expense/CreateExpenseUseCase';
@@ -71,3 +73,7 @@ export * from './use-cases/wishlist/CreateWishItemUseCase';
 export * from './use-cases/wishlist/GetWishItemsUseCase';
 export * from './use-cases/wishlist/UpdateWishItemUseCase';
 export * from './use-cases/wishlist/DeleteWishItemUseCase';
+
+export * from './use-cases/dashboardWidget/GetDashboardWidgetsUseCase';
+export * from './use-cases/dashboardWidget/UpdateDashboardWidgetUseCase';
+export * from './use-cases/dashboardWidget/UpdateManyDashboardWidgetsUseCase';

@@ -9,6 +9,7 @@ export * from './entities/WishItem';
 export * from './entities/Subscription';
 export * from './entities/CalendarEvent';
 export * from './entities/Quote';
+export * from './entities/DashboardWidget';
 
 // Subscription Enums (exported separately for convenience)
 export { SubscriptionFrequency, SubscriptionStatus } from './entities/Subscription';
@@ -30,3 +31,4 @@ export * from './enums/ExpenseCategory';
 export * from './enums/ProjectStatus';
 export * from './enums/TaskPriority';
 export * from './enums/UserRole';
+export * from './enums/WidgetType';

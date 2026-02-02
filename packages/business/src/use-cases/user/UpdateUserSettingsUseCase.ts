@@ -8,16 +8,22 @@ export class UpdateUserSettingsUseCase {
   async execute(dto: UpdateUserSettingsDTO): Promise<Result<UserSettingsDTO, Error>> {
     try {
       // Get existing settings
-      const existingSettings = await this.userSettingsRepository.get(dto.userId);
+      let settings = await this.userSettingsRepository.get(dto.userId);
       
-      // Create updated settings
-      const updatedSettings = existingSettings.withTheme(dto.theme);
+      // Apply updates
+      if (dto.theme !== undefined) {
+        settings = settings.withTheme(dto.theme);
+      }
+      if (dto.preferredDashboardView !== undefined) {
+        settings = settings.withPreferredDashboardView(dto.preferredDashboardView);
+      }
       
       // Save
-      await this.userSettingsRepository.save(dto.userId, updatedSettings);
+      await this.userSettingsRepository.save(dto.userId, settings);
       
       return success({
-        theme: updatedSettings.getTheme(),
+        theme: settings.getTheme(),
+        preferredDashboardView: settings.getPreferredDashboardView(),
       });
     } catch (error) {
       return failure(error as Error);

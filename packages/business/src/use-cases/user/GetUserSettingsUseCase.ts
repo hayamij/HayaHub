@@ -11,6 +11,7 @@ export class GetUserSettingsUseCase {
       
       return success({
         theme: settings.getTheme(),
+        preferredDashboardView: settings.getPreferredDashboardView(),
       });
     } catch (error) {
       return failure(error as Error);
