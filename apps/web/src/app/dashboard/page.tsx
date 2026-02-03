@@ -10,7 +10,7 @@ import QuoteWidget from '@/components/dashboard/QuoteWidget';
 import SubscriptionsWidget from '@/components/dashboard/SubscriptionsWidget';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useSyncToast } from '@/hooks/useSyncToast';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, TrendingUp, FileText, ArrowUpRight, ArrowDownRight, Grid3x3, Layout } from 'lucide-react';
@@ -22,7 +22,7 @@ import type { LayoutPositionData } from 'hayahub-domain';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { isSyncing, queueSize } = useSyncStatus();
+  useSyncToast(); // Auto show toast when syncing completes
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -227,16 +227,6 @@ export default function DashboardPage() {
   return (
     <PageLoader>
     <DashboardLayout>
-      {/* Sync indicator */}
-      {isSyncing && (
-        <div className="mb-6 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center gap-3">
-          <div className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Syncing to GitHub... ({queueSize} items)
-          </span>
-        </div>
-      )}
-
       {/* Hero Section with Quick Actions */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
