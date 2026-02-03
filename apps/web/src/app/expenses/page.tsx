@@ -2,12 +2,12 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useSyncToast } from '@/hooks/useSyncToast';
 
 export default function ExpensesPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const { isSyncing, queueSize } = useSyncStatus();
+  useSyncToast(); // Auto show toast when syncing completes
 
   if (!user) {
     return null; // AuthContext will redirect to login
@@ -15,16 +15,6 @@ export default function ExpensesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-8">
-      {/* Sync indicator */}
-      {isSyncing && (
-        <div className="fixed top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 z-50">
-          <div className="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Syncing to GitHub... ({queueSize} items)
-          </span>
-        </div>
-      )}
-      
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
