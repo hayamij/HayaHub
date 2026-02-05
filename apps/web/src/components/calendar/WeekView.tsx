@@ -3,6 +3,7 @@
 import type { CalendarEventDTO } from 'hayahub-business';
 import { EventPriority } from 'hayahub-domain';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface WeekViewProps {
   events: CalendarEventDTO[];
@@ -79,12 +80,13 @@ export function WeekView({ events, currentDate, onDateChange, onEventClick, onDa
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {formatWeekRange()}
           </h2>
-          <button
+          <Button
             onClick={goToToday}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            variant="primary"
+            size="sm"
           >
             Hôm nay
-          </button>
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <button

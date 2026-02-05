@@ -5,6 +5,7 @@ import type { CalendarEventDTO, CreateCalendarEventDTO } from 'hayahub-business'
 import { EventPriority } from 'hayahub-domain';
 import { X } from 'lucide-react';
 import { toLocalDateString, toLocalTimeString } from '@/lib/date-utils';
+import { Button } from '@/components/ui/Button';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -260,33 +261,35 @@ export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, us
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             {editingEvent && onDelete && (
-              <button
+              <Button
                 type="button"
+                variant="danger"
                 onClick={() => {
                   if (confirm('Bạn có chắc chắn muốn xóa sự kiện này?')) {
                     onDelete(editingEvent.id);
                     onClose();
                   }
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Xóa
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              fullWidth
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="primary"
+              isLoading={isSubmitting}
+              fullWidth
             >
-              {isSubmitting ? 'Đang lưu...' : 'Lưu'}
-            </button>
+              Lưu
+            </Button>
           </div>
         </form>
       </div>

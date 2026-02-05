@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from 'lucide-react';
 import type { DashboardWidgetDTO } from 'hayahub-business';
 import { WidgetType } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 interface WidgetConfigModalProps {
   widgets: DashboardWidgetDTO[];
@@ -61,12 +62,12 @@ export function WidgetConfigModal({ widgets, onToggleVisibility, onClose }: Widg
         </div>
 
         <div className="mt-6 flex justify-end">
-          <button
+          <Button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:opacity-90 transition"
+            variant="primary"
           >
             Đóng
-          </button>
+          </Button>
         </div>
       </div>
     </div>

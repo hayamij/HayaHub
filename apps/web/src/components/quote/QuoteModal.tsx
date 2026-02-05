@@ -198,21 +198,21 @@ export function QuoteModal({
           )}
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
               disabled={isSubmitting}
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-              disabled={isSubmitting}
+              variant="primary"
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? 'Đang lưu...' : editingQuote ? 'Cập nhật' : 'Thêm quote'}
-            </button>
+              {editingQuote ? 'Cập nhật' : 'Tạo mới'}
+            </Button>
           </div>
         </form>
       </div>

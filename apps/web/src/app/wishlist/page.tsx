@@ -10,6 +10,7 @@ import { WishItemModal } from '@/components/wishlist/WishItemModal';
 import { WishItemGrid } from '@/components/wishlist/WishItemGrid';
 import { Plus, Filter } from 'lucide-react';
 import type { WishItemDTO, CreateWishItemDTO, UpdateWishItemDTO } from 'hayahub-business';
+import { Button } from '@/components/ui/Button';
 
 type FilterType = 'all' | 'purchased' | 'unpurchased';
 
@@ -128,13 +129,13 @@ export default function WishlistPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Wishlist
             </h1>
-            <button
+            <Button
               onClick={handleAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              variant="primary"
             >
               <Plus className="w-5 h-5" />
-              Thêm sản phẩm
-            </button>
+              Thêm
+            </Button>
           </div>
 
           {/* Stats */}

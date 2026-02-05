@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { CreateSubscriptionDTO, SubscriptionDTO, UpdateSubscriptionDTO } from 'hayahub-business';
 import { SubscriptionFrequency } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 interface SubscriptionModalProps {
   isOpen: boolean;
@@ -213,21 +214,22 @@ export function SubscriptionModal({
           </div>
 
           <div className="flex gap-3 pt-4">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               disabled={isSubmitting}
             >
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
-              disabled={isSubmitting}
+              variant="primary"
+              isLoading={isSubmitting}
+              fullWidth={false}
             >
-              {isSubmitting ? 'Đang xử lý...' : editingSubscription ? 'Cập nhật' : 'Thêm mới'}
-            </button>
+              {editingSubscription ? 'Cập nhật' : 'Tạo mới'}
+            </Button>
           </div>
         </form>
       </div>

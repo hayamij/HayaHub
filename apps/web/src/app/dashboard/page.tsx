@@ -19,6 +19,7 @@ import { getTodayRange, getWeekRange, getMonthRange, isDateInRange } from '@/lib
 import { DashboardWorkspace } from '@/components/dashboard/DashboardWorkspace';
 import type { DashboardWidgetDTO } from 'hayahub-business';
 import type { LayoutPositionData } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -241,20 +242,20 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-3">
-            <button
+            <Button
+              variant="primary"
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium hover:opacity-90 transition-opacity shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              <span>Thêm chi tiêu</span>
-            </button>
-            <button
+              Thêm chi tiêu
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => router.push('/spending')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-lg font-medium hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
             >
               <FileText className="w-4 h-4" />
-              <span>Xem chi tiết</span>
-            </button>
+              Xem chi tiết
+            </Button>
             
             {/* View mode toggle */}
             <div className="inline-flex items-center gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-1">
