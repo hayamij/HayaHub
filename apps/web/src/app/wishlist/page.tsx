@@ -134,7 +134,7 @@ export default function WishlistPage() {
               variant="primary"
             >
               <Plus className="w-5 h-5" />
-              Thêm
+              Thêm sản phẩm
             </Button>
           </div>
 
