@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { CreateQuoteDTO, QuoteDTO, UpdateQuoteDTO } from 'hayahub-business';
+import { Button } from '@/components/ui/Button';
 
 // Import QuoteCategory from domain entity file
 enum QuoteCategory {

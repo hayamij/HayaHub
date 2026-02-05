@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { CreateProjectDTO, ProjectDTO, UpdateProjectDTO } from 'hayahub-business';
 import { ProjectStatus } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 interface ProjectModalProps {
   isOpen: boolean;

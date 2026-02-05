@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { CreateTaskDTO, TaskDTO, UpdateTaskDTO, ProjectDTO } from 'hayahub-business';
 import { TaskPriority } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 interface TaskModalProps {
   isOpen: boolean;
