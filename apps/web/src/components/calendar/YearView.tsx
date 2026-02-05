@@ -2,6 +2,7 @@
 
 import type { CalendarEventDTO } from 'hayahub-business';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface YearViewProps {
   events: CalendarEventDTO[];
@@ -86,12 +87,13 @@ export function YearView({ events, currentDate, onDateChange, onMonthClick }: Ye
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Năm {year}
           </h2>
-          <button
+          <Button
             onClick={goToToday}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            variant="primary"
+            size="sm"
           >
             Hôm nay
-          </button>
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <button

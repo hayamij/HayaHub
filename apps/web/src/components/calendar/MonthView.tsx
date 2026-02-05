@@ -3,6 +3,7 @@
 import type { CalendarEventDTO } from 'hayahub-business';
 import { EventPriority } from 'hayahub-domain';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface MonthViewProps {
   events: CalendarEventDTO[];
@@ -92,12 +93,13 @@ export function MonthView({ events, currentDate, onDateChange, onEventClick, onD
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             {monthNames[month]} {year}
           </h2>
-          <button
+          <Button
             onClick={goToToday}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            variant="primary"
+            size="sm"
           >
             Hôm nay
-          </button>
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <button

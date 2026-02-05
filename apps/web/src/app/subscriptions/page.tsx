@@ -13,6 +13,7 @@ import { Plus, Table, Layout } from 'lucide-react';
 import type { SubscriptionDTO, CreateSubscriptionDTO, UpdateSubscriptionDTO } from 'hayahub-business';
 import { SubscriptionStatus } from 'hayahub-domain';
 import type { LayoutPositionData } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 type ViewMode = 'table' | 'workspace';
 
@@ -113,13 +114,13 @@ export default function SubscriptionsPage() {
                 Quản lý các gói đăng ký định kỳ của bạn
               </p>
             </div>
-            <button
+            <Button
               onClick={handleAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+              variant="primary"
             >
               <Plus className="w-5 h-5" />
-              Thêm mới
-            </button>
+              Thêm đăng ký
+            </Button>
           </div>
 
           {/* Stats Cards */}

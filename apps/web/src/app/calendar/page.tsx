@@ -11,6 +11,7 @@ import { WeekView } from '@/components/calendar/WeekView';
 import { YearView } from '@/components/calendar/YearView';
 import { Plus, Calendar as CalendarIcon, Clock, CalendarDays } from 'lucide-react';
 import type { CalendarEventDTO, CreateCalendarEventDTO } from 'hayahub-business';
+import { Button } from '@/components/ui/Button';
 
 type ViewMode = 'month' | 'week' | 'year';
 
@@ -147,13 +148,15 @@ export default function CalendarPage() {
           {/* Sidebar */}
           <div className="w-80 space-y-4 overflow-y-auto">
             {/* Quick Add Button */}
-            <button
+            <Button
               onClick={handleAdd}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+              variant="primary"
+              fullWidth
+              size="lg"
             >
               <Plus className="w-5 h-5" />
               <span className="font-semibold">Tạo sự kiện</span>
-            </button>
+            </Button>
 
             {/* Mini Calendar */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">

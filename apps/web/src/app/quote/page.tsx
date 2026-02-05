@@ -10,6 +10,7 @@ import { QuoteModal } from '@/components/quote/QuoteModal';
 import { QuoteList } from '@/components/quote/QuoteList';
 import { Plus, Filter, Heart } from 'lucide-react';
 import type { QuoteDTO, CreateQuoteDTO, UpdateQuoteDTO } from 'hayahub-business';
+import { Button } from '@/components/ui/Button';
 
 type FilterType = 'all' | 'favorites' | 'MOTIVATION' | 'WISDOM' | 'INSPIRATION' | 'HUMOR' | 'LIFE' | 'SUCCESS' | 'OTHER';
 
@@ -133,13 +134,13 @@ export default function QuotePage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Bộ sưu tập Quote
             </h1>
-            <button
+            <Button
               onClick={handleAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              variant="primary"
             >
               <Plus className="w-5 h-5" />
               Thêm Quote
-            </button>
+            </Button>
           </div>
 
           {/* Stats */}

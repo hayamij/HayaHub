@@ -13,6 +13,7 @@ import { ProjectList } from '@/components/projects/ProjectList';
 import { TaskList } from '@/components/projects/TaskList';
 import { Plus, FolderOpen, ListTodo } from 'lucide-react';
 import type { ProjectDTO, CreateProjectDTO, UpdateProjectDTO, TaskDTO, CreateTaskDTO, UpdateTaskDTO } from 'hayahub-business';
+import { Button } from '@/components/ui/Button';
 
 type ViewMode = 'all' | 'project';
 
@@ -199,21 +200,21 @@ export default function ProjectsPage() {
               )}
             </div>
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={handleAddTask}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                variant="secondary"
               >
                 <Plus className="w-5 h-5" />
                 Thêm Task
-              </button>
+              </Button>
               {viewMode === 'all' && (
-                <button
+                <Button
                   onClick={handleAddProject}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  variant="primary"
                 >
                   <Plus className="w-5 h-5" />
                   Thêm Dự án
-                </button>
+                </Button>
               )}
             </div>
           </div>
