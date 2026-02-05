@@ -32,7 +32,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const showSuccess = useCallback((message: string) => {
     showToast('success', message);
   }, [showToast]);
-
+1
   const showError = useCallback((message: string) => {
     showToast('error', message);
   }, [showToast]);
