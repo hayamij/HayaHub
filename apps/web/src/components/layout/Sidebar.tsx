@@ -11,9 +11,10 @@ import {
   Heart,
   Quote,
   Pin,
+  GripVertical,
 } from 'lucide-react';
 import type { Route } from 'next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface MenuItem {
   id: string;
@@ -22,7 +23,7 @@ interface MenuItem {
   href: Route;
 }
 
-const menuItems: MenuItem[] = [
+const defaultMenuItems: MenuItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
@@ -75,6 +76,83 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const [isHovering, setIsHovering] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(defaultMenuItems);
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [dragOverItem, setDragOverItem] = useState<string | null>(null);
+
+  // Load menu order from localStorage
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('sidebar-menu-order');
+    if (savedOrder) {
+      try {
+        const orderIds = JSON.parse(savedOrder) as string[];
+        // Reorder items based on saved order
+        const orderedItems = orderIds
+          .map(id => defaultMenuItems.find(item => item.id === id))
+          .filter(Boolean) as MenuItem[];
+        
+        // Add any new items that aren't in saved order
+        const newItems = defaultMenuItems.filter(
+          item => !orderIds.includes(item.id)
+        );
+        
+        setMenuItems([...orderedItems, ...newItems]);
+      } catch (e) {
+        console.error('Failed to load menu order:', e);
+      }
+    }
+  }, []);
+
+  // Save menu order to localStorage
+  const saveMenuOrder = (items: MenuItem[]) => {
+    const orderIds = items.map(item => item.id);
+    localStorage.setItem('sidebar-menu-order', JSON.stringify(orderIds));
+  };
+
+  // Drag handlers
+  const handleDragStart = (e: React.DragEvent, itemId: string) => {
+    setDraggedItem(itemId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, itemId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverItem(itemId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverItem(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    
+    if (!draggedItem || draggedItem === targetId) {
+      setDraggedItem(null);
+      setDragOverItem(null);
+      return;
+    }
+
+    const draggedIndex = menuItems.findIndex(item => item.id === draggedItem);
+    const targetIndex = menuItems.findIndex(item => item.id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    const newItems = [...menuItems];
+    const [removed] = newItems.splice(draggedIndex, 1);
+    newItems.splice(targetIndex, 0, removed);
+
+    setMenuItems(newItems);
+    saveMenuOrder(newItems);
+    setDraggedItem(null);
+    setDragOverItem(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverItem(null);
+  };
 
   // Show full sidebar when: not collapsed, or (collapsed + hovering)
   // When collapsed, always allow hover to expand (ignore pin state for UX)
@@ -130,34 +208,57 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
+            const isDragging = draggedItem === item.id;
+            const isDragOver = dragOverItem === item.id;
 
             return (
-              <Link
+              <div
                 key={item.id}
-                href={item.href}
+                draggable
+                onDragStart={(e) => handleDragStart(e, item.id)}
+                onDragOver={(e) => handleDragOver(e, item.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, item.id)}
+                onDragEnd={handleDragEnd}
                 className={`
-                  flex items-center gap-3 mx-2 my-1 px-3 py-2.5 rounded-md transition-all group relative
-                  ${!shouldShowFull ? 'justify-center' : ''}
-                  ${
-                    isActive
-                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }
+                  mx-2 my-1 rounded-md transition-all group relative
+                  ${isDragging ? 'opacity-50' : ''}
+                  ${isDragOver ? 'border-t-2 border-gray-900 dark:border-gray-100' : ''}
                 `}
-                title={!shouldShowFull ? item.label : undefined}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {shouldShowFull && (
-                  <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
-                )}
-                
-                {/* Tooltip khi collapsed và không hover */}
-                {!shouldShowFull && !isHovering && (
-                  <div className="absolute left-full ml-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                    {item.label}
-                  </div>
-                )}
-              </Link>
+                <Link
+                  href={item.href}
+                  className={`
+                    flex items-center gap-2 px-3 py-2.5 rounded-md transition-colors
+                    ${!shouldShowFull ? 'justify-center' : ''}
+                    ${
+                      isActive
+                        ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }
+                  `}
+                  title={!shouldShowFull ? item.label : undefined}
+                >
+                  {/* Drag handle - only visible when expanded */}
+                  {shouldShowFull && (
+                    <div className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity">
+                      <GripVertical className="w-4 h-4 text-gray-400" />
+                    </div>
+                  )}
+                  
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {shouldShowFull && (
+                    <span className="text-sm font-medium whitespace-nowrap flex-1">{item.label}</span>
+                  )}
+                  
+                  {/* Tooltip khi collapsed và không hover */}
+                  {!shouldShowFull && !isHovering && (
+                    <div className="absolute left-full ml-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                      {item.label}
+                    </div>
+                  )}
+                </Link>
+              </div>
             );
           })}
         </nav>
