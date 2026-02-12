@@ -11,9 +11,11 @@ import {
   Heart,
   Quote,
   PanelLeftClose,
-  PanelLeft,
+  Pin,
+  PinOff,
 } from 'lucide-react';
 import type { Route } from 'next';
+import { useState } from 'react';
 
 interface MenuItem {
   id: string;
@@ -69,44 +71,78 @@ const menuItems: MenuItem[] = [
 
 interface SidebarProps {
   isCollapsed: boolean;
+  isPinned: boolean;
   onToggle: () => void;
+  onTogglePin: () => void;
 }
 
-export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+export function Sidebar({ isCollapsed, isPinned, onToggle, onTogglePin }: SidebarProps) {
   const pathname = usePathname();
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Show full sidebar when: not collapsed, or (collapsed + hovering)
+  // When collapsed, always allow hover to expand (ignore pin state for UX)
+  const shouldShowFull = !isCollapsed || (isCollapsed && isHovering);
 
   return (
     <aside
+      onMouseEnter={() => isCollapsed && setIsHovering(true)}
+      onMouseLeave={() => isCollapsed && setIsHovering(false)}
       className={`
         fixed left-0 top-0 h-screen bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 z-50
         transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-[60px]' : 'w-60'}
+        ${shouldShowFull ? 'w-60' : 'w-[60px]'}
       `}
     >
       <div className="flex flex-col h-full">
-        {/* Toggle button */}
+        {/* Logo area - Always visible */}
         <div className="h-14 flex items-center justify-between px-3 border-b border-gray-200 dark:border-gray-800">
-          {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-gray-900 dark:bg-gray-100 rounded-md flex items-center justify-center">
-                <span className="text-white dark:text-gray-900 font-bold text-sm">H</span>
+          {/* Logo - clickable when collapsed, always show */}
+          {!shouldShowFull ? (
+            <button
+              onClick={onToggle}
+              className="w-7 h-7 bg-gray-900 dark:bg-gray-100 rounded-md flex items-center justify-center mx-auto hover:opacity-80 transition-opacity"
+              title="Mở rộng"
+            >
+              <span className="text-white dark:text-gray-900 font-bold text-sm">H</span>
+            </button>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-gray-900 dark:bg-gray-100 rounded-md flex items-center justify-center flex-shrink-0">
+                  <span className="text-white dark:text-gray-900 font-bold text-sm">H</span>
+                </div>
+                <span className="text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                  HayaHub
+                </span>
               </div>
-              <span className="text-base font-semibold text-gray-900 dark:text-white">
-                HayaHub
-              </span>
-            </div>
+
+              {/* Toggle buttons - only when expanded */}
+              <div className="flex items-center gap-1">
+                {/* Pin/Unpin button */}
+                <button
+                  onClick={onTogglePin}
+                  className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  title={isPinned ? 'Bỏ ghim' : 'Ghim'}
+                >
+                  {isPinned ? (
+                    <Pin className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  ) : (
+                    <PinOff className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  )}
+                </button>
+
+                {/* Collapse button */}
+                <button
+                  onClick={onToggle}
+                  className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  title="Thu gọn"
+                >
+                  <PanelLeftClose className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </button>
+              </div>
+            </>
           )}
-          <button
-            onClick={onToggle}
-            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title={isCollapsed ? 'Mở rộng' : 'Thu gọn'}
-          >
-            {isCollapsed ? (
-              <PanelLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            ) : (
-              <PanelLeftClose className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            )}
-          </button>
         </div>
 
         {/* Menu items */}
@@ -121,22 +157,22 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 href={item.href}
                 className={`
                   flex items-center gap-3 mx-2 my-1 px-3 py-2.5 rounded-md transition-all group relative
-                  ${isCollapsed ? 'justify-center' : ''}
+                  ${!shouldShowFull ? 'justify-center' : ''}
                   ${
                     isActive
                       ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }
                 `}
-                title={isCollapsed ? item.label : undefined}
+                title={!shouldShowFull ? item.label : undefined}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && (
+                {shouldShowFull && (
                   <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
                 )}
                 
-                {/* Tooltip khi collapsed */}
-                {isCollapsed && (
+                {/* Tooltip khi collapsed và không hover */}
+                {!shouldShowFull && !isHovering && (
                   <div className="absolute left-full ml-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
                     {item.label}
                   </div>
@@ -147,7 +183,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        {!isCollapsed && (
+        {shouldShowFull && (
           <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
             <p className="text-xs text-gray-500">v1.0.0</p>
           </div>

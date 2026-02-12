@@ -10,12 +10,18 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarPinned, setSidebarPinned] = useState(true);
 
   // Load sidebar state from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved !== null) {
-      setSidebarCollapsed(saved === 'true');
+    const savedCollapsed = localStorage.getItem('sidebar-collapsed');
+    const savedPinned = localStorage.getItem('sidebar-pinned');
+    
+    if (savedCollapsed !== null) {
+      setSidebarCollapsed(savedCollapsed === 'true');
+    }
+    if (savedPinned !== null) {
+      setSidebarPinned(savedPinned === 'true');
     }
   }, []);
 
@@ -26,10 +32,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     localStorage.setItem('sidebar-collapsed', String(newValue));
   };
 
+  const handleTogglePin = () => {
+    const newValue = !sidebarPinned;
+    setSidebarPinned(newValue);
+    localStorage.setItem('sidebar-pinned', String(newValue));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Sidebar - Always visible, collapsible */}
-      <Sidebar isCollapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
+      {/* Sidebar - Always visible, collapsible with hover */}
+      <Sidebar 
+        isCollapsed={sidebarCollapsed}
+        isPinned={sidebarPinned}
+        onToggle={handleToggleSidebar}
+        onTogglePin={handleTogglePin}
+      />
 
       {/* Main content area with dynamic padding */}
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'pl-[60px]' : 'pl-60'}`}>
