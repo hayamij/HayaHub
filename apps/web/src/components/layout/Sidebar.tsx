@@ -10,9 +10,7 @@ import {
   Folder,
   Heart,
   Quote,
-  PanelLeftClose,
   Pin,
-  PinOff,
 } from 'lucide-react';
 import type { Route } from 'next';
 import { useState } from 'react';
@@ -71,12 +69,10 @@ const menuItems: MenuItem[] = [
 
 interface SidebarProps {
   isCollapsed: boolean;
-  isPinned: boolean;
   onToggle: () => void;
-  onTogglePin: () => void;
 }
 
-export function Sidebar({ isCollapsed, isPinned, onToggle, onTogglePin }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const [isHovering, setIsHovering] = useState(false);
 
@@ -117,30 +113,14 @@ export function Sidebar({ isCollapsed, isPinned, onToggle, onTogglePin }: Sideba
                 </span>
               </div>
 
-              {/* Toggle buttons - only when expanded */}
-              <div className="flex items-center gap-1">
-                {/* Pin/Unpin button */}
-                <button
-                  onClick={onTogglePin}
-                  className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  title={isPinned ? 'Bỏ ghim' : 'Ghim'}
-                >
-                  {isPinned ? (
-                    <Pin className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                  ) : (
-                    <PinOff className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                  )}
-                </button>
-
-                {/* Collapse button */}
-                <button
-                  onClick={onToggle}
-                  className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  title="Thu gọn"
-                >
-                  <PanelLeftClose className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                </button>
-              </div>
+              {/* Collapse button - only when expanded */}
+              <button
+                onClick={onToggle}
+                className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Thu gọn"
+              >
+                <Pin className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              </button>
             </>
           )}
         </div>
