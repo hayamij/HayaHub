@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Search, Moon, Sun, LogOut, User as UserIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserSettings } from '@/hooks/useUserSettings';
 
