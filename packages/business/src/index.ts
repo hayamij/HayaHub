@@ -13,6 +13,7 @@ export * from './ports/ISubscriptionRepository';
 export * from './ports/ICalendarEventRepository';
 export * from './ports/IQuoteRepository';
 export * from './ports/IDashboardWidgetRepository';
+export * from './ports/IPhotoRepository';
 export * from './ports/IStorageService';
 
 // DTOs
@@ -27,6 +28,7 @@ export * from './dtos/calendarEvent';
 export * from './dtos/quote';
 export * from './dtos/wishItem';
 export * from './dtos/dashboardWidget';
+export * from './dtos/photo';
 
 // Use Cases
 export * from './use-cases/expense/CreateExpenseUseCase';
@@ -77,3 +79,9 @@ export * from './use-cases/wishlist/DeleteWishItemUseCase';
 export * from './use-cases/dashboardWidget/GetDashboardWidgetsUseCase';
 export * from './use-cases/dashboardWidget/UpdateDashboardWidgetUseCase';
 export * from './use-cases/dashboardWidget/UpdateManyDashboardWidgetsUseCase';
+
+export * from './use-cases/photo/UploadPhotoUseCase';
+export * from './use-cases/photo/GetPhotosUseCase';
+export * from './use-cases/photo/GetPhotoByIdUseCase';
+export * from './use-cases/photo/UpdatePhotoCaptionUseCase';
+export * from './use-cases/photo/DeletePhotoUseCase';

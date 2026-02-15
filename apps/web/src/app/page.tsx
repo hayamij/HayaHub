@@ -22,9 +22,9 @@ function HomePageContent() {
 
     if (!loading) {
       if (user) {
-        router.push('/dashboard');
+        router.push('/dashboard' as any);
       } else {
-        router.push('/home');
+        router.push('/home' as any);
       }
     }
   }, [user, loading, router, searchParams]);

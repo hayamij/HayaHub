@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
+import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuotes } from '@/hooks/useQuotes';
 import { QuoteStatsCards } from '@/components/quote/QuoteStatsCards';
@@ -40,6 +41,14 @@ export default function QuotePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<QuoteDTO | null>(null);
   const [filterType, setFilterType] = useState<FilterType>('all');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Show login prompt if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
 
   const handleAdd = useCallback(() => {
     setEditingQuote(null);
@@ -211,6 +220,13 @@ export default function QuotePage() {
               userId={user.id}
             />
           )}
+
+          {/* Login Prompt Modal */}
+          <LoginPromptModal
+            isOpen={showLoginPrompt}
+            onClose={() => setShowLoginPrompt(false)}
+            message="Bạn cần đăng nhập để quản lý quotes của mình"
+          />
         </div>
       </DashboardLayout>
     </PageLoader>

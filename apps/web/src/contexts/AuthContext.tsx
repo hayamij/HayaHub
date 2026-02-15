@@ -33,17 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Redirect logic
-    const publicPaths = ['/login', '/register', '/syncing', '/', '/home'];
-    const isPublicPath = publicPaths.includes(pathname);
-
-    if (!loading) {
-      if (!user && !isPublicPath) {
-        // Redirect to routing hub
-        router.push('/');
-      } else if (user && (pathname === '/login' || pathname === '/register' || pathname === '/home')) {
-        router.push('/dashboard');
-      }
+    // Only redirect if user is logged in and on login/register pages
+    if (!loading && user && (pathname === '/login' || pathname === '/register' || pathname === '/home')) {
+      router.push('/dashboard' as any);
     }
   }, [user, loading, pathname, router]);
 
@@ -54,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     // Redirect immediately to routing hub for instant loading feedback
-    router.push('/?action=logout');
+    router.push('/?action=logout' as any);
   };
 
   return (

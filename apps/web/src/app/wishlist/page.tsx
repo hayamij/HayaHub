@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
+import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishItems } from '@/hooks/useWishItems';
 import { WishItemStatsCards } from '@/components/wishlist/WishItemStatsCards';
@@ -28,6 +29,14 @@ export default function WishlistPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWishItem, setEditingWishItem] = useState<WishItemDTO | null>(null);
   const [filterType, setFilterType] = useState<FilterType>('all');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Show login prompt if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
 
   const formatCurrency = useCallback((amount: number, currency: string) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -197,6 +206,13 @@ export default function WishlistPage() {
               userId={user.id}
             />
           )}
+
+          {/* Login Prompt Modal */}
+          <LoginPromptModal
+            isOpen={showLoginPrompt}
+            onClose={() => setShowLoginPrompt(false)}
+            message="Bạn cần đăng nhập để quản lý wishlist của mình"
+          />
         </div>
       </DashboardLayout>
     </PageLoader>

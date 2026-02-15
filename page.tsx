@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
@@ -10,19 +10,26 @@ import QuoteWidget from '@/components/dashboard/QuoteWidget';
 import SubscriptionsWidget from '@/components/dashboard/SubscriptionsWidget';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useSyncToast } from '@/hooks/useSyncToast';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, TrendingUp, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Plus, TrendingUp, FileText, ArrowUpRight, ArrowDownRight, Grid3x3, Layout } from 'lucide-react';
 import { Container } from '@/infrastructure/di/Container';
 import { getTodayRange, getWeekRange, getMonthRange, isDateInRange } from '@/lib/date-filter';
+import { DashboardWorkspace } from '@/components/dashboard/DashboardWorkspace';
+import type { DashboardWidgetDTO } from 'hayahub-business';
+import type { LayoutPositionData } from 'hayahub-domain';
+import { Button } from '@/components/ui/Button';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { isSyncing, queueSize } = useSyncStatus();
+  useSyncToast(); // Auto show toast when syncing completes
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [viewMode, setViewMode] = useState<'grid' | 'workspace'>('grid');
+  const [widgets, setWidgets] = useState<DashboardWidgetDTO[]>([]);
+  const [isLoadingWidgets, setIsLoadingWidgets] = useState(false);
   const [stats, setStats] = useState({
     today: { income: 0, expense: 0 },
     week: { income: 0, expense: 0 },
@@ -33,6 +40,124 @@ export default function DashboardPage() {
     // Refresh spending widget and stats by changing key
     setRefreshKey(prev => prev + 1);
     loadStats();
+  };
+
+  const loadUserSettings = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const getUserSettingsUseCase = Container.getUserSettingsUseCase();
+      const result = await getUserSettingsUseCase.execute({ userId: user.id });
+
+      if (result.isSuccess()) {
+        setViewMode(result.value.preferredDashboardView);
+      }
+    } catch (error) {
+      console.error('Failed to load user settings:', error);
+    }
+  }, [user]);
+
+  const saveViewMode = useCallback(async (mode: 'grid' | 'workspace') => {
+    if (!user?.id) return;
+
+    try {
+      const updateUserSettingsUseCase = Container.updateUserSettingsUseCase();
+      await updateUserSettingsUseCase.execute({
+        userId: user.id,
+        preferredDashboardView: mode,
+      });
+    } catch (error) {
+      console.error('Failed to save view mode:', error);
+    }
+  }, [user]);
+
+  const handleViewModeChange = (mode: 'grid' | 'workspace') => {
+    setViewMode(mode);
+    saveViewMode(mode);
+  };
+
+  const loadWidgets = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsLoadingWidgets(true);
+    try {
+      const getDashboardWidgetsUseCase = Container.getDashboardWidgetsUseCase();
+      const result = await getDashboardWidgetsUseCase.execute(user.id);
+
+      if (result.isSuccess()) {
+        setWidgets(result.value);
+      }
+    } catch (error) {
+      console.error('Failed to load widgets:', error);
+    } finally {
+      setIsLoadingWidgets(false);
+    }
+  }, [user]);
+
+  const handleLayoutChange = async (id: string, layout: LayoutPositionData) => {
+    if (!user?.id) return;
+
+    try {
+      const updateDashboardWidgetUseCase = Container.updateDashboardWidgetUseCase();
+      const result = await updateDashboardWidgetUseCase.execute(id, {
+        layoutPosition: layout,
+      });
+
+      if (result.isSuccess()) {
+        setWidgets(prev => 
+          prev.map(w => w.id === id ? { ...w, layoutPosition: layout } : w)
+        );
+      }
+    } catch (error) {
+      console.error('Failed to update widget layout:', error);
+    }
+  };
+
+  const handleBatchLayoutChange = async (updates: Array<{ id: string; layout: LayoutPositionData }>) => {
+    if (!user?.id) return;
+
+    try {
+      const updateManyDashboardWidgetsUseCase = Container.updateManyDashboardWidgetsUseCase();
+      
+      // Convert to WidgetUpdate format expected by use case
+      const widgetUpdates = updates.map(update => ({
+        id: update.id,
+        updates: { layoutPosition: update.layout }
+      }));
+
+      const result = await updateManyDashboardWidgetsUseCase.execute(user.id, widgetUpdates);
+
+      if (result.isSuccess()) {
+        // Update state with all new layouts
+        setWidgets(prev => 
+          prev.map(widget => {
+            const update = updates.find(u => u.id === widget.id);
+            return update ? { ...widget, layoutPosition: update.layout } : widget;
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Failed to batch update widget layouts:', error);
+    }
+  };
+
+  const handleToggleVisibility = async (id: string, visible: boolean) => {
+    if (!user?.id) return;
+
+    try {
+      const updateDashboardWidgetUseCase = Container.updateDashboardWidgetUseCase();
+      const result = await updateDashboardWidgetUseCase.execute(id, {
+        isVisible: visible,
+      });
+
+      if (result.isSuccess()) {
+        setWidgets(prev => 
+          prev.map(w => w.id === id ? { ...w, isVisible: visible } : w)
+        );
+      }
+    } catch (error) {
+      console.error('Failed to toggle widget visibility:', error);
+    }
   };
 
 
@@ -83,12 +208,14 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  // Load stats when user is available
+  // Load stats, widgets and settings when user is available
   useEffect(() => {
     if (user) {
       loadStats();
+      loadWidgets();
+      loadUserSettings();
     }
-  }, [user, refreshKey, loadStats]);
+  }, [user, loadStats, loadWidgets, loadUserSettings]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
@@ -101,16 +228,6 @@ export default function DashboardPage() {
   return (
     <PageLoader>
     <DashboardLayout>
-      {/* Sync indicator */}
-      {isSyncing && (
-        <div className="mb-6 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center gap-3">
-          <div className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Syncing to GitHub... ({queueSize} items)
-          </span>
-        </div>
-      )}
-
       {/* Hero Section with Quick Actions */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
@@ -125,20 +242,46 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-3">
-            <button
+            <Button
+              variant="primary"
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium hover:opacity-90 transition-opacity shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              <span>Thêm chi tiêu</span>
-            </button>
-            <button
-              onClick={() => router.push('/spending' as any)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-lg font-medium hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+              Thêm chi tiêu
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => router.push('/spending')}
             >
               <FileText className="w-4 h-4" />
-              <span>Xem chi tiết</span>
-            </button>
+              Xem chi tiết
+            </Button>
+            
+            {/* View mode toggle */}
+            <div className="inline-flex items-center gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => handleViewModeChange('grid')}
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                title="Chế độ lưới"
+              >
+                <Grid3x3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleViewModeChange('workspace')}
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-medium transition-colors ${
+                  viewMode === 'workspace'
+                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                title="Chế độ workspace"
+              >
+                <Layout className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -236,52 +379,75 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Content - Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Left Column - Main Content (2/3 width) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Spending Widget - Real data */}
-          {user && <SpendingWidget key={refreshKey} userId={user.id} />}
+      {/* Main Content */}
+      {viewMode === 'grid' ? (
+        /* Grid View - Two Column Layout */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Left Column - Main Content (2/3 width) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Spending Widget - Real data */}
+            {user && <SpendingWidget key={refreshKey} userId={user.id} />}
 
-          {/* Calendar Widget */}
-          <CalendarWidget />
+            {/* Calendar Widget */}
+            <CalendarWidget />
 
-          {/* Projects Widget */}
-          <ProjectsWidget />
-        </div>
+            {/* Projects Widget */}
+            <ProjectsWidget />
+          </div>
 
-        {/* Right Column - Sidebar (1/3 width) */}
-        <div className="space-y-6">
-          {/* Quote Widget */}
-          <QuoteWidget />
+          {/* Right Column - Sidebar (1/3 width) */}
+          <div className="space-y-6">
+            {/* Quote Widget */}
+            <QuoteWidget />
 
-          {/* Wishlist Widget */}
-          <WishlistWidget />
+            {/* Wishlist Widget */}
+            <WishlistWidget />
 
-          {/* Subscriptions Widget */}
-          <SubscriptionsWidget />
+            {/* Subscriptions Widget */}
+            <SubscriptionsWidget />
 
-          {/* Quick Links */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-5">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-              Truy cập nhanh
-            </h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => router.push('/spending' as any)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-4 h-4 text-gray-400 dark:text-gray-600 group-hover:text-gray-900 dark:group-hover:text-white" />
-                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
-                    Chi tiêu
-                  </span>
-                </div>
-              </button>
+            {/* Quick Links */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                Truy cập nhanh
+              </h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => router.push('/spending')}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="w-4 h-4 text-gray-400 dark:text-gray-600 group-hover:text-gray-900 dark:group-hover:text-white" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                      Chi tiêu
+                    </span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* Workspace View - Drag & Drop */
+        <div className="mb-8">
+          {isLoadingWidgets ? (
+            <div className="flex items-center justify-center h-96 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="text-center">
+                <div className="w-8 h-8 border-2 border-gray-900 dark:border-gray-100 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <p className="text-gray-500 dark:text-gray-400">Đang tải widgets...</p>
+              </div>
+            </div>
+          ) : user ? (
+            <DashboardWorkspace
+              widgets={widgets}
+              onLayoutChange={handleLayoutChange}
+              onBatchLayoutChange={handleBatchLayoutChange}
+              onToggleVisibility={handleToggleVisibility}
+              userId={user.id}
+            />
+          ) : null}
+        </div>
+      )}
 
       {/* Add Expense Modal */}
       {user && (

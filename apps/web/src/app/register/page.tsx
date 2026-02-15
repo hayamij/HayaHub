@@ -56,7 +56,7 @@ export default function RegisterPage() {
         // Store user session
         localStorage.setItem('currentUser', JSON.stringify(result.value));
         // Redirect to syncing page, then auto-redirect to dashboard
-        router.push('/syncing?redirect=/dashboard');
+        router.push('/syncing?redirect=/dashboard' as any);
       } else {
         setError(result.error.message);
       }

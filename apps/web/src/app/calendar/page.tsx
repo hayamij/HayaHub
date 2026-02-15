@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
+import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { Container } from '@/infrastructure/di/Container';
 import { EventModal } from '@/components/calendar/EventModal';
@@ -25,6 +26,14 @@ export default function CalendarPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEventDTO | null>(null);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Show login prompt if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
 
   const getCalendarEventsUseCase = Container.getCalendarEventsUseCase();
   const createCalendarEventUseCase = Container.createCalendarEventUseCase();
@@ -371,6 +380,13 @@ export default function CalendarPage() {
           onDelete={handleDelete}
           userId={user?.id || ''}
           quickAddDate={quickAddDate}
+        />
+
+        {/* Login Prompt Modal */}
+        <LoginPromptModal
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+          message="Bạn cần đăng nhập để quản lý lịch của mình"
         />
       </DashboardLayout>
     </PageLoader>

@@ -65,7 +65,7 @@ function ProfilePageContent() {
         setIsEditing(false);
         
         // Redirect to syncing page immediately
-        router.push('/syncing?redirect=/profile?updated=true');
+        router.push('/syncing?redirect=/profile?updated=true' as any);
       } else {
         setError(result.error.message);
       }

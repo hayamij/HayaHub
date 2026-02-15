@@ -106,7 +106,7 @@ export function Header() {
                   <div className="py-1">
                     <button
                       onClick={() => {
-                        router.push('/profile');
+                        router.push('/profile' as any);
                         setShowUserMenu(false);
                       }}
                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
