@@ -90,7 +90,7 @@ export default function CalendarWidget() {
 
   return (
     <div
-      onClick={() => router.push('/calendar')}
+      onClick={() => router.push('/calendar' as any)}
       className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group"
     >
       <div className="flex items-center justify-between mb-4">

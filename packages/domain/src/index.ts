@@ -10,6 +10,7 @@ export * from './entities/Subscription';
 export * from './entities/CalendarEvent';
 export * from './entities/Quote';
 export * from './entities/DashboardWidget';
+export * from './entities/Photo';
 
 // Subscription Enums (exported separately for convenience)
 export { SubscriptionFrequency, SubscriptionStatus } from './entities/Subscription';

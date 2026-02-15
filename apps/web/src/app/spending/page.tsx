@@ -2,6 +2,7 @@
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
+import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { SpendingChartCard } from '@/components/spending/SpendingChartCard';
 import { TimeViewSelector } from '@/components/spending/TimeViewSelector';
@@ -61,6 +62,14 @@ const getTimePeriodLabel = (timeView: 'day' | 'month' | 'year' | 'all', selected
 
 export default function SpendingPage() {
   const { user } = useAuth();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Show login prompt if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
   
   // State management using custom hooks
   const filters = useExpenseFilters();
@@ -357,6 +366,13 @@ export default function SpendingPage() {
           onSuccess={handleAddSuccess}
         />
       )}
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        isOpen={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        message="Bạn cần đăng nhập để quản lý chi tiêu của mình"
+      />
     </DashboardLayout>
     </PageLoader>
   );

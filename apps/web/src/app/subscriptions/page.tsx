@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
+import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { SubscriptionTable } from '@/components/subscriptions/SubscriptionTable';
@@ -31,6 +32,14 @@ export default function SubscriptionsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<SubscriptionDTO | null>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Show login prompt if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
 
   const formatCurrency = useCallback((amount: number, currency: string) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -190,6 +199,13 @@ export default function SubscriptionsPage() {
           onClose={handleCloseModal}
           onSubmit={handleSave}
           userId={user?.id || ''}
+        />
+
+        {/* Login Prompt Modal */}
+        <LoginPromptModal
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+          message="Bạn cần đăng nhập để quản lý subscriptions của mình"
         />
       </DashboardLayout>
     </PageLoader>

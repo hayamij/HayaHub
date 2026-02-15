@@ -21,7 +21,7 @@ export default function ExpensesPage() {
             Expense Management
           </h1>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/' as any)}
             className="inline-flex h-10 items-center justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-6 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Back to Home

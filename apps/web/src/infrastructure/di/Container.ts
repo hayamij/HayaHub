@@ -17,6 +17,7 @@ import { ProjectRepositoryAdapter } from '../repositories/ProjectRepositoryAdapt
 import { TaskRepositoryAdapter } from '../repositories/TaskRepositoryAdapter';
 import { WishItemRepositoryAdapter } from '../repositories/WishItemRepositoryAdapter';
 import { DashboardWidgetRepositoryAdapter } from '../repositories/DashboardWidgetRepositoryAdapter';
+import { CloudinaryPhotoRepositoryAdapter } from '../repositories/CloudinaryPhotoRepositoryAdapter';
 import {
   CreateExpenseUseCase,
   GetExpensesUseCase,
@@ -59,6 +60,11 @@ import {
   GetDashboardWidgetsUseCase,
   UpdateDashboardWidgetUseCase,
   UpdateManyDashboardWidgetsUseCase,
+  UploadPhotoUseCase,
+  GetPhotosUseCase,
+  GetPhotoByIdUseCase,
+  UpdatePhotoCaptionUseCase,
+  DeletePhotoUseCase,
 } from 'hayahub-business';
 import type { IStorageService } from 'hayahub-business';
 
@@ -80,6 +86,7 @@ class Container {
   private _taskRepository?: TaskRepositoryAdapter;
   private _wishItemRepository?: WishItemRepositoryAdapter;
   private _dashboardWidgetRepository?: DashboardWidgetRepositoryAdapter;
+  private _photoRepository?: CloudinaryPhotoRepositoryAdapter;
 
   // Use Cases
   private _createExpenseUseCase?: CreateExpenseUseCase;
@@ -123,6 +130,11 @@ class Container {
   private _getDashboardWidgetsUseCase?: GetDashboardWidgetsUseCase;
   private _updateDashboardWidgetUseCase?: UpdateDashboardWidgetUseCase;
   private _updateManyDashboardWidgetsUseCase?: UpdateManyDashboardWidgetsUseCase;
+  private _uploadPhotoUseCase?: UploadPhotoUseCase;
+  private _getPhotosUseCase?: GetPhotosUseCase;
+  private _getPhotoByIdUseCase?: GetPhotoByIdUseCase;
+  private _updatePhotoCaptionUseCase?: UpdatePhotoCaptionUseCase;
+  private _deletePhotoUseCase?: DeletePhotoUseCase;
 
   private constructor() {}
 
@@ -220,6 +232,13 @@ class Container {
       this._dashboardWidgetRepository = new DashboardWidgetRepositoryAdapter(this.storageService);
     }
     return this._dashboardWidgetRepository;
+  }
+
+  get photoRepository(): CloudinaryPhotoRepositoryAdapter {
+    if (!this._photoRepository) {
+      this._photoRepository = new CloudinaryPhotoRepositoryAdapter(this.storageService);
+    }
+    return this._photoRepository;
   }
 
   // Use Cases - Expense
@@ -526,6 +545,42 @@ class Container {
     return this._updateManyDashboardWidgetsUseCase;
   }
 
+  // Use Cases - Photo
+  get uploadPhotoUseCase(): UploadPhotoUseCase {
+    if (!this._uploadPhotoUseCase) {
+      this._uploadPhotoUseCase = new UploadPhotoUseCase(this.photoRepository);
+    }
+    return this._uploadPhotoUseCase;
+  }
+
+  get getPhotosUseCase(): GetPhotosUseCase {
+    if (!this._getPhotosUseCase) {
+      this._getPhotosUseCase = new GetPhotosUseCase(this.photoRepository);
+    }
+    return this._getPhotosUseCase;
+  }
+
+  get getPhotoByIdUseCase(): GetPhotoByIdUseCase {
+    if (!this._getPhotoByIdUseCase) {
+      this._getPhotoByIdUseCase = new GetPhotoByIdUseCase(this.photoRepository);
+    }
+    return this._getPhotoByIdUseCase;
+  }
+
+  get updatePhotoCaptionUseCase(): UpdatePhotoCaptionUseCase {
+    if (!this._updatePhotoCaptionUseCase) {
+      this._updatePhotoCaptionUseCase = new UpdatePhotoCaptionUseCase(this.photoRepository);
+    }
+    return this._updatePhotoCaptionUseCase;
+  }
+
+  get deletePhotoUseCase(): DeletePhotoUseCase {
+    if (!this._deletePhotoUseCase) {
+      this._deletePhotoUseCase = new DeletePhotoUseCase(this.photoRepository);
+    }
+    return this._deletePhotoUseCase;
+  }
+
   // Static convenience methods
   static createExpenseUseCase(): CreateExpenseUseCase {
     return Container.getInstance().createExpenseUseCase;
@@ -689,6 +744,26 @@ class Container {
 
   static updateManyDashboardWidgetsUseCase(): UpdateManyDashboardWidgetsUseCase {
     return Container.getInstance().updateManyDashboardWidgetsUseCase;
+  }
+
+  static uploadPhotoUseCase(): UploadPhotoUseCase {
+    return Container.getInstance().uploadPhotoUseCase;
+  }
+
+  static getPhotosUseCase(): GetPhotosUseCase {
+    return Container.getInstance().getPhotosUseCase;
+  }
+
+  static getPhotoByIdUseCase(): GetPhotoByIdUseCase {
+    return Container.getInstance().getPhotoByIdUseCase;
+  }
+
+  static updatePhotoCaptionUseCase(): UpdatePhotoCaptionUseCase {
+    return Container.getInstance().updatePhotoCaptionUseCase;
+  }
+
+  static deletePhotoUseCase(): DeletePhotoUseCase {
+    return Container.getInstance().deletePhotoUseCase;
   }
 }
 

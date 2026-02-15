@@ -36,7 +36,7 @@ export function SpendingWidget({ userId }: SpendingWidgetProps) {
   );
 
   const handleClick = () => {
-    router.push('/spending');
+    router.push('/spending' as any);
   };
 
   useEffect(() => {

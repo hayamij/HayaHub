@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "class-variance-authority": "^0.7.0",
+    "cloudinary": "^2.9.0",
     "clsx": "^2.0.0",
     "hayahub-business": "file:../../packages/business",
     "hayahub-domain": "file:../../packages/domain",

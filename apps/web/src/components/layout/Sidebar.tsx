@@ -12,6 +12,7 @@ import {
   Quote,
   Pin,
   GripVertical,
+  Image,
 } from 'lucide-react';
 import type { Route } from 'next';
 import { useState, useEffect } from 'react';
@@ -28,43 +29,49 @@ const defaultMenuItems: MenuItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
-    href: '/dashboard',
+    href: '/dashboard' as Route,
   },
   {
     id: 'spending',
     label: 'Spending',
     icon: Wallet,
-    href: '/spending',
+    href: '/spending' as Route,
   },
   {
     id: 'subscriptions',
     label: 'Subscriptions',
     icon: CreditCard,
-    href: '/subscriptions',
+    href: '/subscriptions' as Route,
   },
   {
     id: 'calendar',
     label: 'Calendar',
     icon: Calendar,
-    href: '/calendar',
+    href: '/calendar' as Route,
   },
   {
     id: 'projects',
     label: 'Projects',
     icon: Folder,
-    href: '/projects',
+    href: '/projects' as Route,
   },
   {
     id: 'wishlist',
     label: 'Wishlists',
     icon: Heart,
-    href: '/wishlist',
+    href: '/wishlist' as Route,
   },
   {
     id: 'quote',
     label: 'Quotes',
     icon: Quote,
-    href: '/quote',
+    href: '/quote' as Route,
+  },
+  {
+    id: 'photos',
+    label: 'Photos',
+    icon: Image,
+    href: '/photos' as Route,
   },
 ];
 

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
+import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import { useTasks } from '@/hooks/useTasks';
@@ -43,6 +44,14 @@ export default function ProjectsPage() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectDTO | null>(null);
   const [editingTask, setEditingTask] = useState<TaskDTO | null>(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Show login prompt if not authenticated
+  useEffect(() => {
+    if (!user) {
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
 
   const handleAddProject = useCallback(() => {
     setEditingProject(null);
@@ -302,6 +311,13 @@ export default function ProjectsPage() {
               />
             </>
           )}
+
+          {/* Login Prompt Modal */}
+          <LoginPromptModal
+            isOpen={showLoginPrompt}
+            onClose={() => setShowLoginPrompt(false)}
+            message="Bạn cần đăng nhập để quản lý projects và tasks của mình"
+          />
         </div>
       </DashboardLayout>
     </PageLoader>
