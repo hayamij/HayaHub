@@ -36,9 +36,13 @@ export function Header() {
 
   return (
     <header className="h-14 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
-      <div className="flex items-center justify-between h-full px-6">
-        {/* Left section - Search bar */}
-        <div className="flex-1 max-w-md">
+      <div className="flex items-center justify-between h-full px-6 gap-4">
+        {/* Left section - Logo */}
+        <div className="flex-1 flex items-center">
+        </div>
+
+        {/* Center section - Search bar */}
+        <div className="flex-shrink-0 w-full max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -50,7 +54,7 @@ export function Header() {
         </div>
 
         {/* Right section - Dark mode toggle & User menu */}
-        <div className="flex items-center gap-3">
+        <div className="flex-1 flex items-center justify-end gap-3">
           {/* Dark/Light mode toggle */}
           <button
             onClick={handleThemeToggle}
