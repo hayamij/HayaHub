@@ -49,5 +49,5 @@ Thumbs.db
 .turbo
 
 # Misc
-materials/
+.materials/
 *.local
