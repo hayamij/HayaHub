@@ -38,8 +38,6 @@ export class CloudinaryPhotoRepositoryAdapter implements IPhotoRepository {
       formData.append('file', file);
       formData.append('upload_preset', this.uploadPreset);
       formData.append('folder', `hayahub/users/${userId}`);
-      // Support RAW formats
-      formData.append('resource_type', 'auto');
 
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`,

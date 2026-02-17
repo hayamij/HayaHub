@@ -21,35 +21,32 @@ export default function PhotosPage() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [loginPromptMessage, setLoginPromptMessage] = useState('');
 
-  // Maximum file size for Cloudinary free tier unsigned upload (10MB)
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
-
   useEffect(() => {
+    const loadPhotos = async () => {
+      // Load photos even if not logged in (for public viewing)
+      setIsLoading(true);
+      setError(null);
+      
+      // For now, only show photos if user is logged in
+      // This can be modified to show public photos later
+      if (!user) {
+        setPhotos([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      const result = await Container.getPhotosUseCase().execute(user.id);
+      
+      if (result.success) {
+        setPhotos(result.value);
+      } else {
+        setError(result.error.message);
+      }
+      setIsLoading(false);
+    };
+
     loadPhotos();
   }, [user]);
-
-  const loadPhotos = async () => {
-    // Load photos even if not logged in (for public viewing)
-    setIsLoading(true);
-    setError(null);
-    
-    // For now, only show photos if user is logged in
-    // This can be modified to show public photos later
-    if (!user) {
-      setPhotos([]);
-      setIsLoading(false);
-      return;
-    }
-    
-    const result = await Container.getPhotosUseCase().execute(user.id);
-    
-    if (result.success) {
-      setPhotos(result.value);
-    } else {
-      setError(result.error.message);
-    }
-    setIsLoading(false);
-  };
 
   const requireAuth = (action: string): boolean => {
     if (!user) {
@@ -58,97 +55,6 @@ export default function PhotosPage() {
       return false;
     }
     return true;
-  };
-
-  /**
-   * Check if file is a browser-supported image format
-   */
-  const isBrowserSupportedImage = (file: File): boolean => {
-    const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    return supportedTypes.includes(file.type.toLowerCase());
-  };
-
-  /**
-   * Check if file is a RAW image format
-   */
-  const isRawImage = (file: File): boolean => {
-    const rawExtensions = ['.arw', '.cr2', '.cr3', '.nef', '.orf', '.rw2', '.pef', '.raf', '.dng'];
-    const fileName = file.name.toLowerCase();
-    return rawExtensions.some(ext => fileName.endsWith(ext));
-  };
-
-  /**
-   * Compress image file to meet size requirements
-   * Converts to JPEG with adjustable quality
-   */
-  const compressImage = async (file: File, maxSizeBytes: number, quality = 0.85): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          
-          // Calculate new dimensions if image is too large
-          const maxDimension = 4096; // Max dimension in pixels
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = (height / width) * maxDimension;
-              width = maxDimension;
-            } else {
-              width = (width / height) * maxDimension;
-              height = maxDimension;
-            }
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            reject(new Error('Could not get canvas context'));
-            return;
-          }
-          
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          // Convert to blob with specified quality
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                reject(new Error('Could not compress image'));
-                return;
-              }
-              
-              // Check if compressed size is within limit
-              if (blob.size <= maxSizeBytes) {
-                const compressedFile = new File([blob], file.name.replace(/\.\w+$/, '.jpg'), {
-                  type: 'image/jpeg',
-                  lastModified: Date.now(),
-                });
-                resolve(compressedFile);
-              } else if (quality > 0.1) {
-                // Try again with lower quality
-                reject(new Error('RETRY_WITH_LOWER_QUALITY'));
-              } else {
-                reject(new Error('Could not compress image to required size'));
-              }
-            },
-            'image/jpeg',
-            quality
-          );
-        };
-        
-        img.onerror = () => reject(new Error('Không thể đọc file ảnh. Định dạng file có thể không được trình duyệt hỗ trợ.'));
-        img.src = e.target?.result as string;
-      };
-      
-      reader.onerror = () => reject(new Error('Không thể đọc file'));
-      reader.readAsDataURL(file);
-    });
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,65 +66,7 @@ export default function PhotosPage() {
     setIsUploading(true);
     setError(null);
 
-    let fileToUpload = file;
-    
-    // Check if file is RAW format
-    if (isRawImage(file)) {
-      setError('⚠️ File RAW không thể upload trực tiếp. Vui lòng convert sang JPEG trước khi upload hoặc nâng cấp Cloudinary plan để hỗ trợ signed uploads.');
-      setIsUploading(false);
-      e.target.value = '';
-      return;
-    }
-
-    // Check if file is browser-supported format
-    if (!isBrowserSupportedImage(file)) {
-      setError('⚠️ Định dạng file không được hỗ trợ. Vui lòng chọn file JPEG, PNG hoặc WebP.');
-      setIsUploading(false);
-      e.target.value = '';
-      return;
-    }
-    
-    // Check file size
-    if (file.size > MAX_FILE_SIZE) {
-      try {
-        setError(`File gốc ${formatFileSize(file.size)} vượt quá giới hạn 10MB. Đang nén ảnh...`);
-        
-        // Try to compress with multiple quality levels
-        let quality = 0.85;
-        let compressed = false;
-        
-        while (quality >= 0.3 && !compressed) {
-          try {
-            fileToUpload = await compressImage(file, MAX_FILE_SIZE, quality);
-            compressed = true;
-            setError(`Đã nén ảnh từ ${formatFileSize(file.size)} xuống ${formatFileSize(fileToUpload.size)}`);
-            
-            // Clear error after 3 seconds
-            setTimeout(() => setError(null), 3000);
-          } catch (err) {
-            if ((err as Error).message === 'RETRY_WITH_LOWER_QUALITY') {
-              quality -= 0.15;
-            } else {
-              throw err;
-            }
-          }
-        }
-        
-        if (!compressed) {
-          setError('Không thể nén ảnh xuống dưới 10MB. Vui lòng chọn ảnh khác hoặc nâng cấp Cloudinary plan.');
-          setIsUploading(false);
-          e.target.value = '';
-          return;
-        }
-      } catch (err) {
-        setError('Lỗi khi nén ảnh: ' + (err as Error).message);
-        setIsUploading(false);
-        e.target.value = '';
-        return;
-      }
-    }
-
-    const result = await Container.uploadPhotoUseCase().execute(fileToUpload, user.id);
+    const result = await Container.uploadPhotoUseCase().execute(file, user.id);
     
     if (result.success) {
       setPhotos([result.value, ...photos]);
@@ -300,7 +148,7 @@ export default function PhotosPage() {
             <input
               id="file-upload"
               type="file"
-              accept="image/*,.arw,.cr2,.nef,.raw,.dng"
+              accept="image/*"
               onChange={handleFileUpload}
               disabled={isUploading}
               className="hidden"
@@ -322,23 +170,6 @@ export default function PhotosPage() {
                 </>
               )}
             </Button>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-              File &gt; 10MB sẽ tự động nén xuống
-            </p>
-          </div>
-        </div>
-
-        {/* Info Banner */}
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="flex items-start gap-3">
-            <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800 dark:text-blue-200">
-              <p className="font-medium mb-1">Hỗ trợ upload ảnh</p>
-              <ul className="text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
-                <li><strong>JPEG, PNG, WebP</strong>: File &gt; 10MB sẽ tự động nén sang JPEG chất lượng cao</li>
-                <li><strong>File RAW (.ARW, .CR2, .NEF...)</strong>: Cần convert sang JPEG trước khi upload (trình duyệt không hỗ trợ đọc RAW)</li>
-              </ul>
-            </div>
           </div>
         </div>
 
