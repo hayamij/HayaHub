@@ -27,8 +27,8 @@ const STATUS_LABELS: Record<SubscriptionStatus, string> = {
 };
 
 const STATUS_COLORS: Record<SubscriptionStatus, string> = {
-  [SubscriptionStatus.ACTIVE]: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-  [SubscriptionStatus.PAUSED]: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+  [SubscriptionStatus.ACTIVE]: 'bg-gray-300 text-gray-900 dark:bg-gray-600 dark:text-gray-100',
+  [SubscriptionStatus.PAUSED]: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
   [SubscriptionStatus.CANCELLED]: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 };
 
@@ -113,7 +113,7 @@ export function SubscriptionTable({
                 <div className="flex items-center justify-end gap-2">
                   <button
                     onClick={() => onEdit(sub)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition"
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition"
                     title="Chỉnh sửa"
                   >
                     <Edit2 className="w-4 h-4" />
@@ -121,7 +121,7 @@ export function SubscriptionTable({
                   {sub.status === SubscriptionStatus.ACTIVE ? (
                     <button
                       onClick={() => onPause(sub.id)}
-                      className="p-2 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded transition"
+                      className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition"
                       title="Tạm dừng"
                     >
                       <Pause className="w-4 h-4" />
@@ -129,7 +129,7 @@ export function SubscriptionTable({
                   ) : sub.status === SubscriptionStatus.PAUSED ? (
                     <button
                       onClick={() => onResume(sub.id)}
-                      className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition"
                       title="Tiếp tục"
                     >
                       <Play className="w-4 h-4" />
@@ -137,7 +137,7 @@ export function SubscriptionTable({
                   ) : null}
                   <button
                     onClick={() => onDelete(sub.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                    className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition"
                     title="Xóa"
                   >
                     <Trash2 className="w-4 h-4" />

@@ -178,7 +178,7 @@ export function WishItemModal({
                   onClick={() => setFormData({ ...formData, priority: priority.toString() })}
                   className={`flex-1 py-2 px-3 rounded-lg border-2 transition ${
                     formData.priority === priority.toString()
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                      ? 'border-gray-900 dark:border-gray-100 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                       : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
                   }`}
                 >

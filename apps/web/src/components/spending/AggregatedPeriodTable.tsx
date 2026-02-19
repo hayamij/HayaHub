@@ -111,7 +111,7 @@ export function AggregatedPeriodTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button onClick={onSave} className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Lưu"><Save className="w-4 h-4" /></button>
+                      <button onClick={onSave} className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Lưu"><Save className="w-4 h-4" /></button>
                       <button onClick={onCancel} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Hủy"><X className="w-4 h-4" /></button>
                     </div>
                   </td>
@@ -133,7 +133,7 @@ export function AggregatedPeriodTable({
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
                       <button onClick={() => onEdit(period)} className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Sửa"><Pencil className="w-4 h-4" /></button>
-                      <button onClick={() => onDelete(period)} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Xóa"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => onDelete(period)} className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Xóa"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </>

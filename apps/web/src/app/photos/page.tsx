@@ -348,13 +348,13 @@ export default function PhotosPage() {
                   </div>
                   
                   {/* Delete Button */}
-                  <Button
+                  <button
                     onClick={() => handleDelete(selectedPhoto.getId())}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                     Xóa
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
