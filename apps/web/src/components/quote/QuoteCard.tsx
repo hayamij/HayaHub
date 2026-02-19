@@ -9,12 +9,12 @@ interface QuoteCardProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  MOTIVATION: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-  WISDOM: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-  INSPIRATION: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-  HUMOR: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
-  LIFE: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-  SUCCESS: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
+  MOTIVATION: 'bg-gray-300 text-gray-900 dark:bg-gray-600 dark:text-gray-100',
+  WISDOM: 'bg-gray-400 text-gray-50 dark:bg-gray-500 dark:text-gray-50',
+  INSPIRATION: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+  HUMOR: 'bg-gray-250 text-gray-850 dark:bg-gray-650 dark:text-gray-150',
+  LIFE: 'bg-gray-300 text-gray-900 dark:bg-gray-600 dark:text-gray-100',
+  SUCCESS: 'bg-gray-350 text-gray-900 dark:bg-gray-550 dark:text-gray-100',
   OTHER: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 };
 
@@ -32,7 +32,7 @@ export function QuoteCard({ quote, onToggleFavorite }: QuoteCardProps) {
   return (
     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">
-        <QuoteIcon className="w-8 h-8 text-blue-500 flex-shrink-0 mt-1" />
+        <QuoteIcon className="w-8 h-8 text-gray-600 dark:text-gray-400 flex-shrink-0 mt-1" />
         
         <div className="flex-1 min-w-0">
           <p className="text-lg text-gray-900 dark:text-white leading-relaxed mb-4 italic">
@@ -58,8 +58,8 @@ export function QuoteCard({ quote, onToggleFavorite }: QuoteCardProps) {
               onClick={() => onToggleFavorite(quote.id, !quote.isFavorite)}
               className={`p-2 rounded-full transition ${
                 quote.isFavorite
-                  ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-red-600'
+                  ? 'bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
               title={quote.isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
             >

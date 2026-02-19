@@ -20,9 +20,9 @@ const STATUS_LABELS: Record<ProjectStatus, string> = {
 };
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
-  [ProjectStatus.PLANNING]: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-  [ProjectStatus.IN_PROGRESS]: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-  [ProjectStatus.COMPLETED]: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+  [ProjectStatus.PLANNING]: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+  [ProjectStatus.IN_PROGRESS]: 'bg-gray-300 text-gray-900 dark:bg-gray-600 dark:text-gray-100',
+  [ProjectStatus.COMPLETED]: 'bg-gray-400 text-gray-50 dark:bg-gray-500 dark:text-gray-50',
   [ProjectStatus.ARCHIVED]: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 };
 
@@ -165,7 +165,7 @@ export function ProjectList({ projects, tasks, onEdit, onDelete, onSelectProject
                         e.stopPropagation();
                         onEdit(project);
                       }}
-                      className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition"
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition"
                       title="Chỉnh sửa"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -175,7 +175,7 @@ export function ProjectList({ projects, tasks, onEdit, onDelete, onSelectProject
                         e.stopPropagation();
                         onDelete(project.id);
                       }}
-                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                      className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition"
                       title="Xóa"
                     >
                       <Trash2 className="w-4 h-4" />
