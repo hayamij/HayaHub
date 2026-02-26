@@ -18,7 +18,7 @@ export interface UseCalendarEventsResult {
   goToPrevious: () => void;
   goToNext: () => void;
   setCurrentDate: (date: Date) => void;
-  createEvent: (dto: Omit<CalendarEventDTO, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  createEvent: (dto: Omit<CreateCalendarEventDTO, 'userId'>) => Promise<void>;
   updateEvent: (id: string, dto: Partial<CalendarEventDTO>) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   refetch: () => Promise<void>;
@@ -71,7 +71,7 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
     fetchEvents();
   }, [fetchEvents]);
 
-  const createEvent = async (dto: Omit<CalendarEventDTO, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
+  const createEvent = async (dto: Omit<CreateCalendarEventDTO, 'userId'>) => {
     if (!user) throw new Error('User not authenticated');
 
     const createCalendarEventUseCase = container.createCalendarEventUseCase;
