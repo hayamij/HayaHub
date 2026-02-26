@@ -2,17 +2,17 @@
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useState, useEffect, Suspense } from 'react';
 import { User, Mail, Calendar, LogOut } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function ProfilePageContent() {
   const { user, logout, login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { updateProfile, isLoading } = useUserProfile();
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
@@ -46,33 +46,23 @@ function ProfilePageContent() {
   const handleSave = async () => {
     if (!user) return;
 
-    setLoading(true);
     setError('');
     setSuccess('');
 
-    try {
-      const container = Container.getInstance();
-      const updateUserUseCase = container.updateUserUseCase;
+    const result = await updateProfile(user.id, {
+      name: formData.name,
+      email: formData.email,
+    });
 
-      const result = await updateUserUseCase.execute(user.id, {
-        name: formData.name,
-        email: formData.email,
-      });
-
-      if (result.isSuccess()) {
-        // Update auth context with new user data
-        login(result.value);
-        setIsEditing(false);
-        
-        // Redirect to syncing page immediately
-        router.push('/syncing?redirect=/profile?updated=true' as any);
-      } else {
-        setError(result.error.message);
-      }
-    } catch (err) {
-      setError('Failed to update profile');
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      // Update auth context with new user data
+      login(result.user);
+      setIsEditing(false);
+      
+      // Redirect to syncing page immediately
+      router.push('/syncing?redirect=/profile?updated=true' as any);
+    } else {
+      setError(result.error || 'Failed to update profile');
     }
   };
 
@@ -190,7 +180,7 @@ function ProfilePageContent() {
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  disabled={loading}
+                  disabled={isLoading}
                   className="flex-1 px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Edit Profile
@@ -199,14 +189,14 @@ function ProfilePageContent() {
                 <>
                   <button
                     onClick={handleSave}
-                    disabled={loading}
+                    disabled={isLoading}
                     className="flex-1 px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Saving...' : 'Save Changes'}
+                    {isLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                   <button
                     onClick={handleCancel}
-                    disabled={loading}
+                    disabled={isLoading}
                     className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel

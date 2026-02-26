@@ -1,64 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CreditCard, AlertCircle, TrendingUp, Calendar } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
-import type { SubscriptionDTO } from 'hayahub-business';
+import { useSubscriptionsWidget } from '@/hooks/useSubscriptionsWidget';
 
 export default function SubscriptionsWidget() {
   const router = useRouter();
   const { user } = useAuth();
-  const [subscriptions, setSubscriptions] = useState<SubscriptionDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
-    active: 0,
-    monthlyCost: 0,
-    upcomingRenewals: 0,
-  });
-
-  useEffect(() => {
-    const loadSubscriptions = async () => {
-      if (!user?.id) return;
-
-      setIsLoading(true);
-      try {
-        const getSubscriptionsUseCase = Container.getSubscriptionsUseCase();
-        const result = await getSubscriptionsUseCase.execute(user.id);
-
-        if (result.success) {
-          const allSubs = result.value;
-          setSubscriptions(allSubs);
-
-          const activeSubs = allSubs.filter((s) => s.status === 'ACTIVE');
-          const monthlyCost = activeSubs.reduce((sum, s) => sum + s.amount, 0);
-
-          // Calculate upcoming renewals (within next 7 days)
-          const now = new Date();
-          const nextWeek = new Date(now);
-          nextWeek.setDate(nextWeek.getDate() + 7);
-
-          const upcomingRenewals = activeSubs.filter((s) => {
-            const nextBilling = new Date(s.nextBillingDate);
-            return nextBilling >= now && nextBilling <= nextWeek;
-          });
-
-          setStats({
-            active: activeSubs.length,
-            monthlyCost,
-            upcomingRenewals: upcomingRenewals.length,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load subscriptions:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadSubscriptions();
-  }, [user]);
+  const { upcomingSubscriptions, stats, isLoading } = useSubscriptionsWidget(user?.id);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
@@ -67,17 +17,6 @@ export default function SubscriptionsWidget() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-
-  const upcomingSubs = subscriptions
-    .filter((s) => {
-      const now = new Date();
-      const nextWeek = new Date(now);
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      const nextBilling = new Date(s.nextBillingDate);
-      return s.status === 'ACTIVE' && nextBilling >= now && nextBilling <= nextWeek;
-    })
-    .sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime())
-    .slice(0, 5);
 
   return (
     <div
@@ -111,12 +50,12 @@ export default function SubscriptionsWidget() {
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Chi/tháng</p>
               <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                {formatCurrency(stats.monthlyCost).replace('₫', '')}
+                {formatCurrency(stats.monthlyTotal).replace('₫', '')}
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Sắp gia hạn</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.upcomingRenewals}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.upcoming}</p>
             </div>
           </div>
 
@@ -125,8 +64,8 @@ export default function SubscriptionsWidget() {
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Sắp gia hạn
             </p>
-            {upcomingSubs.length > 0 ? (
-              upcomingSubs.map((sub) => (
+            {upcomingSubscriptions.length > 0 ? (
+              upcomingSubscriptions.map((sub) => (
                 <div
                   key={sub.id}
                   className="flex items-start gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors"

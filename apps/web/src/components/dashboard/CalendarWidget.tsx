@@ -1,83 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Clock, TrendingUp } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
-import type { CalendarEventDTO } from 'hayahub-business';
+import { useCalendarWidget } from '@/hooks/useCalendarWidget';
 
 export default function CalendarWidget() {
   const router = useRouter();
   const { user } = useAuth();
-  const [events, setEvents] = useState<CalendarEventDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
-    today: 0,
-    week: 0,
-    upcoming: 0,
-  });
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      if (!user?.id) return;
-
-      setIsLoading(true);
-      try {
-        const getCalendarEventsUseCase = Container.getCalendarEventsUseCase();
-        const result = await getCalendarEventsUseCase.execute(user.id);
-
-        if (result.success) {
-          const allEvents = result.value;
-          setEvents(allEvents);
-
-          // Calculate stats
-          const now = new Date();
-          const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          const todayEnd = new Date(todayStart);
-          todayEnd.setHours(23, 59, 59, 999);
-
-          const weekStart = new Date(todayStart);
-          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekEnd.getDate() + 6);
-          weekEnd.setHours(23, 59, 59, 999);
-
-          const todayEvents = allEvents.filter((e) => {
-            const start = new Date(e.startDate);
-            return start >= todayStart && start <= todayEnd;
-          });
-
-          const weekEvents = allEvents.filter((e) => {
-            const start = new Date(e.startDate);
-            return start >= weekStart && start <= weekEnd;
-          });
-
-          const upcomingEvents = allEvents.filter((e) => {
-            const start = new Date(e.startDate);
-            return start > now;
-          }).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
-          setStats({
-            today: todayEvents.length,
-            week: weekEvents.length,
-            upcoming: upcomingEvents.slice(0, 5).length,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load calendar events:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadEvents();
-  }, [user]);
-
-  const upcomingEvents = events
-    .filter((e) => new Date(e.startDate) > new Date())
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .slice(0, 5);
+  const { upcomingEvents, stats, isLoading } = useCalendarWidget(user?.id);
 
   const formatEventTime = (date: Date) => {
     return new Date(date).toLocaleString('vi-VN', {

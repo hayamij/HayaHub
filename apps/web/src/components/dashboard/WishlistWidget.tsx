@@ -1,56 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, Star, TrendingUp } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
-import type { WishItemDTO } from 'hayahub-business';
+import { useWishlistWidget } from '@/hooks/useWishlistWidget';
 
 export default function WishlistWidget() {
   const router = useRouter();
   const { user } = useAuth();
-  const [wishItems, setWishItems] = useState<WishItemDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalItems: 0,
-    highPriority: 0,
-    totalCost: 0,
-  });
-
-  useEffect(() => {
-    const loadWishItems = async () => {
-      if (!user?.id) return;
-
-      setIsLoading(true);
-      try {
-        const getWishItemsUseCase = Container.getWishItemsUseCase();
-        const result = await getWishItemsUseCase.execute(user.id);
-
-        if (result.success) {
-          const items = result.value;
-          setWishItems(items);
-
-          const highPriority = items.filter(
-            (item) => item.priority === 1
-          );
-          const totalCost = items.reduce((sum, item) => sum + (item.estimatedPrice || 0), 0);
-
-          setStats({
-            totalItems: items.length,
-            highPriority: highPriority.length,
-            totalCost,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load wish items:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadWishItems();
-  }, [user]);
+  const { topWishItems, stats, isLoading } = useWishlistWidget(user?.id);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
@@ -59,10 +17,6 @@ export default function WishlistWidget() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-
-  const topItems = wishItems
-    .sort((a, b) => a.priority - b.priority)
-    .slice(0, 5);
 
   return (
     <div
@@ -91,7 +45,7 @@ export default function WishlistWidget() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Tổng số</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalItems}</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Ưu tiên</p>
@@ -100,7 +54,7 @@ export default function WishlistWidget() {
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Tổng giá</p>
               <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                {formatCurrency(stats.totalCost).replace('₫', '')}
+                {formatCurrency(stats.totalValue).replace('₫', '')}
               </p>
             </div>
           </div>
@@ -110,8 +64,8 @@ export default function WishlistWidget() {
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Mong muốn hàng đầu
             </p>
-            {topItems.length > 0 ? (
-              topItems.map((item) => (
+            {topWishItems.length > 0 ? (
+              topWishItems.map((item) => (
                 <div
                   key={item.id}
                   className="flex items-start gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 group-hover:bg-pink-50 dark:group-hover:bg-pink-900/20 transition-colors"

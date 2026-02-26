@@ -3,40 +3,30 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Container } from '@/infrastructure/di/Container';
+import { useLogin } from '@/hooks/useLogin';
 import { PublicHeader } from '@/components/layout/PublicHeader';
 import { Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isLoading } = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
-    try {
-      const container = Container.getInstance();
-      const loginUseCase = container.loginUserUseCase;
+    const result = await login({ email, password });
 
-      const result = await loginUseCase.execute({ email, password });
-
-      if (result.isSuccess()) {
-        // Store user session
-        localStorage.setItem('currentUser', JSON.stringify(result.value));
-        // Redirect to syncing page, then auto-redirect to dashboard
-        router.push('/syncing?redirect=/dashboard' as any);
-      } else {
-        setError(result.error.message);
-      }
-    } catch (err) {
-      setError('An unexpected error occurred');
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      // Store user session
+      localStorage.setItem('currentUser', JSON.stringify(result.user));
+      // Redirect to syncing page, then auto-redirect to dashboard
+      router.push('/syncing?redirect=/dashboard' as any);
+    } else {
+      setError(result.error || 'Login failed');
     }
   };
 
@@ -110,10 +100,10 @@ export default function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full py-3 px-4 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
 

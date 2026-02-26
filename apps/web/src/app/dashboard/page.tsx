@@ -11,16 +11,18 @@ import SubscriptionsWidget from '@/components/dashboard/SubscriptionsWidget';
 import { AddExpenseModal } from '@/components/dashboard/AddExpenseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { useExpenses } from '@/hooks/useExpenses';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, TrendingUp, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { getTodayRange, getWeekRange, getMonthRange, isDateInRange } from '@/lib/date-filter';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { isSyncing, queueSize } = useSyncStatus();
   const router = useRouter();
+  const monthRange = getMonthRange();
+  const { expenses, refetch } = useExpenses(user?.id, monthRange.start, monthRange.end);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [stats, setStats] = useState({
@@ -32,63 +34,45 @@ export default function DashboardPage() {
   const handleExpenseAdded = () => {
     // Refresh spending widget and stats by changing key
     setRefreshKey(prev => prev + 1);
-    loadStats();
+    refetch();
   };
 
-
-  const loadStats = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const getExpensesUseCase = Container.getExpensesUseCase();
-      const now = new Date();
-
-      // Get all expenses for the month using shared utility
-      const monthRange = getMonthRange();
-      
-      const result = await getExpensesUseCase.execute({
-        userId: user.id,
-        startDate: monthRange.start,
-        endDate: monthRange.end,
-      });
-
-      if (result.isSuccess()) {
-        const expenses = result.value;
-
-        // Calculate today using shared utility
-        const todayRange = getTodayRange();
-        const todayExpenses = expenses.filter(exp => 
-          isDateInRange(new Date(exp.date), todayRange.start, todayRange.end)
-        );
-        const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-
-        // Calculate this week using shared utility
-        const weekRange = getWeekRange(now);
-        const weekExpenses = expenses.filter(exp => 
-          isDateInRange(new Date(exp.date), weekRange.start, weekRange.end)
-        );
-        const weekTotal = weekExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-
-        // Calculate this month
-        const monthTotal = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-
-        setStats({
-          today: { income: 0, expense: todayTotal },
-          week: { income: 0, expense: weekTotal },
-          month: { income: 0, expense: monthTotal },
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
-  }, [user]);
-
-  // Load stats when user is available
+  // Calculate stats from expenses
   useEffect(() => {
-    if (user) {
-      loadStats();
+    if (!expenses.length) {
+      setStats({
+        today: { income: 0, expense: 0 },
+        week: { income: 0, expense: 0 },
+        month: { income: 0, expense: 0 },
+      });
+      return;
     }
-  }, [user, refreshKey, loadStats]);
+
+    const now = new Date();
+
+    // Calculate today using shared utility
+    const todayRange = getTodayRange();
+    const todayExpenses = expenses.filter(exp => 
+      isDateInRange(new Date(exp.date), todayRange.start, todayRange.end)
+    );
+    const todayTotal = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+    // Calculate this week using shared utility
+    const weekRange = getWeekRange(now);
+    const weekExpenses = expenses.filter(exp => 
+      isDateInRange(new Date(exp.date), weekRange.start, weekRange.end)
+    );
+    const weekTotal = weekExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+    // Calculate this month
+    const monthTotal = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+    setStats({
+      today: { income: 0, expense: todayTotal },
+      week: { income: 0, expense: weekTotal },
+      month: { income: 0, expense: monthTotal },
+    });
+  }, [expenses]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {

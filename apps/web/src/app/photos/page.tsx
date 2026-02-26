@@ -1,52 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
 import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
-import { Container } from '@/infrastructure/di/Container';
 import type { Photo } from 'hayahub-domain';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePhotos } from '@/hooks/usePhotos';
+import { usePhotoActions } from '@/hooks/usePhotoActions';
 import { Upload, X, Image as ImageIcon, Loader2, Edit2, Trash2, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function PhotosPage() {
   const { user } = useAuth();
-  const [photos, setPhotos] = useState<Photo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
+  const { photos, isLoading, error: fetchError, refetch } = usePhotos(user?.id);
+  const { uploadPhoto, deletePhoto, updatePhotoCaption, isUploading } = usePhotoActions();
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [editingCaption, setEditingCaption] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [loginPromptMessage, setLoginPromptMessage] = useState('');
-
-  useEffect(() => {
-    const loadPhotos = async () => {
-      // Load photos even if not logged in (for public viewing)
-      setIsLoading(true);
-      setError(null);
-      
-      // For now, only show photos if user is logged in
-      // This can be modified to show public photos later
-      if (!user) {
-        setPhotos([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      const result = await Container.getPhotosUseCase().execute(user.id);
-      
-      if (result.success) {
-        setPhotos(result.value);
-      } else {
-        setError(result.error.message);
-      }
-      setIsLoading(false);
-    };
-
-    loadPhotos();
-  }, [user]);
 
   const requireAuth = (action: string): boolean => {
     if (!user) {
@@ -63,19 +36,15 @@ export default function PhotosPage() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    setIsUploading(true);
-    setError(null);
-
-    const result = await Container.uploadPhotoUseCase().execute(file, user.id);
+    const result = await uploadPhoto(file, user.id);
     
     if (result.success) {
-      setPhotos([result.value, ...photos]);
+      await refetch();
       setError(null);
     } else {
-      setError(result.error.message);
+      setError(result.error || 'Upload failed');
     }
     
-    setIsUploading(false);
     e.target.value = ''; // Reset input
   };
 
@@ -83,29 +52,29 @@ export default function PhotosPage() {
     if (!requireAuth('xóa ảnh')) return;
     if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) return;
 
-    const result = await Container.deletePhotoUseCase().execute(photoId);
+    const result = await deletePhoto(photoId);
     
     if (result.success) {
-      setPhotos(photos.filter(p => p.getId() !== photoId));
+      await refetch();
       setSelectedPhoto(null);
     } else {
-      setError(result.error.message);
+      setError(result.error || 'Delete failed');
     }
   };
 
   const handleUpdateCaption = async (photoId: string, caption: string) => {
     if (!requireAuth('chỉnh sửa chú thích')) return;
     
-    const result = await Container.updatePhotoCaptionUseCase().execute(photoId, caption || null);
+    const result = await updatePhotoCaption(photoId, caption || null);
     
     if (result.success) {
-      setPhotos(photos.map(p => p.getId() === photoId ? result.value : p));
+      await refetch();
       if (selectedPhoto?.getId() === photoId) {
         setSelectedPhoto(result.value);
       }
       setEditingCaption(null);
     } else {
-      setError(result.error.message);
+      setError(result.error || 'Update caption failed');
     }
   };
 
