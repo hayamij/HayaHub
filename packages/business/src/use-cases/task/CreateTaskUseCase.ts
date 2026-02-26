@@ -2,6 +2,7 @@ import { Task } from 'hayahub-domain';
 import { IdGenerator, success, failure, type Result } from 'hayahub-shared';
 import type { ITaskRepository } from '../../ports/ITaskRepository';
 import type { CreateTaskDTO, TaskDTO } from '../../dtos/task';
+import { taskMapper } from '../../mappers/TaskMapper';
 
 export class CreateTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
@@ -22,26 +23,10 @@ export class CreateTaskUseCase {
       // Persist
       await this.taskRepository.save(task);
 
-      // Return DTO
-      return success(this.toDTO(task));
+      // Return DTO using centralized mapper
+      return success(taskMapper.toDTO(task));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(task: Task): TaskDTO {
-    return {
-      id: task.id,
-      userId: task.userId,
-      title: task.title,
-      description: task.description,
-      priority: task.priority,
-      completed: task.completed,
-      projectId: task.projectId,
-      dueDate: task.dueDate,
-      completedAt: task.completedAt,
-      createdAt: task.createdAt,
-      updatedAt: task.updatedAt,
-    };
   }
 }

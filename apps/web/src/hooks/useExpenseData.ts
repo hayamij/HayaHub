@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ExpenseCategory } from 'hayahub-domain';
 import type { ExpenseDTO } from 'hayahub-business';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 export interface ExpenseRow {
   id: string;
@@ -21,7 +21,7 @@ export function useExpenseData(userId: string | undefined) {
 
     setIsLoading(true);
     try {
-      const getExpensesUseCase = Container.getExpensesUseCase();
+      const getExpensesUseCase = container.getExpensesUseCase;
 
       // Load expenses from the last 3 years for year comparison
       const currentYear = new Date().getFullYear();
@@ -66,7 +66,7 @@ export function useExpenseData(userId: string | undefined) {
     if (!userId) return false;
 
     try {
-      const updateExpenseUseCase = Container.updateExpenseUseCase();
+      const updateExpenseUseCase = container.updateExpenseUseCase;
       const result = await updateExpenseUseCase.execute(expenseId, userId, data);
 
       if (result.isSuccess()) {
@@ -84,7 +84,7 @@ export function useExpenseData(userId: string | undefined) {
     if (!userId) return false;
 
     try {
-      const deleteExpenseUseCase = Container.deleteExpenseUseCase();
+      const deleteExpenseUseCase = container.deleteExpenseUseCase;
       const result = await deleteExpenseUseCase.execute(expenseId, userId);
 
       if (result.isSuccess()) {

@@ -2,6 +2,7 @@ import { Project, DateRange } from 'hayahub-domain';
 import { IdGenerator, success, failure, type Result } from 'hayahub-shared';
 import type { IProjectRepository } from '../../ports/IProjectRepository';
 import type { CreateProjectDTO, ProjectDTO } from '../../dtos/project';
+import { projectMapper } from '../../mappers/ProjectMapper';
 
 export class CreateProjectUseCase {
   constructor(private readonly projectRepository: IProjectRepository) {}
@@ -26,25 +27,10 @@ export class CreateProjectUseCase {
       // Persist
       await this.projectRepository.save(project);
 
-      // Return DTO
-      return success(this.toDTO(project));
+      // Return DTO using centralized mapper
+      return success(projectMapper.toDTO(project));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(project: Project): ProjectDTO {
-    return {
-      id: project.id,
-      userId: project.userId,
-      name: project.name,
-      description: project.description,
-      status: project.status,
-      startDate: project.dateRange?.getStartDate() || null,
-      endDate: project.dateRange?.getEndDate() || null,
-      tags: project.tags,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    };
   }
 }

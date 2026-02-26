@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Edit2, Trash2 } from 'lucide-react';
 import { ExpenseCategory } from 'hayahub-domain';
-import { Container } from '@/infrastructure/di/Container';
+import { useExpenseActions } from '@/hooks/useExpenseActions';
+import { useExpensePresets } from '@/hooks/useExpensePresets';
 import type {
   CreateExpenseDTO,
   ExpensePresetDTO,
@@ -37,14 +38,14 @@ const CATEGORIES = [
 
 export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpenseModalProps) {
   const { showSuccess, showError } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { createExpense, isCreating } = useExpenseActions();
+  const { presets, createPreset, updatePreset, deletePreset } = useExpensePresets(userId);
   const [error, setError] = useState('');
 
   // Selected presets (each will be a separate expense)
   const [selectedPresets, setSelectedPresets] = useState<ExpensePresetDTO[]>([]);
 
   // Preset states
-  const [presets, setPresets] = useState<ExpensePresetDTO[]>([]);
   const [filteredPresets, setFilteredPresets] = useState<ExpensePresetDTO[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showPresetForm, setShowPresetForm] = useState(false);
@@ -78,7 +79,6 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
   // Load presets when modal opens
   useEffect(() => {
     if (isOpen) {
-      loadPresets();
       // Reset form when modal opens
       setFormData({
         description: '',
@@ -96,20 +96,6 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
     filterPresetsByCategory(formData.category);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.category, presets, searchQuery]);
-
-  const loadPresets = async () => {
-    try {
-      const container = Container.getInstance();
-      const getPresetsUseCase = container.getExpensePresetsUseCase;
-      const result = await getPresetsUseCase.execute(userId);
-
-      if (result.isSuccess()) {
-        setPresets(result.value);
-      }
-    } catch (err) {
-      console.error('Failed to load presets', err);
-    }
-  };
 
   const filterPresetsByCategory = (category: ExpenseCategory | '') => {
     let filtered = presets;
@@ -179,71 +165,59 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
       return;
     }
 
-    setLoading(true);
     setError('');
 
-    try {
-      const container = Container.getInstance();
-      const createExpenseUseCase = container.createExpenseUseCase;
+    const allExpenses: CreateExpenseDTO[] = [];
 
-      const allExpenses: CreateExpenseDTO[] = [];
+    // Add each selected preset as separate expense
+    for (const preset of selectedPresets) {
+      allExpenses.push({
+        userId,
+        description: preset.name,
+        amount: preset.amount,
+        currency: 'VND',
+        category: preset.category,
+        date: new Date(formData.date),
+        tags: preset.notes ? [preset.notes] : [],
+      });
+    }
 
-      // Add each selected preset as separate expense
-      for (const preset of selectedPresets) {
-        allExpenses.push({
-          userId,
-          description: preset.name,
-          amount: preset.amount,
-          currency: 'VND',
-          category: preset.category,
-          date: new Date(formData.date),
-          tags: preset.notes ? [preset.notes] : [],
-        });
+    // Add manual entry if complete
+    if (hasCompleteManualEntry) {
+      allExpenses.push({
+        userId,
+        description: formData.description,
+        amount: parseFloat(formData.amount),
+        currency: 'VND',
+        category: formData.category as ExpenseCategory,
+        date: new Date(formData.date),
+        tags: formData.notes ? [formData.notes] : [],
+      });
+    }
+
+    // Create all expenses
+    let successCount = 0;
+    for (const dto of allExpenses) {
+      const result = await createExpense(dto);
+      if (result.success) {
+        successCount++;
       }
+    }
 
-      // Add manual entry if complete
-      if (hasCompleteManualEntry) {
-        allExpenses.push({
-          userId,
-          description: formData.description,
-          amount: parseFloat(formData.amount),
-          currency: 'VND',
-          category: formData.category as ExpenseCategory,
-          date: new Date(formData.date),
-          tags: formData.notes ? [formData.notes] : [],
-        });
-      }
-
-      // Create all expenses
-      let successCount = 0;
-      for (const dto of allExpenses) {
-        const result = await createExpenseUseCase.execute(dto);
-        if (result.isSuccess()) {
-          successCount++;
-        }
-      }
-
-      if (successCount > 0) {
-        showSuccess(`Đã thêm ${successCount} chi tiêu thành công!`);
-        setFormData({
-          description: '',
-          amount: '',
-          category: '',
-          date: getVietnamDate(),
-          notes: '',
-        });
-        clearSelection();
-        onClose();
-        onSuccess();
-      } else {
-        showError('Không thể thêm chi tiêu');
-      }
-    } catch (err) {
-      const errorMessage = 'Có lỗi xảy ra khi thêm chi tiêu';
-      setError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setLoading(false);
+    if (successCount > 0) {
+      showSuccess(`Đã thêm ${successCount} chi tiêu thành công!`);
+      setFormData({
+        description: '',
+        amount: '',
+        category: '',
+        date: getVietnamDate(),
+        notes: '',
+      });
+      clearSelection();
+      onClose();
+      onSuccess();
+    } else {
+      showError('Không thể thêm chi tiêu');
     }
   };
 
@@ -255,77 +229,58 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
       return;
     }
 
-    setLoading(true);
     setError('');
 
-    try {
-      const container = Container.getInstance();
-      const createExpenseUseCase = container.createExpenseUseCase;
+    const dto: CreateExpenseDTO = {
+      userId,
+      description: formData.description,
+      amount: parseFloat(formData.amount),
+      currency: 'VND',
+      category: formData.category as ExpenseCategory,
+      date: new Date(formData.date),
+      tags: formData.notes ? [formData.notes] : [],
+    };
 
-      const dto: CreateExpenseDTO = {
-        userId,
-        description: formData.description,
-        amount: parseFloat(formData.amount),
-        currency: 'VND',
-        category: formData.category as ExpenseCategory,
-        date: new Date(formData.date),
-        tags: formData.notes ? [formData.notes] : [],
-      };
+    const result = await createExpense(dto);
 
-      const result = await createExpenseUseCase.execute(dto);
-
-      if (result.isSuccess()) {
-        showSuccess('Đã thêm chi tiêu thành công!');
-        setFormData({
-          description: '',
-          amount: '',
-          category: '',
-          date: getVietnamDate(),
-          notes: '',
-        });
-        onClose();
-        onSuccess();
-      } else {
-        setError(result.error.message);
-        showError(`Thất bại: ${result.error.message}`);
-      }
-    } catch (err) {
-      const errorMessage = 'Có lỗi xảy ra khi thêm chi tiêu';
+    if (result.success) {
+      showSuccess('Đã thêm chi tiêu thành công!');
+      setFormData({
+        description: '',
+        amount: '',
+        category: '',
+        date: getVietnamDate(),
+        notes: '',
+      });
+      onClose();
+      onSuccess();
+    } else {
+      const errorMessage = result.error || 'Có lỗi xảy ra khi thêm chi tiêu';
       setError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setLoading(false);
+      showError(`Thất bại: ${errorMessage}`);
     }
   };
 
   const handleCreatePreset = async () => {
     const category = formData.category || ExpenseCategory.OTHER;
 
-    try {
-      const container = Container.getInstance();
-      const createPresetUseCase = container.createExpensePresetUseCase;
+    const dto: CreateExpensePresetDTO = {
+      userId,
+      name: presetFormData.name,
+      amount: parseFloat(presetFormData.amount),
+      currency: 'VND',
+      category: category as ExpenseCategory,
+      notes: presetFormData.notes,
+    };
 
-      const dto: CreateExpensePresetDTO = {
-        userId,
-        name: presetFormData.name,
-        amount: parseFloat(presetFormData.amount),
-        currency: 'VND',
-        category: category as ExpenseCategory,
-        notes: presetFormData.notes,
-      };
+    const success = await createPreset(dto);
 
-      const result = await createPresetUseCase.execute(dto);
-
-      if (result.isSuccess()) {
-        showSuccess('Đã thêm preset thành công!');
-        setPresetFormData({ name: '', amount: '', notes: '' });
-        setShowPresetForm(false);
-        loadPresets();
-      } else {
-        showError(`Thất bại: ${result.error.message}`);
-      }
-    } catch (err) {
-      showError('Có lỗi xảy ra khi thêm preset');
+    if (success) {
+      showSuccess('Đã thêm preset thành công!');
+      setPresetFormData({ name: '', amount: '', notes: '' });
+      setShowPresetForm(false);
+    } else {
+      showError('Thất bại khi tạo preset');
     }
   };
 
@@ -334,52 +289,35 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
 
     const category = formData.category || editingPreset.category;
 
-    try {
-      const container = Container.getInstance();
-      const updatePresetUseCase = container.updateExpensePresetUseCase;
+    const dto: UpdateExpensePresetDTO = {
+      name: presetFormData.name,
+      amount: parseFloat(presetFormData.amount),
+      currency: 'VND',
+      category: category as ExpenseCategory,
+      notes: presetFormData.notes,
+    };
 
-      const dto: UpdateExpensePresetDTO = {
-        id: editingPreset.id,
-        name: presetFormData.name,
-        amount: parseFloat(presetFormData.amount),
-        currency: 'VND',
-        category: category as ExpenseCategory,
-        notes: presetFormData.notes,
-      };
+    const success = await updatePreset(editingPreset.id, dto);
 
-      const result = await updatePresetUseCase.execute(dto);
-
-      if (result.isSuccess()) {
-        showSuccess('Đã cập nhật preset thành công!');
-        setPresetFormData({ name: '', amount: '', notes: '' });
-        setEditingPreset(null);
-        setShowPresetForm(false);
-        loadPresets();
-      } else {
-        showError(`Thất bại: ${result.error.message}`);
-      }
-    } catch (err) {
-      showError('Có lỗi xảy ra khi cập nhật preset');
+    if (success) {
+      showSuccess('Đã cập nhật preset thành công!');
+      setPresetFormData({ name: '', amount: '', notes: '' });
+      setEditingPreset(null);
+      setShowPresetForm(false);
+    } else {
+      showError('Thất bại khi cập nhật preset');
     }
   };
 
   const handleDeletePreset = async (presetId: string) => {
     if (!confirm('Bạn có chắc muốn xóa preset này?')) return;
 
-    try {
-      const container = Container.getInstance();
-      const deletePresetUseCase = container.deleteExpensePresetUseCase;
+    const success = await deletePreset(presetId);
 
-      const result = await deletePresetUseCase.execute(presetId);
-
-      if (result.isSuccess()) {
-        showSuccess('Đã xóa preset thành công!');
-        loadPresets();
-      } else {
-        showError(`Thất bại: ${result.error.message}`);
-      }
-    } catch (err) {
-      showError('Có lỗi xảy ra khi xóa preset');
+    if (success) {
+      showSuccess('Đã xóa preset thành công!');
+    } else {
+      showError('Thất bại khi xóa preset');
     }
   };
 
@@ -554,10 +492,10 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
                   <button
                     type="button"
                     onClick={handleSubmitAll}
-                    disabled={loading}
+                    disabled={isCreating}
                     className="flex-1 px-4 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading
+                    {isCreating
                       ? 'Đang lưu...'
                       : `Thêm ${selectedPresets.length + (formData.description && formData.amount && formData.category ? 1 : 0)} chi tiêu`}
                   </button>
@@ -565,10 +503,10 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
                   <button
                     type="submit"
                     onClick={handleSubmitManual}
-                    disabled={loading}
+                    disabled={isCreating}
                     className="flex-1 px-4 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Đang lưu...' : 'Thêm chi tiêu'}
+                    {isCreating ? 'Đang lưu...' : 'Thêm chi tiêu'}
                   </button>
                 )}
               </div>

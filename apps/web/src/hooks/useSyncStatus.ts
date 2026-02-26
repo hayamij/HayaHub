@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 interface SyncStatus {
   isSyncing: boolean;
@@ -19,7 +19,6 @@ export function useSyncStatus() {
   useEffect(() => {
     const checkStatus = () => {
       try {
-        const container = Container.getInstance();
         interface StorageWithSync {
           getSyncStatus?: () => SyncStatus;
         }

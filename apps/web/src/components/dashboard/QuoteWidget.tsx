@@ -1,60 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Quote, Heart, TrendingUp, Sparkles } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
-import type { QuoteDTO } from 'hayahub-business';
+import { useQuotesWidget } from '@/hooks/useQuotesWidget';
 
 export default function QuoteWidget() {
   const router = useRouter();
   const { user } = useAuth();
-  const [dailyQuote, setDailyQuote] = useState<QuoteDTO | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
-    total: 0,
-    favorites: 0,
-  });
-
-  useEffect(() => {
-    const loadQuotes = async () => {
-      if (!user?.id) return;
-
-      setIsLoading(true);
-      try {
-        const getQuotesUseCase = Container.getQuotesUseCase();
-        const result = await getQuotesUseCase.execute(user.id);
-
-        if (result.success) {
-          const allQuotes = result.value;
-
-          const favorites = allQuotes.filter((q) => q.isFavorite);
-
-          setStats({
-            total: allQuotes.length,
-            favorites: favorites.length,
-          });
-
-          // Get quote of the day (pseudo-random based on date)
-          if (allQuotes.length > 0) {
-            const today = new Date();
-            const dayOfYear = Math.floor(
-              (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
-            );
-            const index = dayOfYear % allQuotes.length;
-            setDailyQuote(allQuotes[index]);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load quotes:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadQuotes();
-  }, [user]);
+  const { dailyQuote, stats, isLoading } = useQuotesWidget(user?.id);
 
   return (
     <div

@@ -1,84 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FolderKanban, TrendingUp, Circle } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
-import type { ProjectDTO, TaskDTO } from 'hayahub-business';
-import { ProjectStatus } from 'hayahub-domain';
+import { useProjectsWidget } from '@/hooks/useProjectsWidget';
 
 export default function ProjectsWidget() {
   const router = useRouter();
   const { user } = useAuth();
-  const [tasks, setTasks] = useState<TaskDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
-    activeProjects: 0,
-    pendingTasks: 0,
-    completedTasks: 0,
-    completionRate: 0,
-  });
-
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user?.id) return;
-
-      setIsLoading(true);
-      try {
-        const getProjectsUseCase = Container.getProjectsUseCase();
-        const getTasksUseCase = Container.getTasksUseCase();
-
-        const [projectsResult, tasksResult] = await Promise.all([
-          getProjectsUseCase.execute(user.id),
-          getTasksUseCase.executeByUser(user.id),
-        ]);
-
-        if (projectsResult.success) {
-          const allProjects = projectsResult.value;
-          const activeProjects = allProjects.filter(
-            (p: ProjectDTO) => p.status === ProjectStatus.IN_PROGRESS
-          );
-          
-          const completed = allProjects.filter(
-            (p: ProjectDTO) => p.status === ProjectStatus.COMPLETED
-          ).length;
-          
-          const total = allProjects.length;
-          const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-          setStats((prev) => ({
-            ...prev,
-            activeProjects: activeProjects.length,
-            completionRate,
-          }));
-        }
-
-        if (tasksResult.success) {
-          const allTasks = tasksResult.value;
-          setTasks(allTasks);
-          const pendingTasks = allTasks.filter(
-            (t: TaskDTO) => !t.completed
-          );
-          const completedTasks = allTasks.filter(
-            (t: TaskDTO) => t.completed
-          );
-
-          setStats((prev) => ({
-            ...prev,
-            pendingTasks: pendingTasks.length,
-            completedTasks: completedTasks.length,
-          }));
-        }
-      } catch (error) {
-        console.error('Failed to load projects/tasks:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user]);
+  const { tasks, stats, isLoading } = useProjectsWidget(user?.id);
 
   const recentTasks = tasks
     .filter((t) => !t.completed)

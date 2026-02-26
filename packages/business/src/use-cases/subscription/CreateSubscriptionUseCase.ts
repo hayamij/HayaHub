@@ -3,6 +3,7 @@ import { Subscription, Money } from 'hayahub-domain';
 import { IdGenerator } from 'hayahub-shared';
 import type { ISubscriptionRepository } from '../../ports/ISubscriptionRepository';
 import type { CreateSubscriptionDTO, SubscriptionDTO } from '../../dtos/subscription';
+import { subscriptionMapper } from '../../mappers/SubscriptionMapper';
 
 export class CreateSubscriptionUseCase {
   constructor(private readonly subscriptionRepository: ISubscriptionRepository) {}
@@ -23,28 +24,9 @@ export class CreateSubscriptionUseCase {
 
       await this.subscriptionRepository.save(subscription);
 
-      return success(this.toDTO(subscription));
+      return success(subscriptionMapper.toDTO(subscription));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(subscription: Subscription): SubscriptionDTO {
-    return {
-      id: subscription.id,
-      userId: subscription.userId,
-      name: subscription.name,
-      amount: subscription.amount.getAmount(),
-      currency: subscription.amount.getCurrency(),
-      frequency: subscription.frequency,
-      status: subscription.status,
-      startDate: subscription.startDate,
-      nextBillingDate: subscription.nextBillingDate,
-      description: subscription.description,
-      icon: subscription.icon,
-      layoutPosition: subscription.layoutPosition?.toData(),
-      createdAt: subscription.createdAt,
-      updatedAt: subscription.updatedAt,
-    };
   }
 }

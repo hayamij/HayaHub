@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageLoader } from '@/components/layout/PageLoader';
 import { LoginPromptModal } from '@/components/ui/LoginPromptModal';
 import { useAuth } from '@/contexts/AuthContext';
-import { Container } from '@/infrastructure/di/Container';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { EventModal } from '@/components/calendar/EventModal';
 import { MonthView } from '@/components/calendar/MonthView';
 import { WeekView } from '@/components/calendar/WeekView';
@@ -18,9 +18,16 @@ type ViewMode = 'month' | 'week' | 'year';
 
 export default function CalendarPage() {
   const { user } = useAuth();
-  const [events, setEvents] = useState<CalendarEventDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    events,
+    loading: isLoading,
+    error,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    refetch,
+  } = useCalendarEvents();
+  
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,39 +41,6 @@ export default function CalendarPage() {
       setShowLoginPrompt(true);
     }
   }, [user]);
-
-  const getCalendarEventsUseCase = Container.getCalendarEventsUseCase();
-  const createCalendarEventUseCase = Container.createCalendarEventUseCase();
-  const updateCalendarEventUseCase = Container.updateCalendarEventUseCase();
-  const deleteCalendarEventUseCase = Container.deleteCalendarEventUseCase();
-
-  const loadEvents = useCallback(async () => {
-    if (!user?.id) {
-      setEvents([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = await getCalendarEventsUseCase.execute(user.id);
-      if (result.success) {
-        setEvents(result.value);
-      } else {
-        setError(result.error.message);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load events');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id, getCalendarEventsUseCase]);
-
-  useEffect(() => {
-    loadEvents();
-  }, [user, loadEvents]);
 
   const handleAdd = () => {
     setEditingEvent(null);
@@ -89,21 +63,17 @@ export default function CalendarPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa sự kiện này?')) return;
 
-    const result = await deleteCalendarEventUseCase.execute(id);
-    if (result.success) {
-      await loadEvents();
-    } else {
-      alert('Lỗi khi xóa sự kiện: ' + result.error.message);
+    try {
+      await deleteEvent(id);
+    } catch (err) {
+      alert('Lỗi khi xóa sự kiện: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
   const handleSave = async (data: CreateCalendarEventDTO | Partial<CalendarEventDTO>) => {
     try {
       if (editingEvent) {
-        const result = await updateCalendarEventUseCase.execute(editingEvent.id, data);
-        if (!result.success) {
-          throw new Error(result.error.message);
-        }
+        await updateEvent(editingEvent.id, data);
       } else {
         // Pre-fill with quick add date if available
         const eventData = quickAddDate
@@ -113,15 +83,11 @@ export default function CalendarPage() {
               endDate: data.endDate || new Date(quickAddDate.getTime() + 60 * 60 * 1000),
             }
           : data;
-        const result = await createCalendarEventUseCase.execute(eventData as CreateCalendarEventDTO);
-        if (!result.success) {
-          throw new Error(result.error.message);
-        }
+        await createEvent(eventData as CreateCalendarEventDTO);
       }
       setIsModalOpen(false);
       setEditingEvent(null);
       setQuickAddDate(null);
-      await loadEvents();
     } catch (error) {
       alert('Lỗi: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { SubscriptionDTO, CreateSubscriptionDTO, UpdateSubscriptionDTO } from 'hayahub-business';
+import { useEntityCRUD } from './useEntityCRUD';
 
 interface UseSubscriptionsReturn {
   subscriptions: SubscriptionDTO[];
@@ -16,106 +16,24 @@ interface UseSubscriptionsReturn {
 
 /**
  * Custom Hook for Subscription Management
- * Following the pattern from useExpenseData.ts
+ * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useSubscriptions(userId: string | undefined): UseSubscriptionsReturn {
-  const [subscriptions, setSubscriptions] = useState<SubscriptionDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const loadSubscriptions = useCallback(async () => {
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const getSubscriptionsUseCase = Container.getSubscriptionsUseCase();
-      const result = await getSubscriptionsUseCase.execute(userId);
-
-      if (result.isSuccess()) {
-        setSubscriptions(result.value);
-      } else {
-        setError(result.error);
-        setSubscriptions([]);
-      }
-    } catch (err) {
-      setError(err as Error);
-      setSubscriptions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId]);
-
-  const createSubscription = useCallback(
-    async (dto: CreateSubscriptionDTO): Promise<boolean> => {
-      try {
-        const createSubscriptionUseCase = Container.createSubscriptionUseCase();
-        const result = await createSubscriptionUseCase.execute(dto);
-
-        if (result.isSuccess()) {
-          await loadSubscriptions();
-          return true;
-        } else {
-          setError(result.error);
-          return false;
-        }
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      }
-    },
-    [loadSubscriptions]
-  );
-
-  const updateSubscription = useCallback(
-    async (id: string, dto: UpdateSubscriptionDTO): Promise<boolean> => {
-      try {
-        const updateSubscriptionUseCase = Container.updateSubscriptionUseCase();
-        const result = await updateSubscriptionUseCase.execute(id, dto);
-
-        if (result.isSuccess()) {
-          await loadSubscriptions();
-          return true;
-        } else {
-          setError(result.error);
-          return false;
-        }
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      }
-    },
-    [loadSubscriptions]
-  );
-
-  const deleteSubscription = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        const deleteSubscriptionUseCase = Container.deleteSubscriptionUseCase();
-        const result = await deleteSubscriptionUseCase.execute(id);
-
-        if (result.isSuccess()) {
-          await loadSubscriptions();
-          return true;
-        } else {
-          setError(result.error);
-          return false;
-        }
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      }
-    },
-    [loadSubscriptions]
-  );
-
-  useEffect(() => {
-    loadSubscriptions();
-  }, [loadSubscriptions]);
+  const {
+    entities: subscriptions,
+    isLoading,
+    error,
+    load: loadSubscriptions,
+    create: createSubscription,
+    update: updateSubscription,
+    deleteEntity: deleteSubscription,
+  } = useEntityCRUD<SubscriptionDTO, CreateSubscriptionDTO, UpdateSubscriptionDTO>({
+    getUseCase: container.getSubscriptionsUseCase,
+    createUseCase: container.createSubscriptionUseCase,
+    updateUseCase: container.updateSubscriptionUseCase,
+    deleteUseCase: container.deleteSubscriptionUseCase,
+    getParams: userId!,
+  });
 
   return {
     subscriptions,

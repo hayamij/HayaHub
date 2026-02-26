@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { ExpenseCategory } from 'hayahub-domain';
-import { Container } from '@/infrastructure/di/Container';
+import { useExpenseActions } from '@/hooks/useExpenseActions';
 import type { CreateExpenseDTO } from 'hayahub-business';
 import { useToast } from '@/contexts/ToastContext';
 
@@ -32,7 +32,7 @@ const CATEGORIES = [
 
 export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddExpenseFormModalProps) {
   const { showSuccess, showError } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { createExpense, isCreating } = useExpenseActions();
   const [error, setError] = useState('');
   
   // Get current date in Vietnam timezone (UTC+7)
@@ -58,57 +58,46 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
-    try {
-      const container = Container.getInstance();
-      const createExpenseUseCase = container.createExpenseUseCase;
+    // Convert notes to tags array
+    const tags = formData.notes
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
 
-      // Convert notes to tags array
-      const tags = formData.notes
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+    const dto: CreateExpenseDTO = {
+      userId,
+      description: formData.description,
+      amount: parseFloat(formData.amount),
+      currency: 'VND',
+      category: formData.category,
+      date: new Date(formData.date),
+      tags,
+    };
 
-      const dto: CreateExpenseDTO = {
-        userId,
-        description: formData.description,
-        amount: parseFloat(formData.amount),
-        currency: 'VND',
-        category: formData.category,
-        date: new Date(formData.date),
-        tags,
-      };
+    const result = await createExpense(dto);
 
-      const result = await createExpenseUseCase.execute(dto);
-
-      if (result.isSuccess()) {
-        // Reset form
-        setFormData({
-          description: '',
-          amount: '',
-          category: ExpenseCategory.OTHER,
-          date: getVietnamDate(),
-          notes: '',
-        });
-        
-        // Show success toast immediately
-        showSuccess('Đã thêm chi tiêu thành công!');
-        
-        // Close modal and refresh
-        onClose();
-        onSuccess();
-      } else {
-        setError(result.error.message);
-        showError(`Thất bại: ${result.error.message}`);
-      }
-    } catch (err) {
-      const errorMessage = 'Có lỗi xảy ra khi thêm chi tiêu';
+    if (result.success) {
+      // Reset form
+      setFormData({
+        description: '',
+        amount: '',
+        category: ExpenseCategory.OTHER,
+        date: getVietnamDate(),
+        notes: '',
+      });
+      
+      // Show success toast immediately
+      showSuccess('Đã thêm chi tiêu thành công!');
+      
+      // Close modal and refresh
+      onClose();
+      onSuccess();
+    } else {
+      const errorMessage = result.error || 'Có lỗi xảy ra khi thêm chi tiêu';
       setError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setLoading(false);
+      showError(`Thất bại: ${errorMessage}`);
     }
   };
 
@@ -235,10 +224,10 @@ export function AddExpenseFormModal({ isOpen, onClose, userId, onSuccess }: AddE
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isCreating}
               className="flex-1 px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Đang lưu...' : 'Thêm'}
+              {isCreating ? 'Đang lưu...' : 'Thêm'}
             </button>
           </div>
         </form>

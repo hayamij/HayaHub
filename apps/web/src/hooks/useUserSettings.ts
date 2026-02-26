@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 export interface UserSettings {
   theme: 'light' | 'dark';
@@ -24,7 +24,7 @@ export function useUserSettings() {
     }
 
     try {
-      const getUserSettingsUseCase = Container.getUserSettingsUseCase();
+      const getUserSettingsUseCase = container.getUserSettingsUseCase;
       const result = await getUserSettingsUseCase.execute({ userId: user.id });
 
       if (result.isSuccess()) {
@@ -45,7 +45,7 @@ export function useUserSettings() {
     setSettings(updatedSettings);
 
     try {
-      const updateUserSettingsUseCase = Container.updateUserSettingsUseCase();
+      const updateUserSettingsUseCase = container.updateUserSettingsUseCase;
       const result = await updateUserSettingsUseCase.execute({
         userId: user.id,
         theme: updatedSettings.theme,

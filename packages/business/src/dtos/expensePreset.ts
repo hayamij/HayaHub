@@ -14,9 +14,9 @@ export interface CreateExpensePresetDTO {
 
 /**
  * DTO for updating an existing expense preset
+ * Note: id is passed separately to execute method, not in the DTO
  */
 export interface UpdateExpensePresetDTO {
-  id: string;
   name?: string;
   amount?: number;
   currency?: string;
