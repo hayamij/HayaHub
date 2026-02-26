@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 function SyncingPageContent() {
   const router = useRouter();
@@ -18,7 +18,6 @@ function SyncingPageContent() {
 
     const startSync = async () => {
       // Get storage adapter
-      const container = Container.getInstance();
       const storageService = container.storageService;
 
       // Check if it's HybridStorageAdapter with sync capabilities

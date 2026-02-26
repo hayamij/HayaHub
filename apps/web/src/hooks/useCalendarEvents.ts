@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Container } from '@/infrastructure/di/Container';
-import type { CalendarEventDTO } from 'hayahub-business';
+import { container } from '@/infrastructure/di/Container';
+import type { CalendarEventDTO, CreateCalendarEventDTO, UpdateCalendarEventDTO } from 'hayahub-business';
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -24,6 +24,10 @@ export interface UseCalendarEventsResult {
   refetch: () => Promise<void>;
 }
 
+/**
+ * Custom Hook for Calendar Events Management
+ * Uses use cases properly following Clean Architecture
+ */
 export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalendarEventsResult {
   const { user } = useAuth();
   const [events, setEvents] = useState<CalendarEventDTO[]>([]);
@@ -31,9 +35,6 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
   const [error, setError] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>(initialView);
-
-  const calendarEventRepository = Container.getInstance().calendarEventRepository;
-  const createCalendarEventUseCase = Container.getInstance().createCalendarEventUseCase;
 
   const fetchEvents = useCallback(async () => {
     if (!user) {
@@ -49,59 +50,65 @@ export function useCalendarEvents(initialView: CalendarView = 'month'): UseCalen
       // Calculate date range based on current view
       const { startDate, endDate } = getDateRange(currentDate, view);
       
-      const result = await calendarEventRepository.findByUserIdAndDateRange(user.id, startDate, endDate);
-      setEvents(result);
+      // Use GetCalendarEventsUseCase instead of direct repository access
+      const getCalendarEventsUseCase = container.getCalendarEventsUseCase;
+      const result = await getCalendarEventsUseCase.execute(user.id, startDate, endDate);
+      
+      if (result.isSuccess()) {
+        setEvents(result.value);
+      } else {
+        setError(result.error.message);
+        setEvents([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load events');
     } finally {
       setLoading(false);
     }
-  }, [user, currentDate, view, calendarEventRepository]);
+  }, [user, currentDate, view]);
 
   useEffect(() => {
     fetchEvents();
-  }, [user, currentDate, view, fetchEvents]);
+  }, [fetchEvents]);
 
   const createEvent = async (dto: Omit<CalendarEventDTO, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => {
     if (!user) throw new Error('User not authenticated');
 
+    const createCalendarEventUseCase = container.createCalendarEventUseCase;
     const result = await createCalendarEventUseCase.execute({
       ...dto,
       userId: user.id,
-    });
+    } as CreateCalendarEventDTO);
 
-    if (!result.success) {
+    if (result.isSuccess()) {
+      await fetchEvents();
+    } else {
       throw new Error(result.error.message);
     }
-
-    await fetchEvents();
   };
 
   const updateEvent = async (id: string, dto: Partial<CalendarEventDTO>) => {
-    const event = await calendarEventRepository.findById(id);
-    if (!event) {
-      throw new Error('Event not found');
+    // Use UpdateCalendarEventUseCase instead of direct repository access
+    const updateCalendarEventUseCase = container.updateCalendarEventUseCase;
+    const result = await updateCalendarEventUseCase.execute(id, dto as UpdateCalendarEventDTO);
+    
+    if (result.isSuccess()) {
+      await fetchEvents();
+    } else {
+      throw new Error(result.error.message);
     }
-
-    // Update event properties using reschedule for date changes
-    if (dto.title) event.updateTitle(dto.title);
-    if (dto.description) event.updateDescription(dto.description);
-    if (dto.startDate || dto.endDate) {
-      const startDate = dto.startDate || event.startDate;
-      const endDate = dto.endDate || event.endDate;
-      event.reschedule(startDate, endDate);
-    }
-    if (dto.location) event.updateLocation(dto.location);
-    if (dto.priority) event.setPriority(dto.priority);
-
-    await calendarEventRepository.update(event);
-    await fetchEvents();
   };
 
   const deleteEvent = async (id: string) => {
-    await calendarEventRepository.delete(id);
-
-    await fetchEvents();
+    // Use DeleteCalendarEventUseCase instead of direct repository access
+    const deleteCalendarEventUseCase = container.deleteCalendarEventUseCase;
+    const result = await deleteCalendarEventUseCase.execute(id);
+    
+    if (result.isSuccess()) {
+      await fetchEvents();
+    } else {
+      throw new Error(result.error.message);
+    }
   };
 
   const goToToday = () => {

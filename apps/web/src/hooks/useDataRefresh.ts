@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
@@ -20,7 +20,7 @@ export function useDataRefresh() {
       const refreshData = async () => {
         try {
           console.log('🔄 Auto-refreshing data from GitHub...');
-          const storage = Container.getInstance().storageService;
+          const storage = container.storageService;
           
           // Check if storage has refreshFromGitHub method
           if ('refreshFromGitHub' in storage && typeof storage.refreshFromGitHub === 'function') {
