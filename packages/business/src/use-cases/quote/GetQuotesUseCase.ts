@@ -1,7 +1,7 @@
-import type { Quote } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IQuoteRepository } from '../../ports/IQuoteRepository';
 import type { QuoteDTO } from '../../dtos/quote';
+import { quoteMapper } from '../../mappers/QuoteMapper';
 
 export class GetQuotesUseCase {
   constructor(private readonly quoteRepository: IQuoteRepository) {}
@@ -9,23 +9,9 @@ export class GetQuotesUseCase {
   async execute(userId: string): Promise<Result<QuoteDTO[], Error>> {
     try {
       const quotes = await this.quoteRepository.findByUserId(userId);
-      return success(quotes.map((quote) => this.toDTO(quote)));
+      return success(quoteMapper.toDTOs(quotes));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(quote: Quote): QuoteDTO {
-    return {
-      id: quote.id,
-      userId: quote.userId,
-      text: quote.text,
-      author: quote.author,
-      category: quote.category,
-      isFavorite: quote.isFavorite,
-      tags: quote.tags,
-      createdAt: quote.createdAt,
-      updatedAt: quote.updatedAt,
-    };
   }
 }

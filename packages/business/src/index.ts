@@ -30,6 +30,9 @@ export * from './dtos/wishItem';
 export * from './dtos/dashboardWidget';
 export * from './dtos/photo';
 
+// Mappers
+export * from './mappers';
+
 // Use Cases
 export * from './use-cases/expense/CreateExpenseUseCase';
 export * from './use-cases/expense/GetExpensesUseCase';

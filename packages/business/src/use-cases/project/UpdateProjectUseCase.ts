@@ -2,6 +2,7 @@ import { DateRange, type Project, ProjectStatus } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IProjectRepository } from '../../ports/IProjectRepository';
 import type { UpdateProjectDTO, ProjectDTO } from '../../dtos/project';
+import { projectMapper } from '../../mappers/ProjectMapper';
 
 export class UpdateProjectUseCase {
   constructor(private readonly projectRepository: IProjectRepository) {}
@@ -36,8 +37,8 @@ export class UpdateProjectUseCase {
       // Persist
       await this.projectRepository.update(project);
 
-      // Return DTO
-      return success(this.toDTO(project));
+      // Return DTO using centralized mapper
+      return success(projectMapper.toDTO(project));
     } catch (error) {
       return failure(error as Error);
     }
@@ -56,20 +57,5 @@ export class UpdateProjectUseCase {
         break;
       // PLANNING status is default, no action needed
     }
-  }
-
-  private toDTO(project: Project): ProjectDTO {
-    return {
-      id: project.id,
-      userId: project.userId,
-      name: project.name,
-      description: project.description,
-      status: project.status,
-      startDate: project.dateRange?.getStartDate() || null,
-      endDate: project.dateRange?.getEndDate() || null,
-      tags: project.tags,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-    };
   }
 }
