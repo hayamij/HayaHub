@@ -2,7 +2,7 @@ import { Email } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IUserRepository } from '../../ports/IUserRepository';
 import type { UserDTO } from '../../dtos/user';
-import type { User } from 'hayahub-domain';
+import { userMapper } from '../../mappers/UserMapper';
 
 export interface UpdateUserDTO {
   name?: string;
@@ -40,20 +40,9 @@ export class UpdateUserUseCase {
       // Persist changes
       await this.userRepository.update(user);
 
-      return success(this.toDTO(user));
+      return success(userMapper.toDTO(user));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(user: User): UserDTO {
-    return {
-      id: user.id,
-      email: user.email.getValue(),
-      name: user.name,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }
 }

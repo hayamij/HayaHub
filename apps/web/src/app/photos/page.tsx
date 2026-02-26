@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/Button';
 
 export default function PhotosPage() {
   const { user } = useAuth();
-  const { photos, isLoading, error: fetchError, refetch } = usePhotos(user?.id);
+  const { photos, isLoading, refetch } = usePhotos(user?.id);
   const { uploadPhoto, deletePhoto, updatePhotoCaption, isUploading } = usePhotoActions();
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [editingCaption, setEditingCaption] = useState<string | null>(null);

@@ -2,7 +2,7 @@ import { Money } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IExpenseRepository } from '../../ports/IExpenseRepository';
 import type { UpdateExpenseDTO, ExpenseDTO } from '../../dtos/expense';
-import type { Expense } from 'hayahub-domain';
+import { expenseMapper } from '../../mappers/ExpenseMapper';
 
 export class UpdateExpenseUseCase {
   constructor(private readonly expenseRepository: IExpenseRepository) {}
@@ -44,24 +44,9 @@ export class UpdateExpenseUseCase {
       // Persist
       await this.expenseRepository.update(expense);
 
-      return success(this.toDTO(expense));
+      return success(expenseMapper.toDTO(expense));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(expense: Expense): ExpenseDTO {
-    return {
-      id: expense.id,
-      userId: expense.userId,
-      description: expense.description,
-      amount: expense.amount.getAmount(),
-      currency: expense.amount.getCurrency(),
-      category: expense.category,
-      date: expense.date,
-      tags: expense.tags,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
-    };
   }
 }

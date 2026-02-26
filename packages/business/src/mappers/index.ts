@@ -10,3 +10,7 @@ export * from './QuoteMapper';
 export * from './SubscriptionMapper';
 export * from './WishItemMapper';
 export * from './UserMapper';
+export * from './ExpenseMapper';
+export * from './ExpensePresetMapper';
+export * from './CalendarEventMapper';
+export * from './DashboardWidgetMapper';

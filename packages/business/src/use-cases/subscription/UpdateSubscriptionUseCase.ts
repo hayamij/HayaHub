@@ -1,7 +1,8 @@
 import { success, failure, type Result } from 'hayahub-shared';
-import { Subscription, Money, LayoutPosition } from 'hayahub-domain';
+import { Money, LayoutPosition } from 'hayahub-domain';
 import type { ISubscriptionRepository } from '../../ports/ISubscriptionRepository';
 import type { UpdateSubscriptionDTO, SubscriptionDTO } from '../../dtos/subscription';
+import { subscriptionMapper } from '../../mappers/SubscriptionMapper';
 
 export class UpdateSubscriptionUseCase {
   constructor(private readonly subscriptionRepository: ISubscriptionRepository) {}
@@ -47,28 +48,9 @@ export class UpdateSubscriptionUseCase {
 
       await this.subscriptionRepository.update(subscription);
 
-      return success(this.toDTO(subscription));
+      return success(subscriptionMapper.toDTO(subscription));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(subscription: Subscription): SubscriptionDTO {
-    return {
-      id: subscription.id,
-      userId: subscription.userId,
-      name: subscription.name,
-      amount: subscription.amount.getAmount(),
-      currency: subscription.amount.getCurrency(),
-      frequency: subscription.frequency,
-      status: subscription.status,
-      startDate: subscription.startDate,
-      nextBillingDate: subscription.nextBillingDate,
-      description: subscription.description,
-      icon: subscription.icon,
-      layoutPosition: subscription.layoutPosition?.toData(),
-      createdAt: subscription.createdAt,
-      updatedAt: subscription.updatedAt,
-    };
   }
 }

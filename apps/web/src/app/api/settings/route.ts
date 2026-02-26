@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 export async function GET(request: Request) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     }
 
     // Use Clean Architecture: Call use case through Container
-    const getUserSettingsUseCase = Container.getUserSettingsUseCase();
+    const getUserSettingsUseCase = container.getUserSettingsUseCase;
     const result = await getUserSettingsUseCase.execute({ userId });
 
     if (result.isSuccess()) {
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     // Use Clean Architecture: Call use case through Container
-    const updateUserSettingsUseCase = Container.updateUserSettingsUseCase();
+    const updateUserSettingsUseCase = container.updateUserSettingsUseCase;
     const result = await updateUserSettingsUseCase.execute({
       userId,
       theme: settings.theme,

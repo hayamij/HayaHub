@@ -2,6 +2,7 @@ import { success, failure, type Result } from 'hayahub-shared';
 import type { IExpenseRepository } from '../../ports/IExpenseRepository';
 import type { ExpenseDTO } from '../../dtos/expense';
 import type { Expense } from 'hayahub-domain';
+import { expenseMapper } from '../../mappers/ExpenseMapper';
 
 export interface GetExpensesQuery {
   userId: string;
@@ -26,25 +27,10 @@ export class GetExpensesUseCase {
         expenses = await this.expenseRepository.findByUserId(query.userId);
       }
 
-      const dtos = expenses.map(this.toDTO);
+      const dtos = expenseMapper.toDTOs(expenses);
       return success(dtos);
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(expense: Expense): ExpenseDTO {
-    return {
-      id: expense.id,
-      userId: expense.userId,
-      description: expense.description,
-      amount: expense.amount.getAmount(),
-      currency: expense.amount.getCurrency(),
-      category: expense.category,
-      date: expense.date,
-      tags: expense.tags,
-      createdAt: expense.createdAt,
-      updatedAt: expense.updatedAt,
-    };
   }
 }

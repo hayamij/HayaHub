@@ -1,7 +1,7 @@
-import type { Quote } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IQuoteRepository } from '../../ports/IQuoteRepository';
 import type { UpdateQuoteDTO, QuoteDTO } from '../../dtos/quote';
+import { quoteMapper } from '../../mappers/QuoteMapper';
 
 export class UpdateQuoteUseCase {
   constructor(private readonly quoteRepository: IQuoteRepository) {}
@@ -36,23 +36,9 @@ export class UpdateQuoteUseCase {
       await this.quoteRepository.update(quote);
 
       // Return DTO
-      return success(this.toDTO(quote));
+      return success(quoteMapper.toDTO(quote));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(quote: Quote): QuoteDTO {
-    return {
-      id: quote.id,
-      userId: quote.userId,
-      text: quote.text,
-      author: quote.author,
-      category: quote.category,
-      isFavorite: quote.isFavorite,
-      tags: quote.tags,
-      createdAt: quote.createdAt,
-      updatedAt: quote.updatedAt,
-    };
   }
 }

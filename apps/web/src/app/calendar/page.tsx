@@ -25,7 +25,6 @@ export default function CalendarPage() {
     createEvent,
     updateEvent,
     deleteEvent,
-    refetch,
   } = useCalendarEvents();
   
   const [viewMode, setViewMode] = useState<ViewMode>('month');

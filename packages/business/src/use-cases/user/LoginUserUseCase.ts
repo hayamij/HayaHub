@@ -1,7 +1,7 @@
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IUserRepository } from '../../ports/IUserRepository';
 import type { LoginUserDTO, UserDTO } from '../../dtos/user';
-import type { User } from 'hayahub-domain';
+import { userMapper } from '../../mappers/UserMapper';
 
 export class LoginUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -20,20 +20,9 @@ export class LoginUserUseCase {
         return failure(new Error('Invalid credentials'));
       }
 
-      return success(this.toDTO(user));
+      return success(userMapper.toDTO(user));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(user: User): UserDTO {
-    return {
-      id: user.id,
-      email: user.email.getValue(),
-      name: user.name,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
   }
 }
