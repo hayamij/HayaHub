@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
-import type { ExpenseDTO } from 'hayahub-business';
+import type { ExpenseDTO, GetExpensesQuery } from 'hayahub-business';
+import { useEntityCRUD } from './useEntityCRUD';
 
 interface UseExpensesOptions {
   userId: string;
@@ -19,8 +20,12 @@ interface UseExpensesReturn {
 }
 
 /**
- * Custom Hook for Expense Management
- * Encapsulates all expense fetching logic to decouple UI from Business layer
+ * Custom Hook for Expense Management (Read-only)
+ * Uses generic useEntityCRUD to eliminate code duplication
+ * Supports date range filtering for expense queries
+ * 
+ * Note: For create/update/delete operations with ownership checks,
+ * use useExpenseData or useExpenseActions hooks instead.
  * 
  * Usage:
  * ```tsx
@@ -37,53 +42,31 @@ export function useExpenses({
   endDate,
   autoFetch = true 
 }: UseExpensesOptions): UseExpensesReturn {
-  const [expenses, setExpenses] = useState<ExpenseDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  // Create query params with date range
+  const queryParams: GetExpensesQuery = useMemo(() => ({
+    userId,
+    startDate,
+    endDate,
+  }), [userId, startDate, endDate]);
 
-  const fetchExpenses = useCallback(async () => {
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const getExpensesUseCase = container.getExpensesUseCase;
-      
-      const result = await getExpensesUseCase.execute({
-        userId,
-        startDate,
-        endDate,
-      });
-
-      if (result.isSuccess()) {
-        setExpenses(result.value);
-      } else {
-        setError(result.error);
-        setExpenses([]);
-      }
-    } catch (err) {
-      setError(err as Error);
-      setExpenses([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, startDate, endDate]);
-
-  useEffect(() => {
-    if (autoFetch) {
-      fetchExpenses();
-    }
-  }, [fetchExpenses, autoFetch]);
+  const {
+    entities: expenses,
+    isLoading,
+    error,
+    load: refetch,
+  } = useEntityCRUD<ExpenseDTO, never, never, GetExpensesQuery>({
+    getUseCase: container.getExpensesUseCase,
+    // Note: create/update/delete not provided here due to ownership checks
+    // Use useExpenseActions or useExpenseData for these operations
+    getParams: queryParams,
+    autoLoad: autoFetch,
+  });
 
   return {
     expenses,
     isLoading,
     error,
-    refetch: fetchExpenses,
+    refetch,
   };
 }
 

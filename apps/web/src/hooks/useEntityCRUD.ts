@@ -6,7 +6,6 @@ import type { Result } from 'hayahub-shared';
 /**
  * Generic CRUD Hook for Entity Management
  * Follows DRY principle by extracting common CRUD patterns
- * 
  * @template TEntity - The entity DTO type
  * @template TCreateDTO - The creation DTO type
  * @template TUpdateDTO - The update DTO type

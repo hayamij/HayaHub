@@ -273,14 +273,14 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
       notes: presetFormData.notes,
     };
 
-    const result = await createPreset(dto);
+    const success = await createPreset(dto);
 
-    if (result.success) {
+    if (success) {
       showSuccess('Đã thêm preset thành công!');
       setPresetFormData({ name: '', amount: '', notes: '' });
       setShowPresetForm(false);
     } else {
-      showError(`Thất bại: ${result.error}`);
+      showError('Thất bại khi tạo preset');
     }
   };
 
@@ -290,7 +290,6 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
     const category = formData.category || editingPreset.category;
 
     const dto: UpdateExpensePresetDTO = {
-      id: editingPreset.id,
       name: presetFormData.name,
       amount: parseFloat(presetFormData.amount),
       currency: 'VND',
@@ -298,27 +297,27 @@ export function AddExpenseModal({ isOpen, onClose, userId, onSuccess }: AddExpen
       notes: presetFormData.notes,
     };
 
-    const result = await updatePreset(editingPreset.id, dto);
+    const success = await updatePreset(editingPreset.id, dto);
 
-    if (result.success) {
+    if (success) {
       showSuccess('Đã cập nhật preset thành công!');
       setPresetFormData({ name: '', amount: '', notes: '' });
       setEditingPreset(null);
       setShowPresetForm(false);
     } else {
-      showError(`Thất bại: ${result.error}`);
+      showError('Thất bại khi cập nhật preset');
     }
   };
 
   const handleDeletePreset = async (presetId: string) => {
     if (!confirm('Bạn có chắc muốn xóa preset này?')) return;
 
-    const result = await deletePreset(presetId);
+    const success = await deletePreset(presetId);
 
-    if (result.success) {
+    if (success) {
       showSuccess('Đã xóa preset thành công!');
     } else {
-      showError(`Thất bại: ${result.error}`);
+      showError('Thất bại khi xóa preset');
     }
   };
 

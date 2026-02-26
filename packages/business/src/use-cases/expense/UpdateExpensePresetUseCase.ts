@@ -10,10 +10,10 @@ import type { UpdateExpensePresetDTO, ExpensePresetDTO } from '../../dtos/expens
 export class UpdateExpensePresetUseCase {
   constructor(private readonly presetRepository: IExpensePresetRepository) {}
 
-  async execute(dto: UpdateExpensePresetDTO): Promise<Result<ExpensePresetDTO, Error>> {
+  async execute(id: string, dto: UpdateExpensePresetDTO): Promise<Result<ExpensePresetDTO, Error>> {
     try {
       // Find existing preset
-      const preset = await this.presetRepository.findById(dto.id);
+      const preset = await this.presetRepository.findById(id);
       if (!preset) {
         return failure(new Error('Preset not found'));
       }

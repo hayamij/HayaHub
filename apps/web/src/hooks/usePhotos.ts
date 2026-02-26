@@ -7,18 +7,21 @@ import type { Photo } from 'hayahub-domain';
 interface UsePhotosReturn {
   photos: Photo[];
   isLoading: boolean;
-  error: string | null;
+  error: Error | null;
   refetch: () => Promise<void>;
 }
 
 /**
  * Custom Hook for Photos List
  * Encapsulates photos data fetching
+ * 
+ * Note: Photo operations are handled by usePhotoActions hook
+ * This hook is read-only for listing photos
  */
 export function usePhotos(userId: string | undefined): UsePhotosReturn {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const loadPhotos = useCallback(async () => {
     if (!userId) {
@@ -36,11 +39,14 @@ export function usePhotos(userId: string | undefined): UsePhotosReturn {
 
       if (result.success) {
         setPhotos(result.value);
+        setError(null);
       } else {
-        setError(result.error.message);
+        setError(result.error);
+        setPhotos([]);
       }
     } catch (err) {
-      setError((err as Error).message);
+      setError(err as Error);
+      setPhotos([]);
     } finally {
       setIsLoading(false);
     }
