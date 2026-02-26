@@ -2,6 +2,7 @@ import { Money, type WishItem } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IWishItemRepository } from '../../ports/IWishItemRepository';
 import type { UpdateWishItemDTO, WishItemDTO } from '../../dtos/wishItem';
+import { wishItemMapper } from '../../mappers/WishItemMapper';
 
 export class UpdateWishItemUseCase {
   constructor(private readonly wishItemRepository: IWishItemRepository) {}
@@ -52,27 +53,10 @@ export class UpdateWishItemUseCase {
       // Persist
       await this.wishItemRepository.update(wishItem);
 
-      // Return DTO
-      return success(this.toDTO(wishItem));
+      // Return DTO using centralized mapper
+      return success(wishItemMapper.toDTO(wishItem));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(wishItem: WishItem): WishItemDTO {
-    return {
-      id: wishItem.id,
-      userId: wishItem.userId,
-      name: wishItem.name,
-      description: wishItem.description,
-      estimatedPrice: wishItem.estimatedPrice?.getAmount() || null,
-      currency: wishItem.estimatedPrice?.getCurrency() || null,
-      priority: wishItem.priority,
-      url: wishItem.url,
-      purchased: wishItem.purchased,
-      purchasedAt: wishItem.purchasedAt,
-      createdAt: wishItem.createdAt,
-      updatedAt: wishItem.updatedAt,
-    };
   }
 }

@@ -2,6 +2,7 @@ import { ExpensePreset, Money } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IExpensePresetRepository } from '../../ports/IExpensePresetRepository';
 import type { UpdateExpensePresetDTO, ExpensePresetDTO } from '../../dtos/expensePreset';
+import { expensePresetMapper } from '../../mappers/ExpensePresetMapper';
 
 /**
  * Use Case: Update an existing expense preset
@@ -40,23 +41,9 @@ export class UpdateExpensePresetUseCase {
       await this.presetRepository.update(preset);
 
       // Return DTO
-      return success(this.toDTO(preset));
+      return success(expensePresetMapper.toDTO(preset));
     } catch (error) {
       return failure(error as Error);
     }
-  }
-
-  private toDTO(preset: ExpensePreset): ExpensePresetDTO {
-    return {
-      id: preset.id,
-      userId: preset.userId,
-      name: preset.name,
-      amount: preset.amount.getAmount(),
-      currency: preset.amount.getCurrency(),
-      category: preset.category,
-      notes: preset.notes,
-      createdAt: preset.createdAt,
-      updatedAt: preset.updatedAt,
-    };
   }
 }
