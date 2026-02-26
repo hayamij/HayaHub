@@ -42,12 +42,16 @@ export function useExpenses({
   endDate,
   autoFetch = true 
 }: UseExpensesOptions): UseExpensesReturn {
-  // Create query params with date range
+  // Extract timestamps BEFORE useMemo to ensure stable primitive comparisons
+  const startTime = startDate?.getTime();
+  const endTime = endDate?.getTime();
+  
+  // Create query params with stable reference based on primitive timestamps
   const queryParams: GetExpensesQuery = useMemo(() => ({
     userId,
     startDate,
     endDate,
-  }), [userId, startDate, endDate]);
+  }), [userId, startTime, endTime]);
 
   const {
     entities: expenses,
@@ -108,5 +112,9 @@ export function useDateRangeExpenses(
   startDate: Date,
   endDate: Date
 ): UseExpensesReturn {
-  return useExpenses({ userId, startDate, endDate });
+  // Memoize dates to prevent infinite loops from parent component re-renders
+  const memoizedStartDate = useMemo(() => startDate, [startDate.getTime()]);
+  const memoizedEndDate = useMemo(() => endDate, [endDate.getTime()]);
+  
+  return useExpenses({ userId, startDate: memoizedStartDate, endDate: memoizedEndDate });
 }

@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { useExpenses } from '@/hooks/useExpenses';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, TrendingUp, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { getTodayRange, getWeekRange, getMonthRange, isDateInRange } from '@/lib/date-filter';
 
@@ -21,7 +21,10 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { isSyncing, queueSize } = useSyncStatus();
   const router = useRouter();
-  const monthRange = getMonthRange();
+  
+  // Memoize date range to prevent infinite re-renders
+  const monthRange = useMemo(() => getMonthRange(), []);
+  
   const { expenses, refetch } = useExpenses({ userId: user?.id || '', startDate: monthRange.start, endDate: monthRange.end });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
