@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
 import type { TaskDTO, CreateTaskDTO, UpdateTaskDTO } from 'hayahub-business';
 import { useEntityCRUD } from './useEntityCRUD';
@@ -23,13 +23,18 @@ interface UseTasksReturn {
 export function useTasks(userId: string | undefined): UseTasksReturn {
   const [isLoadingByProject, setIsLoadingByProject] = useState(false);
   
+  // Memoize use cases to prevent getter re-evaluation
+  const getTasksUseCase = useMemo(() => container.getTasksUseCase, []);
+  const createTaskUseCase = useMemo(() => container.createTaskUseCase, []);
+  const updateTaskUseCase = useMemo(() => container.updateTaskUseCase, []);
+  const deleteTaskUseCase = useMemo(() => container.deleteTaskUseCase, []);
+  
   // Custom execute wrapper for GetTasksUseCase.executeByUser
-  const getTasksWrapper = {
+  const getTasksWrapper = useMemo(() => ({
     execute: async (uid: string) => {
-      const getTasksUseCase = container.getTasksUseCase;
       return await getTasksUseCase.executeByUser(uid);
     }
-  };
+  }), [getTasksUseCase]);
 
   const {
     entities: tasks,
@@ -41,9 +46,9 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
     deleteEntity: deleteTask,
   } = useEntityCRUD<TaskDTO, CreateTaskDTO, UpdateTaskDTO>({
     getUseCase: getTasksWrapper,
-    createUseCase: container.createTaskUseCase,
-    updateUseCase: container.updateTaskUseCase,
-    deleteUseCase: container.deleteTaskUseCase,
+    createUseCase: createTaskUseCase,
+    updateUseCase: updateTaskUseCase,
+    deleteUseCase: deleteTaskUseCase,
     getParams: userId!,
   });
 
@@ -52,7 +57,6 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
     setIsLoadingByProject(true);
 
     try {
-      const getTasksUseCase = container.getTasksUseCase;
       const result = await getTasksUseCase.executeByProject(projectId);
 
       if (result.isSuccess()) {
@@ -62,7 +66,7 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
     } finally {
       setIsLoadingByProject(false);
     }
-  }, []);
+  }, [getTasksUseCase]);
 
   return {
     tasks,

@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
 import type { QuoteDTO, CreateQuoteDTO, UpdateQuoteDTO } from 'hayahub-business';
 import { useEntityCRUD } from './useEntityCRUD';
@@ -19,6 +20,12 @@ interface UseQuotesReturn {
  * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useQuotes(userId: string | undefined): UseQuotesReturn {
+  // Memoize use cases to prevent getter re-evaluation
+  const getQuotesUseCase = useMemo(() => container.getQuotesUseCase, []);
+  const createQuoteUseCase = useMemo(() => container.createQuoteUseCase, []);
+  const updateQuoteUseCase = useMemo(() => container.updateQuoteUseCase, []);
+  const deleteQuoteUseCase = useMemo(() => container.deleteQuoteUseCase, []);
+  
   const {
     entities: quotes,
     isLoading,
@@ -28,10 +35,10 @@ export function useQuotes(userId: string | undefined): UseQuotesReturn {
     update: updateQuote,
     deleteEntity: deleteQuote,
   } = useEntityCRUD<QuoteDTO, CreateQuoteDTO, UpdateQuoteDTO>({
-    getUseCase: container.getQuotesUseCase,
-    createUseCase: container.createQuoteUseCase,
-    updateUseCase: container.updateQuoteUseCase,
-    deleteUseCase: container.deleteQuoteUseCase,
+    getUseCase: getQuotesUseCase,
+    createUseCase: createQuoteUseCase,
+    updateUseCase: updateQuoteUseCase,
+    deleteUseCase: deleteQuoteUseCase,
     getParams: userId!,
   });
 

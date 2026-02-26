@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
 import type { ExpensePresetDTO, CreateExpensePresetDTO, UpdateExpensePresetDTO } from 'hayahub-business';
 import { useEntityCRUD } from './useEntityCRUD';
@@ -17,6 +18,12 @@ interface UseExpensePresetsReturn {
  * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useExpensePresets(userId: string | undefined): UseExpensePresetsReturn {
+  // Memoize use cases to prevent getter re-evaluation
+  const getExpensePresetsUseCase = useMemo(() => container.getExpensePresetsUseCase, []);
+  const createExpensePresetUseCase = useMemo(() => container.createExpensePresetUseCase, []);
+  const updateExpensePresetUseCase = useMemo(() => container.updateExpensePresetUseCase, []);
+  const deleteExpensePresetUseCase = useMemo(() => container.deleteExpensePresetUseCase, []);
+  
   const {
     entities: presets,
     isLoading,
@@ -26,10 +33,10 @@ export function useExpensePresets(userId: string | undefined): UseExpensePresets
     update: updatePreset,
     deleteEntity: deletePreset,
   } = useEntityCRUD<ExpensePresetDTO, CreateExpensePresetDTO, UpdateExpensePresetDTO>({
-    getUseCase: container.getExpensePresetsUseCase,
-    createUseCase: container.createExpensePresetUseCase,
-    updateUseCase: container.updateExpensePresetUseCase,
-    deleteUseCase: container.deleteExpensePresetUseCase,
+    getUseCase: getExpensePresetsUseCase,
+    createUseCase: createExpensePresetUseCase,
+    updateUseCase: updateExpensePresetUseCase,
+    deleteUseCase: deleteExpensePresetUseCase,
     getParams: userId!,
   });
 
