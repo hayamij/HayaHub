@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
 import type { WishItemDTO, CreateWishItemDTO, UpdateWishItemDTO } from 'hayahub-business';
 import { useEntityCRUD } from './useEntityCRUD';
@@ -19,6 +20,12 @@ interface UseWishItemsReturn {
  * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useWishItems(userId: string | undefined): UseWishItemsReturn {
+  // Memoize use cases to prevent getter re-evaluation
+  const getWishItemsUseCase = useMemo(() => container.getWishItemsUseCase, []);
+  const createWishItemUseCase = useMemo(() => container.createWishItemUseCase, []);
+  const updateWishItemUseCase = useMemo(() => container.updateWishItemUseCase, []);
+  const deleteWishItemUseCase = useMemo(() => container.deleteWishItemUseCase, []);
+  
   const {
     entities: wishItems,
     isLoading,
@@ -28,10 +35,10 @@ export function useWishItems(userId: string | undefined): UseWishItemsReturn {
     update: updateWishItem,
     deleteEntity: deleteWishItem,
   } = useEntityCRUD<WishItemDTO, CreateWishItemDTO, UpdateWishItemDTO>({
-    getUseCase: container.getWishItemsUseCase,
-    createUseCase: container.createWishItemUseCase,
-    updateUseCase: container.updateWishItemUseCase,
-    deleteUseCase: container.deleteWishItemUseCase,
+    getUseCase: getWishItemsUseCase,
+    createUseCase: createWishItemUseCase,
+    updateUseCase: updateWishItemUseCase,
+    deleteUseCase: deleteWishItemUseCase,
     getParams: userId!,
   });
 

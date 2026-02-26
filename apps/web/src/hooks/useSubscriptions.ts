@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
 import type { SubscriptionDTO, CreateSubscriptionDTO, UpdateSubscriptionDTO } from 'hayahub-business';
 import { useEntityCRUD } from './useEntityCRUD';
@@ -19,6 +20,12 @@ interface UseSubscriptionsReturn {
  * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useSubscriptions(userId: string | undefined): UseSubscriptionsReturn {
+  // Memoize use cases to prevent getter re-evaluation
+  const getSubscriptionsUseCase = useMemo(() => container.getSubscriptionsUseCase, []);
+  const createSubscriptionUseCase = useMemo(() => container.createSubscriptionUseCase, []);
+  const updateSubscriptionUseCase = useMemo(() => container.updateSubscriptionUseCase, []);
+  const deleteSubscriptionUseCase = useMemo(() => container.deleteSubscriptionUseCase, []);
+  
   const {
     entities: subscriptions,
     isLoading,
@@ -28,10 +35,10 @@ export function useSubscriptions(userId: string | undefined): UseSubscriptionsRe
     update: updateSubscription,
     deleteEntity: deleteSubscription,
   } = useEntityCRUD<SubscriptionDTO, CreateSubscriptionDTO, UpdateSubscriptionDTO>({
-    getUseCase: container.getSubscriptionsUseCase,
-    createUseCase: container.createSubscriptionUseCase,
-    updateUseCase: container.updateSubscriptionUseCase,
-    deleteUseCase: container.deleteSubscriptionUseCase,
+    getUseCase: getSubscriptionsUseCase,
+    createUseCase: createSubscriptionUseCase,
+    updateUseCase: updateSubscriptionUseCase,
+    deleteUseCase: deleteSubscriptionUseCase,
     getParams: userId!,
   });
 

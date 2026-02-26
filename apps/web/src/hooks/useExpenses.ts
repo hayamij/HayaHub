@@ -42,20 +42,15 @@ export function useExpenses({
   endDate,
   autoFetch = true 
 }: UseExpensesOptions): UseExpensesReturn {
-  // Extract timestamps BEFORE useMemo to ensure stable primitive comparisons
-  const startTime = startDate?.getTime();
-  const endTime = endDate?.getTime();
+  // Memoize use case to prevent getter re-evaluation
+  const getExpensesUseCase = useMemo(() => container.getExpensesUseCase, []);
   
-  // Memoize the Date objects themselves to prevent reference changes
-  const memoizedStartDate = useMemo(() => startDate, [startTime]);
-  const memoizedEndDate = useMemo(() => endDate, [endTime]);
-  
-  // Create query params with stable Date references
+  // Memoize query params with primitive timestamp comparisons
   const queryParams: GetExpensesQuery = useMemo(() => ({
     userId,
-    startDate: memoizedStartDate,
-    endDate: memoizedEndDate,
-  }), [userId, memoizedStartDate, memoizedEndDate]);
+    startDate,
+    endDate,
+  }), [userId, startDate?.getTime(), endDate?.getTime()]);
 
   const {
     entities: expenses,
@@ -63,7 +58,7 @@ export function useExpenses({
     error,
     load: refetch,
   } = useEntityCRUD<ExpenseDTO, never, never, GetExpensesQuery>({
-    getUseCase: container.getExpensesUseCase,
+    getUseCase: getExpensesUseCase,
     // Note: create/update/delete not provided here due to ownership checks
     // Use useExpenseActions or useExpenseData for these operations
     getParams: queryParams,

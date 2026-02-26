@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { container } from '@/infrastructure/di/Container';
 import type { ProjectDTO, CreateProjectDTO, UpdateProjectDTO } from 'hayahub-business';
 import { useEntityCRUD } from './useEntityCRUD';
@@ -19,6 +20,12 @@ interface UseProjectsReturn {
  * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useProjects(userId: string | undefined): UseProjectsReturn {
+  // Memoize use cases to prevent getter re-evaluation
+  const getProjectsUseCase = useMemo(() => container.getProjectsUseCase, []);
+  const createProjectUseCase = useMemo(() => container.createProjectUseCase, []);
+  const updateProjectUseCase = useMemo(() => container.updateProjectUseCase, []);
+  const deleteProjectUseCase = useMemo(() => container.deleteProjectUseCase, []);
+  
   const {
     entities: projects,
     isLoading,
@@ -28,10 +35,10 @@ export function useProjects(userId: string | undefined): UseProjectsReturn {
     update: updateProject,
     deleteEntity: deleteProject,
   } = useEntityCRUD<ProjectDTO, CreateProjectDTO, UpdateProjectDTO>({
-    getUseCase: container.getProjectsUseCase,
-    createUseCase: container.createProjectUseCase,
-    updateUseCase: container.updateProjectUseCase,
-    deleteUseCase: container.deleteProjectUseCase,
+    getUseCase: getProjectsUseCase,
+    createUseCase: createProjectUseCase,
+    updateUseCase: updateProjectUseCase,
+    deleteUseCase: deleteProjectUseCase,
     getParams: userId!,
   });
 
