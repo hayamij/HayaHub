@@ -46,12 +46,16 @@ export function useExpenses({
   const startTime = startDate?.getTime();
   const endTime = endDate?.getTime();
   
-  // Create query params with stable reference based on primitive timestamps
+  // Memoize the Date objects themselves to prevent reference changes
+  const memoizedStartDate = useMemo(() => startDate, [startTime]);
+  const memoizedEndDate = useMemo(() => endDate, [endTime]);
+  
+  // Create query params with stable Date references
   const queryParams: GetExpensesQuery = useMemo(() => ({
     userId,
-    startDate,
-    endDate,
-  }), [userId, startTime, endTime]);
+    startDate: memoizedStartDate,
+    endDate: memoizedEndDate,
+  }), [userId, memoizedStartDate, memoizedEndDate]);
 
   const {
     entities: expenses,
