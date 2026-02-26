@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { TaskDTO, CreateTaskDTO, UpdateTaskDTO } from 'hayahub-business';
 
 interface UseTasksReturn {
@@ -33,7 +33,7 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
     setError(null);
 
     try {
-      const getTasksUseCase = Container.getTasksUseCase();
+      const getTasksUseCase = container.getTasksUseCase;
       const result = await getTasksUseCase.executeByUser(userId);
 
       if (result.isSuccess()) {
@@ -55,7 +55,7 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
     setError(null);
 
     try {
-      const getTasksUseCase = Container.getTasksUseCase();
+      const getTasksUseCase = container.getTasksUseCase;
       const result = await getTasksUseCase.executeByProject(projectId);
 
       if (result.isSuccess()) {
@@ -75,7 +75,7 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
   const createTask = useCallback(
     async (dto: CreateTaskDTO): Promise<boolean> => {
       try {
-        const createTaskUseCase = Container.createTaskUseCase();
+        const createTaskUseCase = container.createTaskUseCase;
         const result = await createTaskUseCase.execute(dto);
 
         if (result.isSuccess()) {
@@ -96,7 +96,7 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
   const updateTask = useCallback(
     async (id: string, dto: UpdateTaskDTO): Promise<boolean> => {
       try {
-        const updateTaskUseCase = Container.updateTaskUseCase();
+        const updateTaskUseCase = container.updateTaskUseCase;
         const result = await updateTaskUseCase.execute(id, dto);
 
         if (result.isSuccess()) {
@@ -117,7 +117,7 @@ export function useTasks(userId: string | undefined): UseTasksReturn {
   const deleteTask = useCallback(
     async (id: string): Promise<boolean> => {
       try {
-        const deleteTaskUseCase = Container.deleteTaskUseCase();
+        const deleteTaskUseCase = container.deleteTaskUseCase;
         const result = await deleteTaskUseCase.execute(id);
 
         if (result.isSuccess()) {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { RegisterUserDTO } from 'hayahub-business';
 
 interface UseRegisterReturn {
@@ -12,7 +12,6 @@ export function useRegister(): UseRegisterReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const container = Container.getInstance();
   const registerUseCase = container.registerUserUseCase;
 
   const register = async (userData: RegisterUserDTO) => {

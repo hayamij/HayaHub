@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { ProjectDTO, CreateProjectDTO, UpdateProjectDTO } from 'hayahub-business';
+import { useEntityCRUD } from './useEntityCRUD';
 
 interface UseProjectsReturn {
   projects: ProjectDTO[];
@@ -16,105 +16,24 @@ interface UseProjectsReturn {
 
 /**
  * Custom Hook for Project Management
+ * Uses generic useEntityCRUD to eliminate code duplication
  */
 export function useProjects(userId: string | undefined): UseProjectsReturn {
-  const [projects, setProjects] = useState<ProjectDTO[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const loadProjects = useCallback(async () => {
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const getProjectsUseCase = Container.getProjectsUseCase();
-      const result = await getProjectsUseCase.execute(userId);
-
-      if (result.isSuccess()) {
-        setProjects(result.value);
-      } else {
-        setError(result.error);
-        setProjects([]);
-      }
-    } catch (err) {
-      setError(err as Error);
-      setProjects([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId]);
-
-  const createProject = useCallback(
-    async (dto: CreateProjectDTO): Promise<boolean> => {
-      try {
-        const createProjectUseCase = Container.createProjectUseCase();
-        const result = await createProjectUseCase.execute(dto);
-
-        if (result.isSuccess()) {
-          await loadProjects();
-          return true;
-        } else {
-          setError(result.error);
-          return false;
-        }
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      }
-    },
-    [loadProjects]
-  );
-
-  const updateProject = useCallback(
-    async (id: string, dto: UpdateProjectDTO): Promise<boolean> => {
-      try {
-        const updateProjectUseCase = Container.updateProjectUseCase();
-        const result = await updateProjectUseCase.execute(id, dto);
-
-        if (result.isSuccess()) {
-          await loadProjects();
-          return true;
-        } else {
-          setError(result.error);
-          return false;
-        }
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      }
-    },
-    [loadProjects]
-  );
-
-  const deleteProject = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        const deleteProjectUseCase = Container.deleteProjectUseCase();
-        const result = await deleteProjectUseCase.execute(id);
-
-        if (result.isSuccess()) {
-          await loadProjects();
-          return true;
-        } else {
-          setError(result.error);
-          return false;
-        }
-      } catch (err) {
-        setError(err as Error);
-        return false;
-      }
-    },
-    [loadProjects]
-  );
-
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+  const {
+    entities: projects,
+    isLoading,
+    error,
+    load: loadProjects,
+    create: createProject,
+    update: updateProject,
+    deleteEntity: deleteProject,
+  } = useEntityCRUD<ProjectDTO, CreateProjectDTO, UpdateProjectDTO>({
+    getUseCase: container.getProjectsUseCase,
+    createUseCase: container.createProjectUseCase,
+    updateUseCase: container.updateProjectUseCase,
+    deleteUseCase: container.deleteProjectUseCase,
+    getParams: userId!,
+  });
 
   return {
     projects,

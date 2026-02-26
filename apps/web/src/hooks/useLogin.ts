@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { LoginUserDTO } from 'hayahub-business';
 
 interface UseLoginReturn {
@@ -12,7 +12,6 @@ export function useLogin(): UseLoginReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const container = Container.getInstance();
   const loginUseCase = container.loginUserUseCase;
 
   const login = async (credentials: LoginUserDTO) => {

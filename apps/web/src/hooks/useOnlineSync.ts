@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 /**
  * Hook to monitor online/offline status and trigger sync when coming back online
@@ -22,7 +22,7 @@ export function useOnlineSync() {
       
       // Always trigger sync when coming back online, regardless of duration
       try {
-        const storage = Container.getInstance().storageService;
+        const storage = container.storageService;
         
         // Check if storage has compareAndSync method (HybridStorageAdapter)
         if ('compareAndSync' in storage && typeof storage.compareAndSync === 'function') {

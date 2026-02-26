@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { ExpensePresetDTO, CreateExpensePresetDTO, UpdateExpensePresetDTO } from 'hayahub-business';
 
 interface UseExpensePresetsReturn {
@@ -17,7 +17,6 @@ export function useExpensePresets(userId: string | undefined): UseExpensePresets
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const container = Container.getInstance();
   const getPresetsUseCase = container.getExpensePresetsUseCase;
   const createPresetUseCase = container.createExpensePresetUseCase;
   const updatePresetUseCase = container.updateExpensePresetUseCase;

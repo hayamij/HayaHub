@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { CreateExpenseDTO } from 'hayahub-business';
 
 interface UseExpenseActionsReturn {
@@ -12,7 +12,6 @@ export function useExpenseActions(): UseExpenseActionsReturn {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const container = Container.getInstance();
   const createExpenseUseCase = container.createExpenseUseCase;
 
   const createExpense = async (dto: CreateExpenseDTO) => {

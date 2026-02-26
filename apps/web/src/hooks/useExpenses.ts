@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import type { ExpenseDTO } from 'hayahub-business';
 
 interface UseExpensesOptions {
@@ -51,7 +51,7 @@ export function useExpenses({
     setError(null);
 
     try {
-      const getExpensesUseCase = Container.getExpensesUseCase();
+      const getExpensesUseCase = container.getExpensesUseCase;
       
       const result = await getExpensesUseCase.execute({
         userId,

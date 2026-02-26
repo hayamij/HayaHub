@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 
 interface UpdateUserData {
   name?: string;
@@ -16,7 +16,6 @@ export function useUserProfile(): UseUserProfileReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const container = Container.getInstance();
   const updateUserUseCase = container.updateUserUseCase;
 
   const updateProfile = async (userId: string, data: UpdateUserData) => {
