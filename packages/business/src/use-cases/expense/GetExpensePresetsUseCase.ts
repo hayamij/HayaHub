@@ -1,4 +1,4 @@
-import type { ExpensePreset, ExpenseCategory } from 'hayahub-domain';
+import type { ExpenseCategory } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IExpensePresetRepository } from '../../ports/IExpensePresetRepository';
 import type { ExpensePresetDTO } from '../../dtos/expensePreset';

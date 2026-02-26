@@ -1,7 +1,8 @@
 import { success, failure, type Result } from 'hayahub-shared';
-import { Subscription, Money, LayoutPosition } from 'hayahub-domain';
+import { Money, LayoutPosition } from 'hayahub-domain';
 import type { ISubscriptionRepository } from '../../ports/ISubscriptionRepository';
 import type { UpdateSubscriptionDTO, SubscriptionDTO } from '../../dtos/subscription';
+import { subscriptionMapper } from '../../mappers/SubscriptionMapper';
 
 export class UpdateSubscriptionUseCase {
   constructor(private readonly subscriptionRepository: ISubscriptionRepository) {}

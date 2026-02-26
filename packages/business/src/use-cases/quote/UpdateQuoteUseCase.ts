@@ -1,4 +1,3 @@
-import type { Quote } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IQuoteRepository } from '../../ports/IQuoteRepository';
 import type { UpdateQuoteDTO, QuoteDTO } from '../../dtos/quote';

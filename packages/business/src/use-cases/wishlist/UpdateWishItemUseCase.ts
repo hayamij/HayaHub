@@ -1,4 +1,4 @@
-import { Money, type WishItem } from 'hayahub-domain';
+import { Money } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IWishItemRepository } from '../../ports/IWishItemRepository';
 import type { UpdateWishItemDTO, WishItemDTO } from '../../dtos/wishItem';

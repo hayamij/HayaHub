@@ -1,4 +1,4 @@
-import { ExpensePreset, Money } from 'hayahub-domain';
+import { Money } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IExpensePresetRepository } from '../../ports/IExpensePresetRepository';
 import type { UpdateExpensePresetDTO, ExpensePresetDTO } from '../../dtos/expensePreset';

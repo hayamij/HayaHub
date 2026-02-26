@@ -2,7 +2,6 @@ import { Email } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IUserRepository } from '../../ports/IUserRepository';
 import type { UserDTO } from '../../dtos/user';
-import type { User } from 'hayahub-domain';
 import { userMapper } from '../../mappers/UserMapper';
 
 export interface UpdateUserDTO {

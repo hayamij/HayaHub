@@ -2,7 +2,6 @@ import { Money } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IExpenseRepository } from '../../ports/IExpenseRepository';
 import type { UpdateExpenseDTO, ExpenseDTO } from '../../dtos/expense';
-import type { Expense } from 'hayahub-domain';
 import { expenseMapper } from '../../mappers/ExpenseMapper';
 
 export class UpdateExpenseUseCase {

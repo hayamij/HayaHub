@@ -1,4 +1,3 @@
-import type { DashboardWidget } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { IDashboardWidgetRepository } from '../../ports/IDashboardWidgetRepository';
 import type { DashboardWidgetDTO } from '../../dtos/dashboardWidget';

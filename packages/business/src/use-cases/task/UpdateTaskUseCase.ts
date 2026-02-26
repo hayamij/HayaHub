@@ -1,4 +1,3 @@
-import type { Task } from 'hayahub-domain';
 import { success, failure, type Result } from 'hayahub-shared';
 import type { ITaskRepository } from '../../ports/ITaskRepository';
 import type { UpdateTaskDTO, TaskDTO } from '../../dtos/task';
