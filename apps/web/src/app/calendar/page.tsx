@@ -69,7 +69,7 @@ export default function CalendarPage() {
     }
   };
 
-  const handleSave = async (data: CreateCalendarEventDTO | Partial<CalendarEventDTO>) => {
+  const handleSave = async (data: Omit<CreateCalendarEventDTO, 'userId'> | Partial<CalendarEventDTO>) => {
     try {
       if (editingEvent) {
         await updateEvent(editingEvent.id, data);
@@ -82,7 +82,7 @@ export default function CalendarPage() {
               endDate: data.endDate || new Date(quickAddDate.getTime() + 60 * 60 * 1000),
             }
           : data;
-        await createEvent(eventData as CreateCalendarEventDTO);
+        await createEvent(eventData);
       }
       setIsModalOpen(false);
       setEditingEvent(null);
