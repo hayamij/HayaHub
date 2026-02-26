@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Heart, Sparkles } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
 import type { QuoteDTO } from 'hayahub-business';
 
@@ -21,7 +21,7 @@ export default function QuoteWidgetContent() {
 
       setIsLoading(true);
       try {
-        const getQuotesUseCase = Container.getQuotesUseCase();
+        const getQuotesUseCase = container.getQuotesUseCase;
         const result = await getQuotesUseCase.execute(user.id);
 
         if (result.success) {

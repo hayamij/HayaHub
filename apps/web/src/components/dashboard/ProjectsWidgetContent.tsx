@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Circle } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ProjectDTO, TaskDTO } from 'hayahub-business';
 import { ProjectStatus } from 'hayahub-domain';
@@ -24,8 +24,8 @@ export default function ProjectsWidgetContent() {
 
       setIsLoading(true);
       try {
-        const getProjectsUseCase = Container.getProjectsUseCase();
-        const getTasksUseCase = Container.getTasksUseCase();
+        const getProjectsUseCase = container.getProjectsUseCase;
+        const getTasksUseCase = container.getTasksUseCase;
 
         const [projectsResult, tasksResult] = await Promise.all([
           getProjectsUseCase.execute(user.id),

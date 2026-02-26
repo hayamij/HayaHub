@@ -11,9 +11,8 @@ interface EventModalProps {
   isOpen: boolean;
   editingEvent: CalendarEventDTO | null;
   onClose: () => void;
-  onSave: (data: CreateCalendarEventDTO | Partial<CalendarEventDTO>) => Promise<void>;
+  onSave: (data: Omit<CreateCalendarEventDTO, 'userId'> | Partial<CalendarEventDTO>) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
-  userId: string;
   quickAddDate?: Date | null;
 }
 
@@ -23,7 +22,7 @@ const PRIORITY_LABELS: Record<EventPriority, string> = {
   [EventPriority.HIGH]: 'Cao',
 };
 
-export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, userId, quickAddDate }: EventModalProps) {
+export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, quickAddDate }: EventModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -93,7 +92,6 @@ export function EventModal({ isOpen, editingEvent, onClose, onSave, onDelete, us
         });
       } else {
         await onSave({
-          userId,
           title: formData.title,
           description: formData.description,
           startDate,

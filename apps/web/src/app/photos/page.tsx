@@ -69,8 +69,9 @@ export default function PhotosPage() {
     
     if (result.success) {
       await refetch();
+      // Clear selection to force re-render with updated data
       if (selectedPhoto?.getId() === photoId) {
-        setSelectedPhoto(result.value);
+        setSelectedPhoto(null);
       }
       setEditingCaption(null);
     } else {

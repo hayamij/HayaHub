@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CreditCard, Calendar } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
 import type { SubscriptionDTO } from 'hayahub-business';
 
@@ -22,7 +22,7 @@ export default function SubscriptionsWidgetContent() {
 
       setIsLoading(true);
       try {
-        const getSubscriptionsUseCase = Container.getSubscriptionsUseCase();
+        const getSubscriptionsUseCase = container.getSubscriptionsUseCase;
         const result = await getSubscriptionsUseCase.execute(user.id);
 
         if (result.success) {
