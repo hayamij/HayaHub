@@ -75,13 +75,13 @@ export default function CalendarPage() {
         await updateEvent(editingEvent.id, data);
       } else {
         // Pre-fill with quick add date if available
-        const eventData = quickAddDate
+        const eventData: Omit<CreateCalendarEventDTO, 'userId'> = quickAddDate
           ? {
-              ...data,
+              ...(data as Omit<CreateCalendarEventDTO, 'userId'>),
               startDate: data.startDate || quickAddDate,
               endDate: data.endDate || new Date(quickAddDate.getTime() + 60 * 60 * 1000),
             }
-          : data;
+          : (data as Omit<CreateCalendarEventDTO, 'userId'>);
         await createEvent(eventData);
       }
       setIsModalOpen(false);
@@ -343,7 +343,6 @@ export default function CalendarPage() {
           onClose={handleCloseModal}
           onSave={handleSave}
           onDelete={handleDelete}
-          userId={user?.id || ''}
           quickAddDate={quickAddDate}
         />
 

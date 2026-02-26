@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
 import type { WishItemDTO } from 'hayahub-business';
 
@@ -22,7 +22,7 @@ export default function WishlistWidgetContent() {
 
       setIsLoading(true);
       try {
-        const getWishItemsUseCase = Container.getWishItemsUseCase();
+        const getWishItemsUseCase = container.getWishItemsUseCase;
         const result = await getWishItemsUseCase.execute(user.id);
 
         if (result.success) {

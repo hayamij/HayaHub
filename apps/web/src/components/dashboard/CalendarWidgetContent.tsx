@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Calendar, Clock } from 'lucide-react';
-import { Container } from '@/infrastructure/di/Container';
+import { container } from '@/infrastructure/di/Container';
 import { useAuth } from '@/contexts/AuthContext';
 import type { CalendarEventDTO } from 'hayahub-business';
 
@@ -22,7 +22,7 @@ export default function CalendarWidgetContent() {
 
       setIsLoading(true);
       try {
-        const getCalendarEventsUseCase = Container.getCalendarEventsUseCase();
+        const getCalendarEventsUseCase = container.getCalendarEventsUseCase;
         const result = await getCalendarEventsUseCase.execute(user.id);
 
         if (result.success) {

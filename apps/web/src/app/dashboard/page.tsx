@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const { isSyncing, queueSize } = useSyncStatus();
   const router = useRouter();
   const monthRange = getMonthRange();
-  const { expenses, refetch } = useExpenses(user?.id, monthRange.start, monthRange.end);
+  const { expenses, refetch } = useExpenses({ userId: user?.id || '', startDate: monthRange.start, endDate: monthRange.end });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [stats, setStats] = useState({
