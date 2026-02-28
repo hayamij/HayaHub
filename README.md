@@ -1,4 +1,4 @@
-# 🌟 HayaHub
+# HayaHub
 
 <div align="center">
 
@@ -15,30 +15,63 @@ Modern productivity platform built with Clean Architecture, DDD, and React best 
 
 ---
 
-## 🎯 Overview
+## Overview
 
 **HayaHub** combines expense tracking, project management, calendar, subscriptions, wishlist, quotes, and photo gallery into one cohesive platform.
 
 **Key Highlights:**
-- 🏗️ Clean Architecture with 4-layer separation
-- 📦 Turborepo monorepo with 3 packages
-- 💾 Hybrid Storage (LocalStorage + GitHub API)
-- 🔄 Offline-first with background sync
-- ♻️ ~900 LOC eliminated via generic patterns
-- 🧪 Full TypeScript strict mode
+- Clean Architecture with 4-layer separation
+- Turborepo monorepo with 3 packages
+- Hybrid Storage (LocalStorage + GitHub API)
+- Offline-first with background sync
+- ~900 LOC eliminated via generic patterns
+- Full TypeScript strict mode
 
-## ✨ Features
+## Screenshots
 
-**📊 Expense Management** - Track income/expenses with filtering, statistics, and presets  
-**📅 Calendar** - Event management with month/week/day views  
-**💰 Subscriptions** - Monitor recurring payments and costs  
-**📝 Projects & Tasks** - Organize projects with task tracking  
-**🌟 Wishlist** - Item tracking with priorities and prices  
-**💬 Quotes** - Daily inspirational quote management  
-**📸 Photos** - Cloudinary-powered photo gallery  
-**🎨 UI/UX** - Dark mode, responsive design, real-time sync
+### Dashboard
+![Dashboard](docs/assets/images/dashboard1.png)
+*Main dashboard with widgets and expense statistics*
 
-## 🏛️ Architecture
+![Dashboard Detail](docs/assets/images/dashboard2.png)
+*Dashboard widgets: calendar, quotes, wishlist, subscriptions*
+
+### Expense Management
+![Spending](docs/assets/images/spending.png)
+*Expense tracking with filters, charts, and statistics*
+
+### Calendar
+![Calendar](docs/assets/images/calendar.png)
+*Monthly calendar view with event management*
+
+### Subscriptions
+![Subscriptions](docs/assets/images/subscriptions.png)
+*Subscription tracking with payment cycles*
+
+### Wishlist
+![Wishlist](docs/assets/images/wishlist.png)
+*Wishlist with priority and price tracking*
+
+### Quotes
+![Quotes](docs/assets/images/quotes.png)
+*Quote management with categories and favorites*
+
+### Photos
+![Photos](docs/assets/images/photos.png)
+*Photo gallery with Cloudinary integration*
+
+## Features
+
+**Expense Management** - Track income/expenses with filtering, statistics, and presets  
+**Calendar** - Event management with month/week/day views  
+**Subscriptions** - Monitor recurring payments and costs  
+**Projects & Tasks** - Organize projects with task tracking  
+**Wishlist** - Item tracking with priorities and prices  
+**Quotes** - Daily inspirational quote management  
+**Photos** - Cloudinary-powered photo gallery  
+**UI/UX** - Dark mode, responsive design, real-time sync
+
+## Architecture
 
 Clean Architecture with 4 layers:
 
@@ -51,7 +84,7 @@ Web (Next.js) → Infrastructure → Business → Domain
 
 **Stats:** 46 Use Cases • 12 Entities • 11 Mappers • 31+ Hooks • 12 Repositories
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Next.js 15** + React 18.3 + TypeScript 5.3
 - **TailwindCSS 3.4** + Lucide Icons
@@ -61,7 +94,7 @@ Web (Next.js) → Infrastructure → Business → Domain
 
 **Patterns:** Clean Architecture, DDD, Strategy, Repository, DI, Mapper, Generic CRUD
 
-## 📁 Structure
+## Structure
 
 ```
 HayaHub/
@@ -81,7 +114,7 @@ HayaHub/
 └── docs/                 # Screenshots & docs
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone
@@ -102,7 +135,7 @@ pnpm dev
 
 **First use:** Navigate to `/register` → Create account → Login
 
-## 💻 Development
+## Development
 
 ```bash
 pnpm dev           # Start dev server
@@ -112,7 +145,7 @@ pnpm lint          # Lint code
 pnpm test          # Run tests
 ```
 
-## 🎨 Key Patterns
+## Key Patterns
 
 ### Mapper Pattern
 ```typescript
@@ -134,11 +167,11 @@ Eliminates ~500 LOC of repetitive hook code.
 
 ### DI Container
 ```typescript
-// ⚠️ Always memoize container getters to prevent infinite loops
+// Always memoize container getters to prevent infinite loops
 const useCase = useMemo(() => container.getMyUseCase, []);
 ```
 
-## 🚢 Deployment
+## Deployment
 
 **Vercel (Recommended):**
 1. Import GitHub repo
@@ -147,7 +180,7 @@ const useCase = useMemo(() => container.getMyUseCase, []);
 
 **Manual:** `pnpm build` → Deploy `apps/web/.next`
 
-## 📝 License
+## License
 
 ISC License - see [LICENSE](LICENSE)
 
