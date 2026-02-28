@@ -13,10 +13,8 @@ Modern productivity platform built with Clean Architecture, DDD, and React best 
 
 </div>
 
----
-
 ## Overview
-
+![Dashboard](docs/assets/images/dashboard1.png)
 **HayaHub** combines expense tracking, project management, calendar, subscriptions, wishlist, quotes, and photo gallery into one cohesive platform.
 
 **Key Highlights:**
@@ -27,11 +25,7 @@ Modern productivity platform built with Clean Architecture, DDD, and React best 
 - ~900 LOC eliminated via generic patterns
 - Full TypeScript strict mode
 
-## Screenshots
-
 ### Dashboard
-![Dashboard](docs/assets/images/dashboard1.png)
-*Main dashboard with widgets and expense statistics*
 
 ![Dashboard Detail](docs/assets/images/dashboard2.png)
 *Dashboard widgets: calendar, quotes, wishlist, subscriptions*
