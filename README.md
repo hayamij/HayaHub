@@ -88,26 +88,6 @@ Web (Next.js) → Infrastructure → Business → Domain
 
 **Patterns:** Clean Architecture, DDD, Strategy, Repository, DI, Mapper, Generic CRUD
 
-## Structure
-
-```
-HayaHub/
-├── apps/web/              # Next.js app
-│   └── src/
-│       ├── app/           # Pages (dashboard, expenses, calendar, etc.)
-│       ├── components/    # React components
-│       ├── hooks/         # Custom hooks (31+)
-│       └── infrastructure/
-│           ├── di/        # DI Container
-│           ├── repositories/
-│           └── storage/   # Hybrid storage strategies
-├── packages/
-│   ├── domain/           # Entities, value objects
-│   ├── business/         # Use cases, DTOs, mappers
-│   └── shared/           # Utilities
-└── docs/                 # Screenshots & docs
-```
-
 ## Quick Start
 
 ```bash
